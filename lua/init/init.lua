@@ -1,0 +1,5 @@
+require('init/treesitter')
+require('init/lsp')
+require('init/completion')
+require('init/telescope')
+require('init/trouble')
