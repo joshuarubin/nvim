@@ -39,7 +39,7 @@ let g:lightline = {
       \     [ 'fullfilename' ]
       \   ],
       \   'right': [
-      \     [ 'lineinfo', 'filetype' ],
+      \     [ 'filetype' ],
       \   ]
       \ },
       \ 'tabline': {

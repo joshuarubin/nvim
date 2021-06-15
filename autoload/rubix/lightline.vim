@@ -39,7 +39,7 @@ function! rubix#lightline#filetype() abort
   endif
 
   if &filetype !=# ''
-    return &filetype . ' ' . WebDevIconsGetFileTypeSymbol() . ' '
+    return WebDevIconsGetFileTypeSymbol()
   endif
 
   return ''
