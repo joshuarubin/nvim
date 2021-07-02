@@ -139,6 +139,7 @@ set sidescrolloff=15
 set sidescroll=1
 set scrolljump=3
 set numberwidth=1
+set cursorline
 
 if has("nvim-0.5.0") || has("patch-8.1.1564")
   set signcolumn=number

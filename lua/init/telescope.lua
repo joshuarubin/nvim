@@ -17,7 +17,9 @@ telescope.setup{
       '--follow',
       '--color=never',
     },
-    prompt_position = "top",
+    layout_config = {
+      prompt_position = "top",
+    },
     sorting_strategy = "ascending",
     set_env = { ['COLORTERM'] = 'truecolor' },
 
