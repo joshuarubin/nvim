@@ -3,7 +3,6 @@ augroup InitAutoCmd
 augroup END
 
 lua require('init')
-runtime rc/commands.vim
 runtime rc/colors.vim
 
 set exrc   " enable per-directory .vimrc files
