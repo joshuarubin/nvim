@@ -1,38 +1,33 @@
 " leader mappings
-if has('eval')
-  nnoremap <silent> <leader>n :silent :nohlsearch<cr>
+nnoremap <silent> <leader>n :silent :nohlsearch<cr>
 
-  " find merge conflict markers
-  noremap <leader>fc /\v^[<\|=>]{7}( .*\|$)<cr>
+" find merge conflict markers
+noremap <leader>fc /\v^[<\|=>]{7}( .*\|$)<cr>
 
-  nnoremap <silent> <leader>q :qa<cr>
-  nnoremap <silent> <leader>Q :qa!<cr>
+nnoremap <silent> <leader>q :qa<cr>
+nnoremap <silent> <leader>Q :qa!<cr>
 
-  " <leader>cd: Switch to the directory of the open buffer
-  nnoremap <leader>cd :lcd %:p:h<cr>:pwd<cr>
+" <leader>cd: Switch to the directory of the open buffer
+nnoremap <leader>cd :lcd %:p:h<cr>:pwd<cr>
 
-  " <leader>,: Switch to previous window
-  nnoremap <leader>p <c-w>p
+" <leader>,: Switch to previous window
+nnoremap <leader>p <c-w>p
 
-  " <leader>m: Toggle Maximize current window
-  nnoremap <leader>m :call rubix#maximize_toggle()<cr>
+" adjust viewports to the same size
+noremap <leader>= <c-w>=
 
-  " adjust viewports to the same size
-  noremap <leader>= <c-w>=
+nnoremap <leader>fR :source $MYVIMRC<cr>
 
-  nnoremap <leader>fR :source $MYVIMRC<cr>
+vnoremap <leader>s :sort<cr>
 
-  vnoremap <leader>s :sort<cr>
+for s:i in range(1, 9)
+  " <leader>[1-9] move to window [1-9]
+  execute 'nnoremap <silent> <leader>'.s:i ' :'.s:i.'wincmd w<cr>'
 
-  for s:i in range(1, 9)
-    " <leader>[1-9] move to window [1-9]
-    execute 'nnoremap <silent> <leader>'.s:i ' :'.s:i.'wincmd w<cr>'
-
-    " <leader>b[1-9] move to buffer [1-9]
-    execute 'nnoremap <silent> <leader>b'.s:i ':b'.s:i.'<cr>'
-  endfor
-  unlet s:i
-endif
+  " <leader>b[1-9] move to buffer [1-9]
+  execute 'nnoremap <silent> <leader>b'.s:i ':b'.s:i.'<cr>'
+endfor
+unlet s:i
 
 cnoremap <c-j> <down>
 cnoremap <c-k> <up>
@@ -149,10 +144,6 @@ inoremap <silent><expr> <c-space> compe#complete()
 " - else <esc>
 " must be imap or else <esc> after iabbr doesn't expand
 imap <expr> <silent> <esc> pumvisible() ? "\<c-y>\<esc>" : "\<esc>"
-
-" formatting shortcuts
-nnoremap <silent> <leader>fa :call rubix#preserve('normal gg=G')<cr>
-nnoremap <silent> <leader>f$ :call rubix#trim()<cr>
 
 " abbreviations
 iabbrev TODO TODO(jawa)

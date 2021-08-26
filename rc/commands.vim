@@ -1,7 +1,4 @@
-if has('eval')
-  autocmd InitAutoCmd BufEnter * call rubix#update_title()
-endif
-
+autocmd InitAutoCmd BufEnter * let &titlestring = exists('b:term_title') ? b:term_title : ''
 autocmd InitAutoCmd InsertEnter * setlocal nohlsearch
 autocmd InitAutoCmd InsertLeave * setlocal hlsearch
 
@@ -20,11 +17,4 @@ autocmd InitAutoCmd BufReadPost *
   \  execute 'normal! g`"zvzz' |
   \ endif
 
-if has('eval')
-  command! -nargs=* Only call rubix#only()
-  command! Kwbd call rubix#kwbd()
-endif
-
-if has('nvim')
-  command! -nargs=0 Format :lua vim.lsp.buf.formatting()
-endif
+command! -nargs=0 Format :lua vim.lsp.buf.formatting()

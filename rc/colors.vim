@@ -1,11 +1,5 @@
 scriptencoding utf-8
 
-set background=dark
-
-if has#colorscheme('iceberg')
-  colorscheme iceberg
-endif
-
 augroup HighlightTODO
   " ensure any instance TODO or FIXME is highlighted as an Error in any filetype
   autocmd!

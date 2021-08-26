@@ -15,46 +15,27 @@ set regexpengine=1
 " persistent undo
 if has('persistent_undo')
   set undofile
-
-  if !has('nvim')
-    let &undodir=rubix#cache#dir('undo')
-  endif
 endif
 
 " backups
 set backup
 set backupcopy=yes
 
-if has('eval')
-  let &backupdir=rubix#cache#dir('backup')
+let s:backupdir = stdpath('data')..'/backup'
+if !isdirectory(s:backupdir)
+  call mkdir(s:backupdir, "p", 0700)
+endif
+let &backupdir=s:backupdir
 
-  let g:mapleader = ','
+let g:mapleader = ','
 
-  " prefer locally installed python
-  if executable('/usr/local/bin/python')
-    let g:python_host_prog = '/usr/local/bin/python'
-  endif
-
-  if executable('/usr/local/bin/python3')
-    let g:python3_host_prog = '/usr/local/bin/python3'
-  endif
-
-  " swap files
-  if !has('nvim')
-    let &directory=rubix#cache#dir('swap')
-  endif
+" prefer locally installed python
+if executable('/usr/local/bin/python')
+  let g:python_host_prog = '/usr/local/bin/python'
 endif
 
-if has('termguicolors')
-  " belongs in 'gui' but has to be set before plugins are loaded
-  if $TERM_PROGRAM !=# 'Apple_Terminal'
-    set termguicolors
-  endif
-
-  if !has('nvim')
-    let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
-    let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
-  endif
+if executable('/usr/local/bin/python3')
+  let g:python3_host_prog = '/usr/local/bin/python3'
 endif
 
 set synmaxcol=512
@@ -71,10 +52,7 @@ set fillchars=vert:│,fold:-
 set laststatus=2 " always show the statusline
 set title
 set linebreak " wrap lines at convenient points
-
-if has('eval')
-  let &showbreak='=>'
-endif
+let &showbreak='=>'
 
 set whichwrap+=<,>,[,]
 
@@ -128,11 +106,7 @@ set showtabline=2
 
 set ruler
 set noshowcmd                   " prevent flicker, lightline shows info anyway
-
-if has('eval')
-  " numberwidth doesn't work in vim.tiny, so line numbers look awful
-  set number " line numbers are good
-endif
+set number " line numbers are good
 
 set scrolloff=8                 " start scrolling when we're 8 lines away from margins
 set sidescrolloff=15
@@ -140,13 +114,7 @@ set sidescroll=1
 set scrolljump=3
 set numberwidth=1
 set cursorline
-
-if has("nvim-0.5.0") || has("patch-8.1.1564")
-  set signcolumn=number
-else
-  set signcolumn=yes
-endif
-
+set signcolumn=number
 set smarttab
 set expandtab
 set shiftround
@@ -215,17 +183,4 @@ set tags=./tags;/,~/.vimtags
 if has('mouse')
   set mouse=nv
   set mousehide
-endif
-
-if !has('nvim') && has('mouse_sgr')
-  set ttymouse=sgr
-endif
-
-if !has('nvim')
-  set t_ut= " make vim flicker less
-
-  " different cursors for insert vs normal mode
-  let &t_SI = "\<Esc>[6 q"
-  let &t_SR = "\<Esc>[4 q"
-  let &t_EI = "\<Esc>[2 q"
 endif

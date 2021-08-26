@@ -13,10 +13,29 @@ capabilities.textDocument.completion.completionItem.resolveSupport = {
   }
 }
 
+vim.lsp.handlers["textDocument/codeLens"] = function(err, _, result, client_id, bufnr)
+  -- ignore this error since it shows up for the codelens.refresh() autocmd and
+  -- is very annoying
+  -- method textDocument/codeLens is not supported by any of the servers registered for the current buffer
+  if err and err.code == -32601 then
+    return
+  end
+
+  return vim.lsp.codelens.on_codelens(err, _, result, client_id, bufnr)
+end
+
 -- Use an on_attach function to only map the following keys
 -- after the language server attaches to the current buffer
 local on_attach = function(client, bufnr)
-  vim.api.nvim_command[[autocmd BufWritePre <buffer> lua vim.lsp.buf.formatting_seq_sync()]]
+  local filetype = vim.api.nvim_buf_get_option(0, "filetype")
+
+  if filetype == "go" then
+    vim.api.nvim_command[[autocmd BufWritePre <buffer> lua go_organize_imports()]]
+  else
+    vim.api.nvim_command[[autocmd BufWritePre <buffer> lua vim.lsp.buf.formatting_seq_sync()]]
+  end
+
+  vim.api.nvim_command[[autocmd CursorHold,CursorHoldI,InsertLeave <buffer> lua vim.lsp.codelens.refresh()]]
 
   local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
 
@@ -33,9 +52,8 @@ local on_attach = function(client, bufnr)
   buf_set_keymap('n', '<leader>ca', '<cmd>lua vim.lsp.buf.code_action()<cr>', opts)
   buf_set_keymap('n', '[d', '<cmd>lua vim.lsp.diagnostic.goto_prev()<cr>', opts)
   buf_set_keymap('n', ']d', '<cmd>lua vim.lsp.diagnostic.goto_next()<cr>', opts)
+  buf_set_keymap('n', '<leader>l', '<cmd>lua vim.lsp.codelens.run()<cr>', opts)
 end
-
-vim.api.nvim_command[[autocmd BufWritePre *.go lua go_organize_imports()]]
 
 _G.go_organize_imports = function(timeout_ms)
   local context = { source = { organizeImports = true } }
@@ -48,13 +66,17 @@ _G.go_organize_imports = function(timeout_ms)
   local result = vim.lsp.buf_request_sync(0, method, params, timeout_ms)
   if not result then return end
 
-  for _, v in ipairs(result) do
-    local result = v.result
-    if result and result[1] then
-      local edit = result[1].edit
-      vim.lsp.util.apply_workspace_edit(edit)
+  if result then
+    for _, v in ipairs(result) do
+      local result = v.result
+      if result and result[1] then
+        local edit = result[1].edit
+        vim.lsp.util.apply_workspace_edit(edit)
+      end
     end
   end
+
+  vim.lsp.buf.formatting_seq_sync()
 end
 
 lspconfig.gopls.setup {
@@ -62,19 +84,35 @@ lspconfig.gopls.setup {
   capabilities = capabilities,
   settings = {
     gopls = {
-      usePlaceholders = true;
-      codelenses = { test = true };
+      buildFlags = {'-tags=wireinject'},
+      experimentalTemplateSupport = true,
+      usePlaceholders = true,
+      codelenses = {
+        gc_details = true,
+        generate = true,
+        regenerate_cgo = true,
+        tidy = true,
+        upgrade_dependency = true,
+        vendor = true,
+        nilness = true,
+      },
       analyses = {
-        fillreturns = true;
-        nonewvars = true;
-        undeclaredname = true;
-        unusedparams = true;
-      };
-      gofumpt = true;
-      ["local"] = 'go.ngrok.com';
-      staticcheck = true;
+        fillreturns = true,
+        nonewvars = true,
+        shadow = true,
+        undeclaredname = true,
+        unreachable = true,
+        unusedparams = true,
+        unusedwrite = true,
+      },
+      gofumpt = true,
+      ["local"] = 'go.ngrok.com',
+      staticcheck = true,
     }
-  }
+  },
+  flags = {
+    debounce_text_changes = 200,
+  },
 }
 
 null_ls.setup {}

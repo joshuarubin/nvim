@@ -1,8 +1,5 @@
 local telescope = require('telescope')
 local actions = require('telescope.actions')
-local builtin = require('telescope.builtin')
-local dir = require('rubix/dir')
-local rubix = require('rubix/telescope')
 
 telescope.setup{
   defaults = {
@@ -35,37 +32,20 @@ telescope.setup{
         ["<c-k>"] = actions.move_selection_previous,
       },
     },
+
+    extensions = {
+      fzf = {
+        fuzzy = true,                    -- false will only do exact matching
+        override_generic_sorter = true, -- override the generic sorter
+        override_file_sorter = true,     -- override the file sorter
+        case_mode = "smart_case",        -- or "ignore_case" or "respect_case" the default case_mode is "smart_case"
+      }
+    }
   }
 }
 
-_G.rubix_find_files = function()
-  builtin.find_files{
-    find_command = { 'rg', '--files', '--hidden' },
-    cwd = dir.project()
-  }
-end
+telescope.load_extension('fzf')
+telescope.load_extension('zoxide')
 
-_G.rubix_grep_string = function()
-  builtin.grep_string{
-    cwd = dir.project()
-  }
-end
-
-_G.rubix_live_grep = function()
-  builtin.live_grep{
-    cwd = dir.project()
-  }
-end
-
-_G.rubix_history = function()
-  rubix.history{}
-end
-
-vim.api.nvim_set_keymap("n", "<c-p>",      ":lua rubix_find_files()<cr>",  {silent = true})
-vim.api.nvim_set_keymap("n", "<c-b>",      "<cmd>Telescope buffers<cr>",   {silent = true})
-vim.api.nvim_set_keymap("n", "<c-f>",      ":lua rubix_history()<cr>",     {silent = true})
-vim.api.nvim_set_keymap("n", "<c-s><c-s>", ":lua rubix_grep_string()<cr>", {silent = true})
-vim.api.nvim_set_keymap("n", "<c-s><c-d>", ":lua rubix_live_grep()<cr>",   {silent = true})
-
-vim.api.nvim_set_keymap("t", "<c-p>", "terminal#save_mode() . ':lua rubix_find_files()<cr>'", {silent = true, expr = true})
-vim.api.nvim_set_keymap("t", "<c-b>", "terminal#save_mode() . '<cmd>Telescope buffers<cr>'",  {silent = true, expr = true})
+vim.api.nvim_set_keymap("n", "<c-b>",     "<cmd>Telescope buffers<cr>",     {silent = true})
+vim.api.nvim_set_keymap("n", "<leader>z", "<cmd>Telescope zoxide list<cr>", {silent = true})

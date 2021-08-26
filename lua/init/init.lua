@@ -1,3 +1,4 @@
+require('init/plugins')
 require('init/treesitter')
 require('init/lsp')
 require('init/completion')
