@@ -43,7 +43,8 @@ cmp.setup {
       elseif expandable then -- there's no popup, but the entered text is an expandable snippet
         vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<plug>(vsnip-expand)', true, true, true))
       else
-        fallback() -- fallback to a normal `<cr>`
+        -- fallback to normal <cr>, but make sure to expand any abbreviations first
+        vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<c-]><cr>', true, true, true), "n")
         vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<plug>Endwise", true, true, true))
       end
     end, {'i'}),

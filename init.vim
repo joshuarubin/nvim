@@ -3,7 +3,6 @@ augroup InitAutoCmd
 augroup END
 
 lua require('init')
-runtime rc/mappings.vim
 runtime rc/commands.vim
 runtime rc/colors.vim
 
