@@ -3,6 +3,11 @@ local rust = require('rust-tools')
 local ts_utils = require('nvim-lsp-ts-utils')
 local null_ls = require("null-ls")
 
+vim.cmd [[sign define LspDiagnosticsSignError       text= texthl=LspDiagnosticsSignError       linehl= numhl=]]
+vim.cmd [[sign define LspDiagnosticsSignWarning     text= texthl=LspDiagnosticsSignWarning     linehl= numhl=]]
+vim.cmd [[sign define LspDiagnosticsSignInformation text= texthl=LspDiagnosticsSignInformation linehl= numhl=]]
+vim.cmd [[sign define LspDiagnosticsSignHint        text= texthl=LspDiagnosticsSignHint        linehl= numhl=]]
+
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 capabilities.textDocument.completion.completionItem.resolveSupport = {

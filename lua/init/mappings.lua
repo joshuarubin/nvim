@@ -76,6 +76,6 @@ vim.api.nvim_set_keymap("t", "<c-a>J", "<c-\\><c-n><c-w>+i", {noremap = true}) -
 vim.api.nvim_set_keymap("t", "<c-a>K", "<c-\\><c-n><c-w>-i", {noremap = true}) -- resize window
 
 -- abbreviations
-vim.cmd('iabbrev TODO TODO(jawa)')
-vim.cmd('iabbrev meml me@jawa.dev')
-vim.cmd('iabbrev weml joshua@ngrok.com')
+vim.cmd [[iabbrev TODO TODO(jawa)]]
+vim.cmd [[iabbrev meml me@jawa.dev]]
+vim.cmd [[iabbrev weml joshua@ngrok.com]]

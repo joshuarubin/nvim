@@ -3,18 +3,18 @@ local install_path = vim.fn.stdpath('data') .. '/site/pack/packer/start/packer.n
 
 if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
   vim.fn.system({'git', 'clone', 'https://github.com/wbthomason/packer.nvim', install_path})
-  vim.cmd('packadd packer.nvim')
+  vim.cmd [[packadd packer.nvim]]
 end
 
 local packer = require('packer')
 local use = packer.use
 
-vim.cmd([[
+vim.cmd [[
   augroup Packer
     autocmd!
     autocmd BufWritePost plugins.lua source <afile> | PackerCompile
   augroup END
-]])
+]]
 
 packer.startup(function()
   use 'wbthomason/packer.nvim' -- package manager
@@ -144,16 +144,19 @@ require('gitsigns').setup {
 
 -- colorscheme
 vim.o.termguicolors = true
+vim.cmd [[autocmd ColorScheme * highlight Comment gui=italic cterm=italic]]
 vim.cmd [[colorscheme iceberg]]
+vim.cmd [[call matchadd('Error', 'TODO', -1)]]  -- highlight any instance of TODO  as an error
+vim.cmd [[call matchadd('Error', 'FIXME', -1)]] -- highlight any instance of FIXME as an error
 
 -- fugitive
-vim.cmd([[
+-- delete fugitive buffers when they are left
+vim.cmd [[
   augroup InitFugitive
     autocmd!
-    " delete fugitive buffers when they are left
     autocmd BufReadPost fugitive://* set bufhidden=delete
   augroup END
-]])
+]]
 vim.env.GIT_SSH_COMMAND = 'ssh -o ControlPersist=no'
 vim.api.nvim_set_keymap("n", "<leader>gs", ":Git<cr>",         {silent = true, noremap = true})
 vim.api.nvim_set_keymap("n", "<leader>gd", ":Gvdiffsplit<cr>", {silent = true, noremap = true})
@@ -170,12 +173,12 @@ vim.api.nvim_set_keymap("n", "<leader>gn", ":Git merge<cr>",   {silent = true, n
 vim.api.nvim_set_keymap("n", "<leader>gf", ":Git fetch<cr>",   {silent = true, noremap = true})
 
 -- lightline
-vim.cmd([[
+vim.cmd [[
   augroup InitLightline
     autocmd!
     autocmd User LspDiagnosticsChanged call lightline#update()
   augroup END
-]])
+]]
 
 vim.g['lightline#bufferline#show_number'] = 1
 vim.g['lightline#bufferline#enable_devicons'] = 1
