@@ -1,10 +1,7 @@
-set nocompatible
-
 augroup InitAutoCmd
   autocmd!
 augroup END
 
-runtime rc/settings.vim
 lua require('init')
 runtime rc/mappings.vim
 runtime rc/commands.vim
