@@ -57,7 +57,7 @@ require'packer'.startup(function()
   use 'tpope/vim-fugitive'
   use 'folke/trouble.nvim'
 
-  use 'joshuarubin/terminal.vim'
+  use 'akinsho/toggleterm.nvim'
   use 'joshuarubin/rubix.vim'
   use 'joshuarubin/rubix-lightline.vim'
   use 'joshuarubin/rubix-telescope.nvim'
@@ -750,8 +750,8 @@ nmap("<c-f>",      "<cmd>Telescope rubix history<cr>",     {silent = true})
 nmap("<c-s><c-s>", "<cmd>Telescope rubix grep_string<cr>", {silent = true})
 nmap("<c-s><c-d>", "<cmd>Telescope rubix live_grep<cr>",   {silent = true})
 nmap("<leader>y",  "<cmd>Telescope neoclip plus<cr>",      {silent = true})
-tmap("<c-p>",      "terminal#save_mode().'<cmd>Telescope rubix find_files<cr>'", {silent = true, expr = true})
-tmap("<c-b>",      "terminal#save_mode().'<cmd>Telescope buffers<cr>'",          {silent = true, expr = true})
+tmap("<c-p>",      "<cmd>Telescope rubix find_files<cr>",  {silent = true})
+tmap("<c-b>",      "<cmd>Telescope buffers<cr>",           {silent = true})
 
 -- trouble
 require'trouble'.setup {
@@ -811,14 +811,22 @@ nnoremap("<leader>fa", ":call rubix#preserve('normal gg=G')<cr>", {silent = true
 nnoremap("<leader>f$", ":call rubix#trim()<cr>",                  {silent = true})
 nnoremap("<c-w><c-w>", ":confirm :Kwbd<cr>",                      {silent = true}) -- ctrl-w, ctrl-w to delete the current buffer without closing the window
 
--- terminal.vim
-tnoremap("<c-x>",  'terminal#save_mode().":TerminalToggle<cr>"',  {expr = true, silent = true})
-tnoremap("<c-a>X", 'terminal#save_mode().":TerminalToggle!<cr>"', {expr = true, silent = true})
-nnoremap("<c-x>",  ':TerminalToggle<cr>',  {silent = true})
-nnoremap("<c-a>X", ':TerminalToggle!<cr>', {silent = true})
-inoremap("<c-x>",  '<c-\\><c-n>:TerminalToggle<cr>',   {silent = true})
-inoremap("<c-a>X", '<c-\\><c-n>:TerminalToggle!<cr>a', {silent = true})
-nnoremap("<leader>t", ':call terminal#new()<cr>', {silent = true})
+-- toggleterm.nvim
+require("toggleterm").setup{
+  size = function(term)
+    if term.direction == "horizontal" then
+      return 10
+    elseif term.direction == "vertical" then
+      return 80
+    end
+  end,
+  open_mapping = '<c-x>',
+  direction = 'float', -- 'vertical' | 'horizontal' | 'window' | 'float'
+  float_opts = {
+    border = 'curved', -- 'single' | 'double' | 'shadow' | 'curved'
+    winblend = 20,
+  }
+}
 
 -- normal mode
 nnoremap("<leader>n",  ":silent :nohlsearch<cr>", {silent = true})
@@ -892,10 +900,10 @@ inoremap("<c-a>J", "<esc><c-w>+a") -- resize window
 inoremap("<c-a>K", "<esc><c-w>-a") -- resize window
 
 -- terminal mode
-tnoremap("<c-h>",  'terminal#save_mode()."<c-w>h"', {expr = true}) -- tmux style navigation
-tnoremap("<c-j>",  'terminal#save_mode()."<c-w>j"', {expr = true}) -- tmux style navigation
-tnoremap("<c-k>",  'terminal#save_mode()."<c-w>k"', {expr = true}) -- tmux style navigation
-tnoremap("<c-l>",  'terminal#save_mode()."<c-w>l"', {expr = true}) -- tmux style navigation
+tnoremap("<c-h>",  "<c-\\><c-n><c-w>h")  -- tmux style navigation
+tnoremap("<c-j>",  "<c-\\><c-n><c-w>j")  -- tmux style navigation
+tnoremap("<c-k>",  "<c-\\><c-n><c-w>k")  -- tmux style navigation
+tnoremap("<c-l>",  "<c-\\><c-n><c-w>l")  -- tmux style navigation
 tnoremap("<c-a>H", "<c-\\><c-n><c-w><i") -- resize window
 tnoremap("<c-a>L", "<c-\\><c-n><c-w>>i") -- resize window
 tnoremap("<c-a>J", "<c-\\><c-n><c-w>+i") -- resize window
