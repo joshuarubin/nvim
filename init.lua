@@ -23,6 +23,7 @@ require'packer'.startup(function()
   use 'tpope/vim-eunuch' -- helpers for unix
   use 'tpope/vim-endwise' -- wisely add "end" in ruby, endfunction/endif/more in vim script, etc.
   use 'tomtom/tcomment_vim' -- easy to use, file-type sensible comments
+  use 'ludovicchabant/vim-gutentags' -- automatic tags management
   use 'editorconfig/editorconfig-vim'
   use 'osyo-manga/vim-anzu' -- search status
   use { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' }
@@ -736,12 +737,19 @@ telescope.setup{
 telescope.load_extension('fzf')
 telescope.load_extension('zoxide')
 telescope.load_extension('rubix')
+telescope.load_extension('neoclip')
+require'neoclip'.setup{
+  default_register = 'plus',
+  filter = nil,
+  history = 1000,
+}
 nmap("<c-b>",      "<cmd>Telescope buffers<cr>",           {silent = true})
 nmap("<leader>z",  "<cmd>Telescope zoxide list<cr>",       {silent = true})
 nmap("<c-p>",      "<cmd>Telescope rubix find_files<cr>",  {silent = true})
 nmap("<c-f>",      "<cmd>Telescope rubix history<cr>",     {silent = true})
 nmap("<c-s><c-s>", "<cmd>Telescope rubix grep_string<cr>", {silent = true})
 nmap("<c-s><c-d>", "<cmd>Telescope rubix live_grep<cr>",   {silent = true})
+nmap("<leader>y",  "<cmd>Telescope neoclip plus<cr>",      {silent = true})
 tmap("<c-p>",      "terminal#save_mode().'<cmd>Telescope rubix find_files<cr>'", {silent = true, expr = true})
 tmap("<c-b>",      "terminal#save_mode().'<cmd>Telescope buffers<cr>'",          {silent = true, expr = true})
 
