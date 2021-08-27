@@ -812,12 +812,6 @@ nnoremap("<leader>f$", ":call rubix#trim()<cr>",                  {silent = true
 nnoremap("<c-w><c-w>", ":confirm :Kwbd<cr>",                      {silent = true}) -- ctrl-w, ctrl-w to delete the current buffer without closing the window
 
 -- terminal.vim
-tnoremap("<c-h>",  'terminal#save_mode()."<c-w>h"', {expr = true})
-tnoremap("<c-j>",  'terminal#save_mode()."<c-w>j"', {expr = true})
-tnoremap("<c-k>",  'terminal#save_mode()."<c-w>k"', {expr = true})
-tnoremap("<c-l>",  'terminal#save_mode()."<c-w>l"', {expr = true})
-tnoremap("<c-y>",  '<c-\\><c-n><c-y>')
-tnoremap("<c-u>",  '<c-\\><c-n><c-u>')
 tnoremap("<c-x>",  'terminal#save_mode().":TerminalToggle<cr>"',  {expr = true, silent = true})
 tnoremap("<c-a>X", 'terminal#save_mode().":TerminalToggle!<cr>"', {expr = true, silent = true})
 nnoremap("<c-x>",  ':TerminalToggle<cr>',  {silent = true})
@@ -825,9 +819,6 @@ nnoremap("<c-a>X", ':TerminalToggle!<cr>', {silent = true})
 inoremap("<c-x>",  '<c-\\><c-n>:TerminalToggle<cr>',   {silent = true})
 inoremap("<c-a>X", '<c-\\><c-n>:TerminalToggle!<cr>a', {silent = true})
 nnoremap("<leader>t", ':call terminal#new()<cr>', {silent = true})
-vim.cmd [[autocmd TermOpen * nnoremap <buffer> <up> i<up>]]   -- switch to insert mode and press up when in terminal normal mode
-vim.cmd [[autocmd TermOpen * nnoremap <buffer> <c-r> i<c-r>]] -- switch to insert mode and press <c-r> when in terminal normal mode
-vim.cmd [[autocmd TermOpen * nnoremap <buffer> q <nop>]]      -- disable macros in terminals
 
 -- normal mode
 nnoremap("<leader>n",  ":silent :nohlsearch<cr>", {silent = true})
@@ -901,22 +892,30 @@ inoremap("<c-a>J", "<esc><c-w>+a") -- resize window
 inoremap("<c-a>K", "<esc><c-w>-a") -- resize window
 
 -- terminal mode
+tnoremap("<c-h>",  'terminal#save_mode()."<c-w>h"', {expr = true}) -- tmux style navigation
+tnoremap("<c-j>",  'terminal#save_mode()."<c-w>j"', {expr = true}) -- tmux style navigation
+tnoremap("<c-k>",  'terminal#save_mode()."<c-w>k"', {expr = true}) -- tmux style navigation
+tnoremap("<c-l>",  'terminal#save_mode()."<c-w>l"', {expr = true}) -- tmux style navigation
 tnoremap("<c-a>H", "<c-\\><c-n><c-w><i") -- resize window
 tnoremap("<c-a>L", "<c-\\><c-n><c-w>>i") -- resize window
 tnoremap("<c-a>J", "<c-\\><c-n><c-w>+i") -- resize window
 tnoremap("<c-a>K", "<c-\\><c-n><c-w>-i") -- resize window
+tnoremap("<c-y>",  '<c-\\><c-n><c-y>') -- scroll up one line
+tnoremap("<c-u>",  '<c-\\><c-n><c-u>') -- scroll up half a screen
 
 -- abbreviations
 vim.cmd [[iabbrev TODO TODO(jawa)]]
 vim.cmd [[iabbrev meml me@jawa.dev]]
 vim.cmd [[iabbrev weml joshua@ngrok.com]]
 
+-- autocommands
 vim.cmd [[
   augroup InitAutoCmd
     autocmd!
   augroup END
 ]]
 
+-- set the window title based on the terminal title (if a term title exists)
 vim.cmd [[autocmd InitAutoCmd BufEnter * let &titlestring = exists('b:term_title') ? b:term_title : '']]
 
 -- disable search highlighting in insert mode
@@ -929,6 +928,11 @@ vim.cmd [[autocmd InitAutoCmd InsertLeave * if &l:diff | diffupdate | endif]] --
 
 -- go back to previous position of cursor if any
 vim.cmd [[autocmd InitAutoCmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") |  execute 'normal! g`"zvzz' | endif]]
+
+-- terminal autocommands
+vim.cmd [[autocmd TermOpen * nnoremap <buffer> <up> i<up>]]   -- switch to insert mode and press up when in terminal normal mode
+vim.cmd [[autocmd TermOpen * nnoremap <buffer> <c-r> i<c-r>]] -- switch to insert mode and press <c-r> when in terminal normal mode
+vim.cmd [[autocmd TermOpen * nnoremap <buffer> q <nop>]]      -- disable macros in terminals
 
 -- these two lines must be last
 vim.o.exrc   = true -- enable per-directory .vimrc files
