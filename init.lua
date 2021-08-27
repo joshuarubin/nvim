@@ -41,10 +41,10 @@ require'packer'.startup(function()
   use 'hrsh7th/cmp-calc'
   use 'hrsh7th/cmp-nvim-lsp'
   use 'hrsh7th/cmp-nvim-lua'
-  use 'hrsh7th/cmp-vsnip'
+  use 'saadparwaiz1/cmp_luasnip'
 
   -- snippets
-  use 'hrsh7th/vim-vsnip'
+  use 'L3MON4D3/LuaSnip'
   use 'rafamadriz/friendly-snippets'
 
   -- telescope
@@ -257,9 +257,6 @@ nmap("N", "<plug>(anzu-N-with-echo)")
 nmap("*", "<plug>(anzu-star-with-echo)")
 nmap("#", "<plug>(anzu-sharp-with-echo)")
 
--- snippets
-vim.g.vsnip_snippet_dir = vim.fn.stdpath('data') .. '/snippets'
-
 -- gitsigns
 require'gitsigns'.setup {
   signs = {
@@ -422,7 +419,7 @@ require'nvim-treesitter.configs'.setup {
 }
 
 -- lsp
-local nvim_lsp = require('lspconfig')
+local nvim_lsp = require 'lspconfig'
 local on_attach = function(_, bufnr)
   local filetype = vim.api.nvim_buf_get_option(0, "filetype")
 
@@ -488,7 +485,7 @@ vim.lsp.handlers["textDocument/codeLens"] = function(err, _, result, client_id, 
 end
 
 local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
+capabilities = require'cmp_nvim_lsp'.update_capabilities(capabilities)
 
 local servers = { "clangd", "cmake" }
 for _, lsp in ipairs(servers) do
@@ -550,7 +547,7 @@ nvim_lsp.tsserver.setup {
     client.resolved_capabilities.document_formatting = false
     client.resolved_capabilities.document_range_formatting = false
 
-    local ts_utils = require('nvim-lsp-ts-utils')
+    local ts_utils = require'nvim-lsp-ts-utils'
 
     ts_utils.setup {
       debug = false,
@@ -615,8 +612,12 @@ vim.cmd [[sign define LspDiagnosticsSignWarning     text= texthl=LspDiagnosti
 vim.cmd [[sign define LspDiagnosticsSignInformation text= texthl=LspDiagnosticsSignInformation linehl= numhl=]]
 vim.cmd [[sign define LspDiagnosticsSignHint        text= texthl=LspDiagnosticsSignHint        linehl= numhl=]]
 
+-- snippets
+local luasnip = require 'luasnip'
+require'luasnip/loaders/from_vscode'.lazy_load()
+
 -- completion
-local cmp = require('cmp')
+local cmp = require 'cmp'
 cmp.setup {
   preselect = require'cmp.types'.cmp.PreselectMode.None,
   sources = {
@@ -625,11 +626,11 @@ cmp.setup {
     { name = 'calc' },
     { name = 'nvim_lsp' },
     { name = 'nvim_lua' },
-    { name = 'vsnip' },
+    { name = 'luasnip' },
   },
   snippet = {
     expand = function(args)
-      vim.fn['vsnip#anonymous'](args.body)
+      luasnip.lsp_expand(args.body)
     end
   },
   mapping = {
@@ -640,7 +641,7 @@ cmp.setup {
     ['<c-space>'] = cmp.mapping.complete(),
     ['<c-e>'] = cmp.mapping.close(),
     ['<cr>'] = cmp.mapping(function(fallback)
-      local expandable = vim.fn["vsnip#expandable"]() == 1
+      local expandable = luasnip.expandable()
 
       -- if the popup menu is visible
       if vim.fn.pumvisible() == 1 then
@@ -649,7 +650,7 @@ cmp.setup {
         -- nothing is selected in the popup menu, but the entered text is an expandable snippet
         if not_selected then
           if expandable then
-            vim.fn.feedkeys(t '<plug>(vsnip-expand)')
+            vim.fn.feedkeys(t '<plug>luasnip-expand-snippet')
           else
             vim.fn.feedkeys(t '<c-e>') -- close cmp
           end
@@ -657,18 +658,19 @@ cmp.setup {
           cmp.mapping.confirm{behavior = cmp.ConfirmBehavior.Replace}(fallback)
         end
       elseif expandable then -- there's no popup, but the entered text is an expandable snippet
-        vim.fn.feedkeys(t '<plug>(vsnip-expand)')
+        vim.fn.feedkeys(t '<plug>luasnip-expand-snippet')
       else
-        -- fallback to normal <cr>, but make sure to expand any abbreviations first
-        vim.fn.feedkeys(vim.api.nvim_replace_termcodes('<c-]><cr>', true, true, true), "n")
+        -- fallback to normal <cr>
+        -- TODO(jawa) this breaks abbreviations :-(
+        fallback()
         vim.fn.feedkeys(t "<plug>Endwise")
       end
     end, {'i'}),
     ['<tab>'] = cmp.mapping(function(fallback)
       if vim.fn.pumvisible() == 1 then
         vim.fn.feedkeys(t '<c-n>', 'n')
-      elseif vim.fn['vsnip#available']() == 1 then
-        vim.fn.feedkeys(t '<plug>(vsnip-expand-or-jump)')
+      elseif luasnip.expand_or_jumpable() then
+        vim.fn.feedkeys(t '<plug>luasnip-expand-or-jump')
       else
         fallback()
       end
@@ -676,8 +678,8 @@ cmp.setup {
     ['<s-tab>'] = cmp.mapping(function(fallback)
       if vim.fn.pumvisible() == 1 then
         vim.fn.feedkeys(t '<c-p>', 'n')
-      elseif vim.fn['vsnip#jumpable']() == 1 then
-        vim.fn.feedkeys(t '<plug>(vsnip-jump-prev)')
+      elseif luasnip.jumpable(-1) then
+        vim.fn.feedkeys(t '<plug>luasnip-jump-prev')
       else
         fallback()
       end
@@ -687,8 +689,8 @@ cmp.setup {
 inoremap("<plug>Endwise", t "<c-r>=EndwiseDiscretionary()<cr>", {silent = true})
 
 -- telescope
-local telescope = require('telescope')
-local telescope_actions = require('telescope.actions')
+local telescope = require 'telescope'
+local telescope_actions = require 'telescope.actions'
 telescope.setup{
   defaults = {
     vimgrep_arguments = {
