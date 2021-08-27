@@ -586,6 +586,30 @@ nvim_lsp.tsserver.setup {
   capabilities = capabilities,
 }
 
+local lua_path = vim.split(package.path, ';')
+table.insert(lua_path, "lua/?.lua")
+table.insert(lua_path, "lua/?/init.lua")
+
+nvim_lsp.sumneko_lua.setup {
+  cmd = {'lua-language-server', '-E', '/usr/share/lua-language-server/main.lua'},
+  on_attach = on_attach,
+  capabilities = capabilities,
+  settings = {
+    Lua = {
+      runtime = {
+        version = 'LuaJIT',
+        path = lua_path,
+      },
+      diagnostics = {
+        globals = {'vim'},
+      },
+      workspace = {
+        library = vim.api.nvim_get_runtime_file('', true),
+      },
+    },
+  }
+}
+
 vim.cmd [[sign define LspDiagnosticsSignError       text= texthl=LspDiagnosticsSignError       linehl= numhl=]]
 vim.cmd [[sign define LspDiagnosticsSignWarning     text= texthl=LspDiagnosticsSignWarning     linehl= numhl=]]
 vim.cmd [[sign define LspDiagnosticsSignInformation text= texthl=LspDiagnosticsSignInformation linehl= numhl=]]
