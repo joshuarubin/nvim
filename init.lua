@@ -25,10 +25,8 @@ require'packer'.startup(function()
   use 'tomtom/tcomment_vim' -- easy to use, file-type sensible comments
   use 'editorconfig/editorconfig-vim'
   use 'osyo-manga/vim-anzu' -- search status
-  use {
-    'nvim-treesitter/nvim-treesitter',
-    run = ':TSUpdate',
-  }
+  use { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' }
+  use 'nvim-treesitter/nvim-treesitter-textobjects'
 
   -- lsp
   use 'neovim/nvim-lspconfig'
@@ -50,13 +48,7 @@ require'packer'.startup(function()
   use 'rafamadriz/friendly-snippets'
 
   -- telescope
-  use {
-    'nvim-telescope/telescope.nvim',
-    requires = {
-      'nvim-lua/popup.nvim',
-      'nvim-lua/plenary.nvim',
-    },
-  }
+  use { 'nvim-telescope/telescope.nvim', requires = { 'nvim-lua/popup.nvim', 'nvim-lua/plenary.nvim' }}
   use {'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
   use 'jvgrootveld/telescope-zoxide'
   use 'AckslD/nvim-neoclip.lua'
@@ -69,12 +61,7 @@ require'packer'.startup(function()
   use 'joshuarubin/rubix-lightline.vim'
   use 'joshuarubin/rubix-telescope.nvim'
 
-  use {
-    'lewis6991/gitsigns.nvim',
-    requires = {
-      'nvim-lua/plenary.nvim'
-    }
-  }
+  use { 'lewis6991/gitsigns.nvim', requires = { 'nvim-lua/plenary.nvim' }}
 
   -- lightline
   use 'itchyny/lightline.vim' -- a light and configurable statusline/tabline
@@ -400,6 +387,38 @@ require'nvim-treesitter.configs'.setup {
   ensure_installed = "maintained",
   highlight = { enable = true },
   indent = { enable = true },
+  textobjects = {
+    select = {
+      enable = true,
+      lookahead = true, -- Automatically jump forward to textobj, similar to targets.vim
+      keymaps = {
+        ['af'] = '@function.outer',
+        ['if'] = '@function.inner',
+        ['ac'] = '@class.outer',
+        ['ic'] = '@class.inner',
+      },
+    },
+    move = {
+      enable = true,
+      set_jumps = true, -- whether to set jumps in the jumplist
+      goto_next_start = {
+        [']m'] = '@function.outer',
+        [']]'] = '@class.outer',
+      },
+      goto_next_end = {
+        [']M'] = '@function.outer',
+        [']['] = '@class.outer',
+      },
+      goto_previous_start = {
+        ['[m'] = '@function.outer',
+        ['[['] = '@class.outer',
+      },
+      goto_previous_end = {
+        ['[M'] = '@function.outer',
+        ['[]'] = '@class.outer',
+      },
+    },
+  }
 }
 
 -- lsp
