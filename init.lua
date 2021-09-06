@@ -15,7 +15,8 @@ require("packer").startup(function()
 	use("tpope/vim-repeat") -- enable repeating supported plugin maps with `.`
 	use("tpope/vim-eunuch") -- helpers for unix
 	use("tpope/vim-endwise") -- wisely add "end" in ruby, endfunction/endif/more in vim script, etc.
-	use("b3nj5m1n/kommentary")
+	use("tpope/vim-commentary")
+	use("JoosepAlviste/nvim-ts-context-commentstring")
 	use("ludovicchabant/vim-gutentags") -- automatic tags management
 	use("editorconfig/editorconfig-vim")
 	use("kevinhwang91/nvim-hlslens")
@@ -77,6 +78,7 @@ require("packer").startup(function()
 			require("colorizer").setup()
 		end,
 	})
+	use({ "kyazdani42/nvim-tree.lua", requires = "kyazdani42/nvim-web-devicons" })
 end)
 
 local backupdir = function()
@@ -226,6 +228,10 @@ end
 -- bufsurf
 nnoremap("Z", t(":BufSurfBack<cr>"), { silent = true })
 nnoremap("X", t(":BufSurfForward<cr>"), { silent = true })
+
+-- nvim-tree
+nnoremap("<c-n>", t(":NvimTreeToggle<cr>"), { silent = true })
+vim.g.nvim_tree_git_hl = 1
 
 -- startify
 vim.g.startify_session_dir = vim.fn.stdpath("data") .. "/sessions"
@@ -401,6 +407,9 @@ require("nvim-treesitter.configs").setup({
 	ensure_installed = "maintained",
 	highlight = { enable = true },
 	-- indent = { enable = true }, -- TODO(jawa) this is too experimental right now, enable when possible
+	context_commentstring = {
+		enable = true,
+	},
 	textobjects = {
 		select = {
 			enable = true,
