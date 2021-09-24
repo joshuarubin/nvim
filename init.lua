@@ -10,7 +10,6 @@ local use = require("packer").use
 require("packer").startup(function()
 	use("wbthomason/packer.nvim") -- package manager
 	use("ton/vim-bufsurf") -- switch buffers based on viewing history per window
-	use("mhinz/vim-startify") -- " shows recently used files, bookmarks and sessions
 	use("tpope/vim-surround") -- quoting/parenthesizing made simple
 	use("tpope/vim-repeat") -- enable repeating supported plugin maps with `.`
 	use("tpope/vim-eunuch") -- helpers for unix
@@ -23,6 +22,15 @@ require("packer").startup(function()
 	use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" })
 	use("nvim-treesitter/nvim-treesitter-textobjects")
 	use({ "folke/todo-comments.nvim", requires = "nvim-lua/plenary.nvim" })
+	use({ "romgrk/nvim-treesitter-context", requires = "nvim-treesitter/nvim-treesitter" })
+
+	use({
+		"goolord/alpha-nvim",
+		requires = { "kyazdani42/nvim-web-devicons" },
+		config = function()
+			require("alpha").setup(require("alpha.themes.startify").opts)
+		end,
+	})
 
 	-- lsp
 	use("neovim/nvim-lspconfig")
@@ -233,22 +241,6 @@ nnoremap("X", t(":BufSurfForward<cr>"), { silent = true })
 nnoremap("<c-n>", t(":NvimTreeToggle<cr>"), { silent = true })
 vim.g.nvim_tree_git_hl = 1
 
--- startify
-vim.g.startify_session_dir = vim.fn.stdpath("data") .. "/sessions"
-vim.g.startify_show_sessions = 1
-vim.g.startify_session_persistence = 1
-vim.g.startify_change_to_vcs_root = 1
-vim.g.startify_update_oldfiles = 1
-vim.g.startify_session_sort = 1
-vim.g.startify_custom_header = ""
-vim.g.startify_skiplist = vim.fn.add(
-	vim.fn.map(vim.split(vim.o.runtimepath, ","), function(_, v)
-		return vim.fn.resolve(v .. "/doc")
-	end),
-	"COMMIT_EDITMSG"
-)
-nmap("<leader>bh", t(":Startify<cr>"), { silent = true })
-
 -- endwise
 vim.g.endwise_no_mappings = 1
 
@@ -260,8 +252,12 @@ vim.fn["editorconfig#AddNewHook"](function(config)
 	return 0 -- return 0 to show no error happened
 end)
 
-nnoremap("n", "<cmd>execute('normal! ' . v:count1 . 'n')<cr><cmd>lua require('hlslens').start()<cr>", { silent = true })
-nnoremap("N", "<cmd>execute('normal! ' . v:count1 . 'N')<cr><cmd>lua require('hlslens').start()<cr>", { silent = true })
+nnoremap("n", "<cmd>execute('normal! ' . v:count1 . 'n')<cr><cmd>lua require('hlslens').start()<cr>", {
+	silent = true,
+})
+nnoremap("N", "<cmd>execute('normal! ' . v:count1 . 'N')<cr><cmd>lua require('hlslens').start()<cr>", {
+	silent = true,
+})
 nnoremap("*", "*<cmd>lua require('hlslens').start()<cr>")
 nnoremap("#", "#<cmd>lua require('hlslens').start()<cr>")
 nnoremap("g*", "g*<cmd>lua require('hlslens').start()<cr>")
@@ -442,6 +438,11 @@ require("nvim-treesitter.configs").setup({
 			},
 		},
 	},
+})
+
+require("treesitter-context").setup({
+	enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
+	throttle = true, -- Throttles plugin updates (may improve performance)
 })
 
 -- formatter
@@ -834,7 +835,7 @@ telescope.load_extension("zoxide")
 telescope.load_extension("rubix")
 telescope.load_extension("neoclip")
 require("neoclip").setup({
-	default_register = "plus",
+	default_register = { "+", "*" },
 	filter = nil,
 	history = 1000,
 })
@@ -844,7 +845,7 @@ nmap("<c-p>", "<cmd>Telescope rubix find_files<cr>", { silent = true })
 nmap("<c-f>", "<cmd>Telescope rubix history<cr>", { silent = true })
 nmap("<c-s><c-s>", "<cmd>Telescope rubix grep_string<cr>", { silent = true })
 nmap("<c-s><c-d>", "<cmd>Telescope rubix live_grep<cr>", { silent = true })
-nmap("<leader>y", "<cmd>Telescope neoclip plus<cr>", { silent = true })
+nmap("<leader>y", "<cmd>Telescope neoclip plus extra=star<cr>", { silent = true })
 tmap("<c-p>", "<cmd>Telescope rubix find_files<cr>", { silent = true })
 tmap("<c-b>", "<cmd>Telescope buffers<cr>", { silent = true })
 
@@ -925,7 +926,7 @@ require("toggleterm").setup({
 
 -- normal mode
 nnoremap("<leader>n", ":nohlsearch<cr>", { silent = true })
-nnoremap("<leader>fc", "/\\v^[<|=>]{7}( .*|$)<cr>") -- find merge conflict markers TODO(jawa) test
+nnoremap("<leader>fc", "/\\v^[<|=>]{7}( .*|$)<cr>") -- find merge conflict markers
 nnoremap("<leader>q", ":qa<cr>", { silent = true })
 nnoremap("<leader>Q", ":qa!<cr>", { silent = true })
 nnoremap("<leader>cd", ":lcd %:p:h<cr>:pwd<cr>") -- switch to the directory of the open buffer
