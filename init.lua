@@ -653,10 +653,10 @@ nvim_lsp.sumneko_lua.setup({
 	},
 })
 
-vim.cmd([[sign define LspDiagnosticsSignError       text= texthl=LspDiagnosticsSignError       linehl= numhl=]])
-vim.cmd([[sign define LspDiagnosticsSignWarning     text= texthl=LspDiagnosticsSignWarning     linehl= numhl=]])
-vim.cmd([[sign define LspDiagnosticsSignInformation text= texthl=LspDiagnosticsSignInformation linehl= numhl=]])
-vim.cmd([[sign define LspDiagnosticsSignHint        text= texthl=LspDiagnosticsSignHint        linehl= numhl=]])
+vim.cmd([[sign define DiagnosticSignError text= texthl=LspDiagnosticsSignError       linehl= numhl=]])
+vim.cmd([[sign define DiagnosticSignWarn  text= texthl=LspDiagnosticsSignWarning     linehl= numhl=]])
+vim.cmd([[sign define DiagnosticSignInfo  text= texthl=LspDiagnosticsSignInformation linehl= numhl=]])
+vim.cmd([[sign define DiagnosticSignHint  text= texthl=LspDiagnosticsSignHint        linehl= numhl=]])
 
 -- snippets
 local luasnip = require("luasnip")
@@ -691,7 +691,7 @@ cmp.setup({
 			local expandable = luasnip.expandable()
 
 			-- if the popup menu is visible
-			if vim.fn.pumvisible() == 1 then
+			if cmp.visible() then
 				local not_selected = vim.fn.complete_info({ "selected" }).selected == -1
 
 				-- nothing is selected in the popup menu, but the entered text is an expandable snippet
@@ -700,6 +700,9 @@ cmp.setup({
 						vim.fn.feedkeys(t("<plug>luasnip-expand-snippet"))
 					else
 						vim.fn.feedkeys(t("<c-e>")) -- close cmp
+
+						-- complete abbreviations
+						vim.fn.feedkeys(t("<c-]>"))
 					end
 				else -- normal completion
 					cmp.mapping.confirm({ behavior = cmp.ConfirmBehavior.Replace })(fallback)
@@ -707,11 +710,11 @@ cmp.setup({
 			elseif expandable then -- there's no popup, but the entered text is an expandable snippet
 				vim.fn.feedkeys(t("<plug>luasnip-expand-snippet"))
 			else
-				-- complete abbreviations
-				vim.fn.feedkeys(t("<c-]>"))
+				-- complete abbreviations and create undo point
+				vim.fn.feedkeys(t("<c-]><c-g>u"))
 
 				-- fallback to normal <cr>
-				fallback()
+				vim.fn.feedkeys(t("<cr>"), "n") -- using fallback() breaks abbreviations
 
 				-- telescope breaks when opening a new file in the same buffer unless we do this
 				local filetype = vim.api.nvim_buf_get_option(0, "filetype")
@@ -725,6 +728,8 @@ cmp.setup({
 		["<tab>"] = cmp.mapping(function(fallback)
 			if vim.fn.pumvisible() == 1 then
 				vim.fn.feedkeys(t("<c-n>"), "n")
+			elseif cmp.visible() then
+				cmp.select_next_item()
 			elseif luasnip.expand_or_jumpable() then
 				vim.fn.feedkeys(t("<plug>luasnip-expand-or-jump"))
 			else
@@ -737,6 +742,8 @@ cmp.setup({
 		["<s-tab>"] = cmp.mapping(function(fallback)
 			if vim.fn.pumvisible() == 1 then
 				vim.fn.feedkeys(t("<c-p>"), "n")
+			elseif cmp.visible() then
+				cmp.select_prev_item()
 			elseif luasnip.jumpable(-1) then
 				vim.fn.feedkeys(t("<plug>luasnip-jump-prev"))
 			else
@@ -886,7 +893,7 @@ require("trouble").setup({
 	auto_fold = false, -- automatically fold a file trouble list at creation
 	signs = {
 		-- icons / text used for a diagnostic
-		error = "",
+		error = "",
 		warning = "",
 		hint = "",
 		information = "",
@@ -987,8 +994,16 @@ cnoremap("<c-k>", "<up>")
 inoremap("<c-w>", "<c-g>u<c-w>") -- ctrl-w: Delete previous word, create undo point
 inoremap("<c-h>", "<esc><c-w>h") -- tmux style navigation
 inoremap("<c-l>", "<esc><c-w>l") -- tmux style navigation
-inoremap("<c-j>", 'pumvisible() ? "<c-n>" : "<esc><c-w>j"', { expr = true }) -- tmux style navigation
-inoremap("<c-k>", 'pumvisible() ? "<c-p>" : "<esc><c-w>k"', { expr = true }) -- tmux style navigation
+inoremap(
+	"<c-j>",
+	'pumvisible() ? "<c-n>" : lua require("cmp").visible() ? lua require("cmp").select_next_item() : "<esc><c-w>j"',
+	{ expr = true }
+) -- tmux style navigation
+inoremap(
+	"<c-k>",
+	'pumvisible() ? "<c-p>" : lua require("cmp").visible() ? lua require("cmp").select_prev_item() : "<esc><c-w>k"',
+	{ expr = true }
+) -- tmux style navigation
 inoremap("<c-a>H", "<esc><c-w><a") -- resize window
 inoremap("<c-a>L", "<esc><c-w>>a") -- resize window
 inoremap("<c-a>J", "<esc><c-w>+a") -- resize window
