@@ -14,7 +14,12 @@ require("packer").startup(function()
 	use("tpope/vim-repeat") -- enable repeating supported plugin maps with `.`
 	use("tpope/vim-eunuch") -- helpers for unix
 	use("tpope/vim-endwise") -- wisely add "end" in ruby, endfunction/endif/more in vim script, etc.
-	use("tpope/vim-commentary")
+	use({
+		"numToStr/Comment.nvim",
+		config = function()
+			require("Comment").setup()
+		end,
+	})
 	use("JoosepAlviste/nvim-ts-context-commentstring")
 	use("ludovicchabant/vim-gutentags") -- automatic tags management
 	use("editorconfig/editorconfig-vim")
@@ -78,7 +83,7 @@ require("packer").startup(function()
 	use("kyazdani42/nvim-web-devicons")
 
 	-- colorscheme
-	use("cocopon/iceberg.vim")
+	use("sainnhe/gruvbox-material")
 	use("folke/lsp-colors.nvim")
 	use({
 		"norcalli/nvim-colorizer.lua",
@@ -293,10 +298,18 @@ require("gitsigns").setup({
 
 -- colorscheme
 vim.o.termguicolors = true
-vim.cmd([[autocmd ColorScheme * highlight Comment gui=italic cterm=italic]])
 vim.cmd([[autocmd ColorScheme * highlight link HlSearchLens Comment]])
 vim.cmd([[autocmd ColorScheme * highlight link HlSearchLensNear Comment]])
-vim.cmd([[colorscheme iceberg]])
+
+vim.g.gruvbox_material_background = "hard"
+vim.g.gruvbox_material_palette = "original"
+vim.g.gruvbox_material_enable_italic = 1
+vim.g.gruvbox_material_enable_bold = 1
+vim.g.gruvbox_material_ui_contrast = "high"
+vim.g.gruvbox_material_diagnostic_virtual_text = "colored"
+vim.g.gruvbox_material_statusline_style = "original"
+vim.cmd([[colorscheme gruvbox-material]])
+
 require("todo-comments").setup({
 	keywords = {
 		TODO = { icon = " ", color = "error" },
@@ -348,7 +361,7 @@ vim.g.lightline_no_filetype_filetypes = { "man", "help", "qf", "taskreport", "ta
 vim.g.lightline_no_filename_filetypes = { "qf", "taskreport", "taskinfo", "defx" }
 
 vim.g.lightline = {
-	colorscheme = "iceberg",
+	colorscheme = "gruvbox_material",
 	separator = { left = "", right = "" },
 	subseparator = { left = "", right = "" },
 	active = {
@@ -692,26 +705,21 @@ cmp.setup({
 
 			-- if the popup menu is visible
 			if cmp.visible() then
-				local not_selected = vim.fn.complete_info({ "selected" }).selected == -1
+				local selected = cmp.core.view:get_selected_entry()
 
-				-- nothing is selected in the popup menu, but the entered text is an expandable snippet
-				if not_selected then
-					if expandable then
-						vim.fn.feedkeys(t("<plug>luasnip-expand-snippet"))
-					else
-						vim.fn.feedkeys(t("<c-e>")) -- close cmp
-
-						-- complete abbreviations
-						vim.fn.feedkeys(t("<c-]>"))
-					end
-				else -- normal completion
+				if selected then -- normal completion
 					cmp.mapping.confirm({ behavior = cmp.ConfirmBehavior.Replace })(fallback)
+				elseif expandable then -- nothing is selected in the popup menu, but the entered text is an expandable snippet
+					vim.fn.feedkeys(t("<plug>luasnip-expand-snippet"))
+				else
+					vim.fn.feedkeys(t("<c-e>")) -- close cmp
+					vim.fn.feedkeys(t("<c-]>")) -- complete abbreviations
 				end
 			elseif expandable then -- there's no popup, but the entered text is an expandable snippet
 				vim.fn.feedkeys(t("<plug>luasnip-expand-snippet"))
 			else
-				-- complete abbreviations and create undo point
-				vim.fn.feedkeys(t("<c-]><c-g>u"))
+				vim.fn.feedkeys(t("<c-]>")) -- complete abbreviations
+				vim.fn.feedkeys(t("<c-g>u")) -- create undo point
 
 				-- fallback to normal <cr>
 				vim.fn.feedkeys(t("<cr>"), "n") -- using fallback() breaks abbreviations
