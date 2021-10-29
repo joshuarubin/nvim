@@ -69,13 +69,14 @@ require("packer").startup(function()
 
 	use("akinsho/toggleterm.nvim")
 	use("joshuarubin/rubix.vim")
-	use("joshuarubin/rubix-lightline.vim")
 	use("joshuarubin/rubix-telescope.nvim")
 
 	use({ "lewis6991/gitsigns.nvim", requires = { "nvim-lua/plenary.nvim" } })
 
-	-- lightline
-	use("itchyny/lightline.vim") -- a light and configurable statusline/tabline
+	use({
+		"nvim-lualine/lualine.nvim",
+		requires = { "kyazdani42/nvim-web-devicons", opt = true },
+	})
 	use("akinsho/bufferline.nvim")
 
 	-- file type icons
@@ -131,7 +132,7 @@ vim.o.lazyredraw = true
 vim.o.conceallevel = 2
 vim.o.concealcursor = "niv"
 vim.o.showmode = false
-vim.o.showtabline = 2 -- prevent flicker, lightline shows info anyway
+vim.o.showtabline = 2 -- prevent flicker, lualine shows info anyway
 vim.o.showcmd = false
 vim.o.number = true -- line numbers are good
 vim.o.scrolloff = 8 -- start scrolling when we're 8 lines away from margins
@@ -346,71 +347,39 @@ nnoremap("<leader>gu", ":Git pull<cr>", { silent = true })
 nnoremap("<leader>gn", ":Git merge<cr>", { silent = true })
 nnoremap("<leader>gf", ":Git fetch<cr>", { silent = true })
 
--- lightline
-vim.cmd([[
-  augroup InitLightline
-    autocmd!
-    autocmd User LspDiagnosticsChanged call lightline#update()
-  augroup END
-]])
-
-vim.g.lightline_readonly_filetypes = { "help", "man", "qf", "taskreport", "taskinfo" }
-vim.g.lightline_filetype_mode_filetypes = { "help", "man", "qf", "defx" }
-vim.g.lightline_no_lineinfo_filetypes = { "taskreport", "taskinfo", "defx" }
-vim.g.lightline_no_filetype_filetypes = { "man", "help", "qf", "taskreport", "taskinfo", "defx" }
-vim.g.lightline_no_filename_filetypes = { "qf", "taskreport", "taskinfo", "defx" }
-
-vim.g.lightline = {
-	colorscheme = "gruvbox_material",
-	separator = { left = "", right = "" },
-	subseparator = { left = "", right = "" },
-	active = {
-		left = {
-			{ "mode", "crypt", "paste", "spell" },
-			{ "filename" },
+require("lualine").setup({
+	options = {
+		theme = "gruvbox",
+		component_separators = { left = "", right = "" },
+		section_separators = { left = "", right = "" },
+	},
+	sections = {
+		lualine_a = { "mode" },
+		lualine_b = {
+			"branch",
+			"diff",
+			{
+				"diagnostics",
+				sources = { "nvim_lsp" },
+				symbols = { error = " ", warn = " ", info = " ", hint = " " },
+			},
 		},
-		right = {
-			{ "filetype", "lineinfo" },
-			{ "warnings", "errors", "git" },
-		},
+		lualine_c = { { "filename", path = 1 } },
+		lualine_x = { "encoding", "fileformat", "filetype" },
+		lualine_y = { "progress" },
+		lualine_z = { "location" },
 	},
-	inactive = {
-		left = {
-			{},
-			{},
-			{ "fullfilename" },
-		},
-		right = {
-			{ "filetype" },
-		},
+	inactive_sections = {
+		lualine_a = {},
+		lualine_b = {},
+		lualine_c = { "filename" },
+		lualine_x = { "location" },
+		lualine_y = {},
+		lualine_z = {},
 	},
-	component = {
-		lambda = "λ",
-	},
-	component_function = {
-		git = "rubix#lightline#git",
-		filename = "rubix#lightline#filename",
-		fullfilename = "rubix#lightline#full_filename",
-		filetype = "rubix#lightline#filetype",
-		mode = "rubix#lightline#mode",
-		crypt = "rubix#lightline#crypt",
-		spell = "rubix#lightline#spell",
-		paste = "rubix#lightline#paste",
-	},
-	component_expand = {
-		lineinfo = "rubix#lightline#line_info",
-		errors = "rubix#lightline#errors",
-		warnings = "rubix#lightline#warnings",
-	},
-	component_type = {
-		errors = "error",
-		warnings = "warning",
-	},
-	enable = {
-		statusline = 1,
-		tabline = 0,
-	},
-}
+	tabline = {},
+	extensions = { "fugitive", "nvim-tree", "quickfix", "toggleterm" },
+})
 
 require("nvim-treesitter.configs").setup({
 	ensure_installed = "maintained",
