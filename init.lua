@@ -53,6 +53,7 @@ require("packer").startup(function()
 	use("hrsh7th/cmp-nvim-lsp")
 	use("hrsh7th/cmp-nvim-lua")
 	use("saadparwaiz1/cmp_luasnip")
+	use("github/copilot.vim")
 
 	-- snippets
 	use("L3MON4D3/LuaSnip")
@@ -310,6 +311,9 @@ vim.g.gruvbox_material_ui_contrast = "high"
 vim.g.gruvbox_material_diagnostic_virtual_text = "colored"
 vim.g.gruvbox_material_statusline_style = "original"
 vim.cmd([[colorscheme gruvbox-material]])
+
+vim.g.copilot_no_tab_map = 1
+vim.g.copilot_assume_mapped = 1
 
 require("todo-comments").setup({
 	keywords = {
@@ -669,6 +673,7 @@ cmp.setup({
 		["<c-f>"] = cmp.mapping.scroll_docs(4),
 		["<c-space>"] = cmp.mapping.complete(),
 		["<c-e>"] = cmp.mapping.close(),
+		["<esc>"] = cmp.mapping.close(),
 		["<cr>"] = cmp.mapping(function(fallback)
 			local expandable = luasnip.expandable()
 
@@ -707,10 +712,13 @@ cmp.setup({
 				vim.fn.feedkeys(t("<c-n>"), "n")
 			elseif cmp.visible() then
 				cmp.select_next_item()
-			elseif luasnip.expand_or_jumpable() then
-				vim.fn.feedkeys(t("<plug>luasnip-expand-or-jump"))
 			else
-				fallback()
+				local result = vim.fn["copilot#Accept"](-1)
+				if result ~= -1 then
+					vim.fn.feedkeys(t(result), "n")
+				else
+					fallback()
+				end
 			end
 		end, {
 			"i",
