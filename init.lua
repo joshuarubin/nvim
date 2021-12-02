@@ -23,14 +23,13 @@ require("packer").startup(function()
 	use("JoosepAlviste/nvim-ts-context-commentstring")
 	use("ludovicchabant/vim-gutentags") -- automatic tags management
 	use("editorconfig/editorconfig-vim")
-	use("kevinhwang91/nvim-hlslens")
+	use("kevinhwang91/nvim-hlslens") -- highlight search lens
 	use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" })
 	use("nvim-treesitter/nvim-treesitter-textobjects")
 	use({ "folke/todo-comments.nvim", requires = "nvim-lua/plenary.nvim" })
-	use({ "romgrk/nvim-treesitter-context", requires = "nvim-treesitter/nvim-treesitter" })
 
 	use({
-		"goolord/alpha-nvim",
+		"goolord/alpha-nvim", -- lua powered greeter like startify
 		requires = { "kyazdani42/nvim-web-devicons" },
 		config = function()
 			require("alpha").setup(require("alpha.themes.startify").opts)
@@ -314,6 +313,15 @@ vim.cmd([[colorscheme gruvbox-material]])
 
 vim.g.copilot_no_tab_map = 1
 vim.g.copilot_assume_mapped = 1
+_G.copilot_accept = function()
+	-- close cmp unconditionally (don't abort as it retains inserted text)
+	require("cmp").mapping.close()
+
+	-- do copilot completion if possible
+	return vim.fn["copilot#Accept"](t("<c-e>"))
+end
+
+inoremap("<c-e>", "v:lua.copilot_accept()", { silent = true, expr = true })
 
 require("todo-comments").setup({
 	keywords = {
@@ -426,11 +434,6 @@ require("nvim-treesitter.configs").setup({
 	},
 })
 
-require("treesitter-context").setup({
-	enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
-	throttle = true, -- Throttles plugin updates (may improve performance)
-})
-
 -- formatter
 require("formatter").setup({
 	filetype = {
@@ -452,7 +455,7 @@ require("formatter").setup({
 local nvim_lsp = require("lspconfig")
 local on_attach = function(_, _)
 	vim.cmd([[autocmd BufWritePre <buffer> lua lsp_format()]])
-	vim.cmd([[autocmd CursorHold,CursorHoldI,InsertLeave <buffer> lua vim.lsp.codelens.refresh()]])
+	vim.cmd([[autocmd CursorHold,CursorHoldI,InsertLeave <buffer> silent! lua vim.lsp.codelens.refresh()]])
 
 	local buf_nnoremap = function(lhs, rhs)
 		return vim.api.nvim_buf_set_keymap(0, "n", lhs, rhs, { noremap = true, silent = true })
@@ -503,17 +506,6 @@ _G.lsp_format_go = function(timeout_ms)
 	end
 
 	vim.lsp.buf.formatting_seq_sync()
-end
-
-vim.lsp.handlers["textDocument/codeLens"] = function(err, _, result, client_id, bufnr)
-	-- ignore this error since it shows up for the codelens.refresh() autocmd and
-	-- is very annoying
-	-- method textDocument/codeLens is not supported by any of the servers registered for the current buffer
-	if err and err.code == -32601 then
-		return
-	end
-
-	return vim.lsp.codelens.on_codelens(err, _, result, client_id, bufnr)
 end
 
 local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -672,8 +664,9 @@ cmp.setup({
 		["<c-d>"] = cmp.mapping.scroll_docs(-4),
 		["<c-f>"] = cmp.mapping.scroll_docs(4),
 		["<c-space>"] = cmp.mapping.complete(),
-		["<c-e>"] = cmp.mapping.close(),
-		["<esc>"] = cmp.mapping.close(),
+		["<c-e>"] = cmp.mapping(function(fallback)
+			fallback()
+		end),
 		["<cr>"] = cmp.mapping(function(fallback)
 			local expandable = luasnip.expandable()
 
@@ -713,12 +706,7 @@ cmp.setup({
 			elseif cmp.visible() then
 				cmp.select_next_item()
 			else
-				local result = vim.fn["copilot#Accept"](-1)
-				if result ~= -1 then
-					vim.fn.feedkeys(t(result), "n")
-				else
-					fallback()
-				end
+				fallback()
 			end
 		end, {
 			"i",
