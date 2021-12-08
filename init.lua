@@ -93,6 +93,13 @@ require("packer").startup(function()
 		end,
 	})
 	use({ "kyazdani42/nvim-tree.lua", requires = "kyazdani42/nvim-web-devicons" })
+
+	use({
+		"glacambre/firenvim",
+		run = function()
+			vim.fn["firenvim#install"](0)
+		end,
+	})
 end)
 
 local backupdir = function()
@@ -269,7 +276,7 @@ nnoremap("#", "#<cmd>lua require('hlslens').start()<cr>")
 nnoremap("g*", "g*<cmd>lua require('hlslens').start()<cr>")
 nnoremap("g#", "g#<cmd>lua require('hlslens').start()<cr>")
 
-require("bufferline").setup({
+local bufferline = {
 	options = {
 		numbers = function(opts)
 			return opts.id
@@ -284,7 +291,7 @@ require("bufferline").setup({
 		show_close_icon = false,
 		separator_style = "slant",
 	},
-})
+}
 
 -- gitsigns
 require("gitsigns").setup({
@@ -311,7 +318,7 @@ vim.g.gruvbox_material_diagnostic_virtual_text = "colored"
 vim.g.gruvbox_material_statusline_style = "original"
 vim.cmd([[colorscheme gruvbox-material]])
 
-vim.g.copilot_no_tab_map = 1
+vim.g.copilot_no_maps = 1
 vim.g.copilot_assume_mapped = 1
 _G.copilot_accept = function()
 	-- close cmp unconditionally (don't abort as it retains inserted text)
@@ -359,7 +366,7 @@ nnoremap("<leader>gu", ":Git pull<cr>", { silent = true })
 nnoremap("<leader>gn", ":Git merge<cr>", { silent = true })
 nnoremap("<leader>gf", ":Git fetch<cr>", { silent = true })
 
-require("lualine").setup({
+local lualine = {
 	options = {
 		theme = "gruvbox",
 		component_separators = { left = "", right = "" },
@@ -391,7 +398,62 @@ require("lualine").setup({
 	},
 	tabline = {},
 	extensions = { "fugitive", "nvim-tree", "quickfix", "toggleterm" },
-})
+}
+
+-- firenvim
+if vim.g.started_by_firenvim then
+	vim.o.guifont = "JetBrainsMono_Nerd_Font:h20"
+	vim.o.laststatus = 0
+	vim.o.number = false
+	vim.o.ruler = false
+	vim.o.showmode = true
+	vim.o.showtabline = 1
+	vim.cmd("startinsert")
+
+	-- two ways to hide the ~ on empty lines at the end of the buffer
+	vim.opt.fillchars:append("eob: ")
+	vim.cmd([[highlight EndOfBuffer guifg=bg]])
+
+	local nowrite = false
+	local firenvim_write = function()
+		nowrite = false
+		vim.cmd("silent write")
+	end
+
+	_G.firenvim_delay_write = function()
+		if nowrite then
+			return
+		end
+		nowrite = true
+		vim.defer_fn(firenvim_write, 1000)
+	end
+
+	vim.cmd([[autocmd TextChanged  * ++nested lua firenvim_delay_write()]])
+	vim.cmd([[autocmd TextChangedI * ++nested lua firenvim_delay_write()]])
+else
+	-- only start these if not in firenvim
+	require("bufferline").setup(bufferline)
+	require("lualine").setup(lualine)
+end
+
+vim.g.firenvim_config = {
+	localSettings = {
+		[".*"] = {
+			cmdline = "neovim",
+			filename = "/tmp/{hostname%32}_{pathname%10}.{extension}",
+			priority = 0,
+		},
+		["https?://github.com/.*"] = {
+			-- markdown for all github pages
+			filename = "/tmp/{hostname%32}_{pathname%10}.md",
+			priority = 1,
+		},
+		["https?://www.notion.so/.*"] = {
+			-- disable on notion
+			takeover = "never",
+		},
+	},
+}
 
 require("nvim-treesitter.configs").setup({
 	ensure_installed = "maintained",
