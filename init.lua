@@ -100,6 +100,13 @@ require("packer").startup(function()
 			vim.fn["firenvim#install"](0)
 		end,
 	})
+
+	use({
+		"lewis6991/spellsitter.nvim",
+		config = function()
+			require("spellsitter").setup()
+		end,
+	})
 end)
 
 local backupdir = function()
@@ -171,6 +178,7 @@ vim.o.ignorecase = true -- case insensitive matching
 vim.o.smartcase = true -- smart case matching
 vim.o.tags = "./tags;/,~/.vimtags"
 vim.o.mouse = "nv"
+vim.o.spell = true
 
 vim.opt.isfname:remove({ "=" })
 
