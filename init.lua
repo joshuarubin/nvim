@@ -63,6 +63,7 @@ require("packer").startup(function()
 	use({ "nvim-telescope/telescope-fzf-native.nvim", run = "make" })
 	use("jvgrootveld/telescope-zoxide")
 	use("AckslD/nvim-neoclip.lua")
+	use({ "nvim-telescope/telescope-frecency.nvim", requires = { "tami5/sqlite.lua" } })
 
 	use("tpope/vim-fugitive")
 	use("folke/trouble.nvim")
@@ -92,6 +93,7 @@ require("packer").startup(function()
 			require("colorizer").setup()
 		end,
 	})
+
 	use({ "kyazdani42/nvim-tree.lua", requires = "kyazdani42/nvim-web-devicons" })
 
 	use({
@@ -328,6 +330,7 @@ vim.cmd([[colorscheme gruvbox-material]])
 
 vim.g.copilot_no_maps = 1
 vim.g.copilot_assume_mapped = 1
+
 _G.copilot_accept = function()
 	-- close cmp unconditionally (don't abort as it retains inserted text)
 	require("cmp").mapping.close()
@@ -387,7 +390,7 @@ local lualine = {
 			"diff",
 			{
 				"diagnostics",
-				sources = { "nvim_lsp" },
+				sources = { "nvim_diagnostic" },
 				symbols = { error = " ", warn = " ", info = " ", hint = " " },
 			},
 		},
@@ -416,6 +419,7 @@ if vim.g.started_by_firenvim then
 	vim.o.ruler = false
 	vim.o.showmode = true
 	vim.o.showtabline = 1
+	vim.o.textwidth = 0
 	vim.cmd("startinsert")
 
 	-- two ways to hide the ~ on empty lines at the end of the buffer
@@ -444,7 +448,7 @@ else
 	require("lualine").setup(lualine)
 end
 
-vim.g.firenvim_config = {
+local firenvim_config = {
 	localSettings = {
 		[".*"] = {
 			cmdline = "neovim",
@@ -456,12 +460,22 @@ vim.g.firenvim_config = {
 			filename = "/tmp/{hostname%32}_{pathname%10}.md",
 			priority = 1,
 		},
-		["https?://www.notion.so/.*"] = {
-			-- disable on notion
-			takeover = "never",
-		},
 	},
 }
+
+-- disable firenvim on these sites
+for _, v in ipairs({
+	"https?://www\\.notion\\.so/.*",
+	"https?://www\\.fastmail\\.com/.*",
+	"https?://mail\\.google\\.com/.*",
+}) do
+	firenvim_config.localSettings[v] = {
+		takeover = "never",
+		priority = 1,
+	}
+end
+
+vim.g.firenvim_config = firenvim_config
 
 require("nvim-treesitter.configs").setup({
 	ensure_installed = "maintained",
@@ -869,14 +883,14 @@ telescope.setup({
 				["<c-k>"] = telescope_actions.move_selection_previous,
 			},
 		},
+	},
 
-		extensions = {
-			fzf = {
-				fuzzy = true, -- false will only do exact matching
-				override_generic_sorter = true, -- override the generic sorter
-				override_file_sorter = true, -- override the file sorter
-				case_mode = "smart_case", -- or "ignore_case" or "respect_case" the default case_mode is "smart_case"
-			},
+	extensions = {
+		fzf = {
+			fuzzy = true, -- false will only do exact matching
+			override_generic_sorter = true, -- override the generic sorter
+			override_file_sorter = true, -- override the file sorter
+			case_mode = "smart_case", -- or "ignore_case" or "respect_case" the default case_mode is "smart_case"
 		},
 	},
 })
@@ -884,6 +898,7 @@ telescope.load_extension("fzf")
 telescope.load_extension("zoxide")
 telescope.load_extension("rubix")
 telescope.load_extension("neoclip")
+telescope.load_extension("frecency")
 require("neoclip").setup({
 	default_register = { "+", "*" },
 	filter = nil,
@@ -892,7 +907,11 @@ require("neoclip").setup({
 nmap("<c-b>", "<cmd>Telescope buffers<cr>", { silent = true })
 nmap("<leader>z", "<cmd>Telescope zoxide list<cr>", { silent = true })
 nmap("<c-p>", "<cmd>Telescope rubix find_files<cr>", { silent = true })
-nmap("<c-f>", "<cmd>Telescope rubix history<cr>", { silent = true })
+nmap(
+	"<c-f>",
+	"<cmd>lua require'telescope'.extensions.frecency.frecency{ sorter = require('telescope.config').values.file_sorter() }<cr>",
+	{ silent = true }
+)
 nmap("<c-s><c-s>", "<cmd>Telescope rubix grep_string<cr>", { silent = true })
 nmap("<c-s><c-d>", "<cmd>Telescope rubix live_grep<cr>", { silent = true })
 nmap("<leader>y", "<cmd>Telescope neoclip plus extra=star<cr>", { silent = true })
