@@ -39,7 +39,10 @@ require("packer").startup(function()
 	-- lsp
 	use("neovim/nvim-lspconfig")
 	use("simrat39/rust-tools.nvim")
-	use("jose-elias-alvarez/null-ls.nvim")
+	use({
+		"jose-elias-alvarez/null-ls.nvim",
+		requires = { "nvim-lua/plenary.nvim" },
+	})
 	use("jose-elias-alvarez/nvim-lsp-ts-utils")
 	use("mhartington/formatter.nvim")
 
@@ -63,7 +66,6 @@ require("packer").startup(function()
 	use({ "nvim-telescope/telescope-fzf-native.nvim", run = "make" })
 	use("jvgrootveld/telescope-zoxide")
 	use("AckslD/nvim-neoclip.lua")
-	use({ "nvim-telescope/telescope-frecency.nvim", requires = { "tami5/sqlite.lua" } })
 
 	use("tpope/vim-fugitive")
 	use("folke/trouble.nvim")
@@ -95,13 +97,6 @@ require("packer").startup(function()
 	})
 
 	use({ "kyazdani42/nvim-tree.lua", requires = "kyazdani42/nvim-web-devicons" })
-
-	use({
-		"glacambre/firenvim",
-		run = function()
-			vim.fn["firenvim#install"](0)
-		end,
-	})
 
 	use({
 		"lewis6991/spellsitter.nvim",
@@ -411,71 +406,8 @@ local lualine = {
 	extensions = { "fugitive", "nvim-tree", "quickfix", "toggleterm" },
 }
 
--- firenvim
-if vim.g.started_by_firenvim then
-	vim.o.guifont = "JetBrainsMono_Nerd_Font:h20"
-	vim.o.laststatus = 0
-	vim.o.number = false
-	vim.o.ruler = false
-	vim.o.showmode = true
-	vim.o.showtabline = 1
-	vim.o.textwidth = 0
-	vim.cmd("startinsert")
-
-	-- two ways to hide the ~ on empty lines at the end of the buffer
-	vim.opt.fillchars:append("eob: ")
-	vim.cmd([[highlight EndOfBuffer guifg=bg]])
-
-	local nowrite = false
-	local firenvim_write = function()
-		nowrite = false
-		vim.cmd("silent write")
-	end
-
-	_G.firenvim_delay_write = function()
-		if nowrite then
-			return
-		end
-		nowrite = true
-		vim.defer_fn(firenvim_write, 1000)
-	end
-
-	vim.cmd([[autocmd TextChanged  * ++nested lua firenvim_delay_write()]])
-	vim.cmd([[autocmd TextChangedI * ++nested lua firenvim_delay_write()]])
-else
-	-- only start these if not in firenvim
-	require("bufferline").setup(bufferline)
-	require("lualine").setup(lualine)
-end
-
-local firenvim_config = {
-	localSettings = {
-		[".*"] = {
-			cmdline = "neovim",
-			filename = "/tmp/{hostname%32}_{pathname%10}.{extension}",
-			priority = 0,
-		},
-		["https?://github.com/.*"] = {
-			-- markdown for all github pages
-			filename = "/tmp/{hostname%32}_{pathname%10}.md",
-			priority = 1,
-		},
-	},
-}
-
--- disable firenvim on these sites
-for _, v in ipairs({
-	"https?://www\\.notion\\.so/.*",
-	"https?://www\\.fastmail\\.com/.*",
-	"https?://mail\\.google\\.com/.*",
-}) do
-	firenvim_config.localSettings[v] = {
-		takeover = "never",
-		priority = 1,
-	}
-end
-
-vim.g.firenvim_config = firenvim_config
+require("bufferline").setup(bufferline)
+require("lualine").setup(lualine)
 
 require("nvim-treesitter.configs").setup({
 	ensure_installed = "maintained",
@@ -552,8 +484,8 @@ local on_attach = function(_, _)
 	buf_nnoremap("gy", "<cmd>lua vim.lsp.buf.type_definition()<cr>")
 	buf_nnoremap("<leader>cr", "<cmd>lua vim.lsp.buf.rename()<cr>")
 	buf_nnoremap("<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<cr>")
-	buf_nnoremap("[d", "<cmd>lua vim.lsp.diagnostic.goto_prev()<cr>")
-	buf_nnoremap("]d", "<cmd>lua vim.lsp.diagnostic.goto_next()<cr>")
+	buf_nnoremap("[d", "<cmd>lua vim.diagnostic.goto_prev()<cr>")
+	buf_nnoremap("]d", "<cmd>lua vim.diagnostic.goto_next()<cr>")
 	buf_nnoremap("<leader>cl", "<cmd>lua vim.lsp.codelens.run()<cr>")
 end
 
@@ -646,44 +578,30 @@ nvim_lsp.gopls.setup({
 	},
 })
 
-require("null-ls").config({})
-nvim_lsp["null-ls"].setup({})
+local null_ls = require("null-ls")
+null_ls.setup({
+	sources = {
+		null_ls.builtins.diagnostics.eslint.with({
+			prefer_local = "node_modules/.bin",
+		}), -- eslint or eslint_d
+		null_ls.builtins.code_actions.eslint.with({
+			prefer_local = "node_modules/.bin",
+		}), -- eslint or eslint_d
+		null_ls.builtins.formatting.prettier.with({
+			prefer_local = "node_modules/.bin",
+		}), -- prettier, eslint, eslint_d, or prettierd
+	},
+})
 
 nvim_lsp.tsserver.setup({
+	init_options = require("nvim-lsp-ts-utils").init_options,
 	on_attach = function(client, bufnr)
 		-- disable tsserver formatting (done by null-ls)
 		client.resolved_capabilities.document_formatting = false
 		client.resolved_capabilities.document_range_formatting = false
 
 		local ts_utils = require("nvim-lsp-ts-utils")
-
-		ts_utils.setup({
-			debug = false,
-			disable_commands = false,
-			enable_import_on_completion = false,
-
-			-- eslint
-			eslint_enable_code_actions = true,
-			eslint_enable_disable_comments = true,
-			eslint_bin = "eslint_d",
-			eslint_config_fallback = nil,
-			eslint_enable_diagnostics = true,
-
-			-- formatting
-			enable_formatting = true,
-			formatter = "eslint_d",
-			formatter_config_fallback = nil,
-
-			-- parentheses completion
-			complete_parens = false,
-			signature_help_in_parens = false,
-
-			-- update imports on file move
-			update_imports_on_move = false,
-			require_confirmation_on_move = false,
-			watch_dir = nil,
-		})
-
+		ts_utils.setup({})
 		ts_utils.setup_client(client)
 
 		on_attach(client, bufnr)
@@ -710,6 +628,7 @@ nvim_lsp.sumneko_lua.setup({
 			},
 			workspace = {
 				library = vim.api.nvim_get_runtime_file("", true),
+				preloadFileSize = 150,
 			},
 		},
 	},
@@ -763,8 +682,11 @@ cmp.setup({
 				elseif expandable then -- nothing is selected in the popup menu, but the entered text is an expandable snippet
 					vim.fn.feedkeys(t("<plug>luasnip-expand-snippet"))
 				else
-					vim.fn.feedkeys(t("<c-e>")) -- close cmp
+					cmp.abort() -- close cmp
 					vim.fn.feedkeys(t("<c-]>")) -- complete abbreviations
+
+					-- fallback to normal <cr>
+					vim.fn.feedkeys(t("<cr>"), "n") -- using fallback() breaks abbreviations
 				end
 			elseif expandable then -- there's no popup, but the entered text is an expandable snippet
 				vim.fn.feedkeys(t("<plug>luasnip-expand-snippet"))
@@ -898,7 +820,6 @@ telescope.load_extension("fzf")
 telescope.load_extension("zoxide")
 telescope.load_extension("rubix")
 telescope.load_extension("neoclip")
-telescope.load_extension("frecency")
 require("neoclip").setup({
 	default_register = { "+", "*" },
 	filter = nil,
@@ -907,11 +828,7 @@ require("neoclip").setup({
 nmap("<c-b>", "<cmd>Telescope buffers<cr>", { silent = true })
 nmap("<leader>z", "<cmd>Telescope zoxide list<cr>", { silent = true })
 nmap("<c-p>", "<cmd>Telescope rubix find_files<cr>", { silent = true })
-nmap(
-	"<c-f>",
-	"<cmd>lua require'telescope'.extensions.frecency.frecency{ sorter = require('telescope.config').values.file_sorter() }<cr>",
-	{ silent = true }
-)
+nmap("<c-f>", "<cmd>Telescope rubix history<cr>", { silent = true })
 nmap("<c-s><c-s>", "<cmd>Telescope rubix grep_string<cr>", { silent = true })
 nmap("<c-s><c-d>", "<cmd>Telescope rubix live_grep<cr>", { silent = true })
 nmap("<leader>y", "<cmd>Telescope neoclip plus extra=star<cr>", { silent = true })
@@ -924,7 +841,7 @@ require("trouble").setup({
 	height = 10, -- height of the trouble list when position is top or bottom
 	width = 50, -- width of the list when position is left or right
 	icons = true, -- use devicons for filenames
-	mode = "lsp_workspace_diagnostics", -- "lsp_workspace_diagnostics", "lsp_document_diagnostics", "quickfix", "lsp_references", "loclist"
+	mode = "workspace_diagnostics", -- "workspace_diagnostics", "document_diagnostics", "quickfix", "lsp_references", "loclist"
 	fold_open = "", -- icon used for open folds
 	fold_closed = "", -- icon used for closed folds
 	action_keys = { -- key mappings for actions in the trouble list
@@ -964,8 +881,8 @@ require("trouble").setup({
 	use_lsp_diagnostic_signs = false, -- enabling this will use the signs defined in your lsp client
 })
 nnoremap("<leader>xx", "<cmd>Trouble<cr>", { silent = true })
-nnoremap("<leader>xw", "<cmd>Trouble lsp_workspace_diagnostics<cr>", { silent = true })
-nnoremap("<leader>xd", "<cmd>Trouble lsp_document_diagnostics<cr>", { silent = true })
+nnoremap("<leader>xw", "<cmd>Trouble workspace_diagnostics<cr>", { silent = true })
+nnoremap("<leader>xd", "<cmd>Trouble document_diagnostics<cr>", { silent = true })
 nnoremap("<leader>xl", "<cmd>Trouble loclist<cr>", { silent = true })
 nnoremap("<leader>xq", "<cmd>Trouble quickfix<cr>", { silent = true })
 nnoremap("gr", "<cmd>Trouble lsp_references<cr>", { silent = true })
