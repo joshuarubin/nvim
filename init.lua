@@ -97,6 +97,9 @@ require("packer").startup(function()
 	})
 
 	use({ "kyazdani42/nvim-tree.lua", requires = "kyazdani42/nvim-web-devicons" })
+	use("stevearc/aerial.nvim")
+	use("ray-x/lsp_signature.nvim")
+	use("simnalamburt/vim-mundo")
 
 	use({
 		"lewis6991/spellsitter.nvim",
@@ -255,12 +258,11 @@ end
 nnoremap("Z", t(":BufSurfBack<cr>"), { silent = true })
 nnoremap("X", t(":BufSurfForward<cr>"), { silent = true })
 
--- nvim-tree
-nnoremap("<c-n>", t(":NvimTreeToggle<cr>"), { silent = true })
-vim.g.nvim_tree_git_hl = 1
-
 -- endwise
 vim.g.endwise_no_mappings = 1
+
+-- mundo
+nnoremap("<leader>u", ":MundoToggle<cr>")
 
 -- editorconfig
 vim.fn["editorconfig#AddNewHook"](function(config)
@@ -409,6 +411,22 @@ local lualine = {
 require("bufferline").setup(bufferline)
 require("lualine").setup(lualine)
 
+-- nvim-tree
+nnoremap("<c-n>", t(":NvimTreeFindFileToggle<cr>"), { silent = true })
+vim.g.nvim_tree_git_hl = 1
+
+require("nvim-tree").setup({
+	diagnostics = {
+		enable = true,
+		icons = {
+			hint = " ",
+			info = " ",
+			warning = " ",
+			error = " ",
+		},
+	},
+})
+
 require("nvim-treesitter.configs").setup({
 	ensure_installed = "maintained",
 	highlight = { enable = true },
@@ -467,15 +485,39 @@ require("formatter").setup({
 	},
 })
 
+local lsp_signature = require("lsp_signature")
+lsp_signature.setup({})
+
+-- aerial
+local aerial = require("aerial")
+aerial.setup({})
+vim.cmd([[autocmd FileType aerial set nospell]])
+
 -- lsp
 local nvim_lsp = require("lspconfig")
-local on_attach = function(_, _)
+
+local on_attach = function(client, bufnr)
+	aerial.on_attach(client, bufnr)
+	lsp_signature.on_attach()
+
 	vim.cmd([[autocmd BufWritePre <buffer> lua lsp_format()]])
 	vim.cmd([[autocmd CursorHold,CursorHoldI,InsertLeave <buffer> silent! lua vim.lsp.codelens.refresh()]])
 
-	local buf_nnoremap = function(lhs, rhs)
-		return vim.api.nvim_buf_set_keymap(0, "n", lhs, rhs, { noremap = true, silent = true })
+	local buf_nnoremap = function(lhs, rhs, opts)
+		opts = opts or {}
+		opts.noremap = true
+		opts.silent = true
+		return vim.api.nvim_buf_set_keymap(0, "n", lhs, rhs, opts)
 	end
+
+	buf_nnoremap("<leader>a", "<cmd>AerialToggle!<cr>")
+	buf_nnoremap("[[", "<cmd>AerialPrev<CR>")
+	buf_nnoremap("]]", "<cmd>AerialNext<CR>")
+	buf_nnoremap("{", "<cmd>AerialPrevUp<CR>")
+	buf_nnoremap("}", "<cmd>AerialNextUp<CR>")
+
+	buf_nnoremap("]c", "&diff ? ']c' : '<cmd>Gitsigns next_hunk<CR>'", { expr = true })
+	buf_nnoremap("[c", "&diff ? '[c' : '<cmd>Gitsigns prev_hunk<CR>'", { expr = true })
 
 	buf_nnoremap("gD", "<cmd>lua vim.lsp.buf.declaration()<cr>")
 	buf_nnoremap("gd", "<cmd>lua vim.lsp.buf.definition()<cr>")
@@ -498,7 +540,7 @@ _G.lsp_format = function()
 	end
 end
 
-_G.lsp_format_go = function(timeout_ms)
+local go_organize_imports = function(timeout_ms)
 	local context = { source = { organizeImports = true } }
 	vim.validate({ context = { context, "t", true } })
 
@@ -506,22 +548,28 @@ _G.lsp_format_go = function(timeout_ms)
 	params.context = context
 
 	local method = "textDocument/codeAction"
-	local result = vim.lsp.buf_request_sync(0, method, params, timeout_ms)
-	if not result then
-		return
-	end
+	return vim.lsp.buf_request_sync(0, method, params, timeout_ms)
+end
 
-	if result then
-		for _, v in ipairs(result) do
-			local vresult = v.result
-			if vresult and vresult[1] then
-				local edit = vresult[1].edit
-				vim.lsp.util.apply_workspace_edit(edit)
-			end
+local go_format = function(result)
+	for _, v in ipairs(result) do
+		local vresult = v.result
+		if vresult and vresult[1] then
+			local edit = vresult[1].edit
+			vim.lsp.util.apply_workspace_edit(edit)
 		end
 	end
 
 	vim.lsp.buf.formatting_seq_sync()
+end
+
+_G.lsp_format_go = function(timeout_ms)
+	local result = go_organize_imports(timeout_ms)
+	if not result then
+		return
+	end
+
+	go_format(result)
 end
 
 local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -553,24 +601,22 @@ nvim_lsp.gopls.setup({
 			codelenses = {
 				gc_details = true,
 				generate = true,
+				nilness = true,
 				regenerate_cgo = true,
 				tidy = true,
 				upgrade_dependency = true,
 				vendor = true,
-				nilness = true,
 			},
 			analyses = {
-				fillreturns = true,
-				nonewvars = true,
+				nilness = true,
 				shadow = true,
-				undeclaredname = true,
-				unreachable = true,
 				unusedparams = true,
 				unusedwrite = true,
 			},
 			gofumpt = true,
 			["local"] = "go.ngrok.com",
 			staticcheck = true,
+			expandWorkspaceToModule = true,
 		},
 	},
 	flags = {
