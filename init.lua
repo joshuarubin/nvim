@@ -311,10 +311,15 @@ require("gitsigns").setup({
 	},
 })
 
+local autocmd = vim.api.nvim_create_autocmd
+local augroup = function(name)
+	vim.api.nvim_create_augroup(name, {})
+end
+
 -- colorscheme
 vim.o.termguicolors = true
-vim.cmd([[autocmd ColorScheme * highlight link HlSearchLens Comment]])
-vim.cmd([[autocmd ColorScheme * highlight link HlSearchLensNear Comment]])
+autocmd("ColorScheme", { pattern = "*", command = "highlight link HlSearchLens Comment" })
+autocmd("ColorScheme", { pattern = "*", command = "highlight link HlSearchLensNear Comment" })
 
 vim.g.gruvbox_material_background = "hard"
 vim.g.gruvbox_material_palette = "original"
@@ -352,13 +357,14 @@ require("todo-comments").setup({
 })
 
 -- fugitive
--- delete fugitive buffers when they are left
-vim.cmd([[
-  augroup InitFugitive
-    autocmd!
-    autocmd BufReadPost fugitive://* set bufhidden=delete
-  augroup END
-]])
+local fugitive_group = augroup("InitFugitive")
+autocmd("BufReadPost", {
+	desc = "delete fugitive buffers when they are left",
+	group = fugitive_group,
+	pattern = "fugitive://*",
+	command = "set bufhidden=delete",
+})
+
 vim.env.GIT_SSH_COMMAND = "ssh -o ControlPersist=no"
 nnoremap("<leader>gs", ":Git<cr>", { silent = true })
 nnoremap("<leader>gd", ":Gvdiffsplit<cr>", { silent = true })
@@ -430,7 +436,7 @@ require("nvim-tree").setup({
 require("nvim-treesitter.configs").setup({
 	ensure_installed = "maintained",
 	highlight = { enable = true },
-	-- indent = { enable = true }, -- TODO(jawa) this is too experimental right now, enable when possible
+	-- indent = { enable = true },
 	context_commentstring = {
 		enable = true,
 	},
@@ -491,17 +497,40 @@ lsp_signature.setup({})
 -- aerial
 local aerial = require("aerial")
 aerial.setup({})
-vim.cmd([[autocmd FileType aerial set nospell]])
+autocmd("FileType", {
+	pattern = "aerial",
+	command = "set nospell",
+})
 
 -- lsp
 local nvim_lsp = require("lspconfig")
+
+local lsp_format = function()
+	local filetype = vim.api.nvim_buf_get_option(0, "filetype")
+	if filetype == "go" or filetype == "gomod" then
+		lsp_format_go()
+	else
+		vim.lsp.buf.formatting_seq_sync()
+	end
+end
 
 local on_attach = function(client, bufnr)
 	aerial.on_attach(client, bufnr)
 	lsp_signature.on_attach()
 
-	vim.cmd([[autocmd BufWritePre <buffer> lua lsp_format()]])
-	vim.cmd([[autocmd CursorHold,CursorHoldI,InsertLeave <buffer> silent! lua vim.lsp.codelens.refresh()]])
+	autocmd("BufWritePre", {
+		buffer = 0,
+		callback = lsp_format,
+	})
+
+	autocmd({
+		"CursorHold",
+		"CursorHoldI",
+		"InsertLeave",
+	}, {
+		buffer = 0,
+		command = "silent! lua vim.lsp.codelens.refresh()",
+	})
 
 	local buf_nnoremap = function(lhs, rhs, opts)
 		opts = opts or {}
@@ -531,32 +560,20 @@ local on_attach = function(client, bufnr)
 	buf_nnoremap("<leader>cl", "<cmd>lua vim.lsp.codelens.run()<cr>")
 end
 
-_G.lsp_format = function()
-	local filetype = vim.api.nvim_buf_get_option(0, "filetype")
-	if filetype == "go" then
-		lsp_format_go()
-	else
-		vim.lsp.buf.formatting_seq_sync()
-	end
-end
-
-local go_organize_imports = function(timeout_ms)
-	local context = { source = { organizeImports = true } }
-	vim.validate({ context = { context, "t", true } })
-
+local go_organize_imports = function(wait_ms)
 	local params = vim.lsp.util.make_range_params()
-	params.context = context
-
-	local method = "textDocument/codeAction"
-	return vim.lsp.buf_request_sync(0, method, params, timeout_ms)
+	params.context = { only = { "source.organizeImports" } }
+	return vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, wait_ms)
 end
 
 local go_format = function(result)
-	for _, v in ipairs(result) do
-		local vresult = v.result
-		if vresult and vresult[1] then
-			local edit = vresult[1].edit
-			vim.lsp.util.apply_workspace_edit(edit)
+	for _, res in pairs(result or {}) do
+		for _, r in pairs(res.result or {}) do
+			if r.edit then
+				vim.lsp.util.apply_workspace_edit(r.edit)
+			else
+				vim.lsp.buf.execute_command(r.command)
+			end
 		end
 	end
 
@@ -565,10 +582,6 @@ end
 
 _G.lsp_format_go = function(timeout_ms)
 	local result = go_organize_imports(timeout_ms)
-	if not result then
-		return
-	end
-
 	go_format(result)
 end
 
@@ -596,7 +609,6 @@ nvim_lsp.gopls.setup({
 	settings = {
 		gopls = {
 			buildFlags = { "-tags=wireinject" },
-			experimentalTemplateSupport = true,
 			usePlaceholders = true,
 			codelenses = {
 				gc_details = true,
@@ -1052,35 +1064,82 @@ vim.cmd([[iabbrev meml me@jawa.dev]])
 vim.cmd([[iabbrev weml joshua@ngrok.com]])
 
 -- autocommands
-vim.cmd([[
-  augroup InitAutoCmd
-    autocmd!
-  augroup END
-]])
+local init_group = augroup("InitAutoCmd")
 
--- set the window title based on the terminal title (if a term title exists)
-vim.cmd([[autocmd InitAutoCmd BufEnter * let &titlestring = exists('b:term_title') ? b:term_title : '']])
+autocmd("InsertEnter", {
+	desc = "disable search highlighting in insert mode",
+	group = init_group,
+	pattern = "*",
+	command = "setlocal nohlsearch",
+})
 
--- disable search highlighting in insert mode
-vim.cmd([[autocmd InitAutoCmd InsertEnter * setlocal nohlsearch]])
-vim.cmd([[autocmd InitAutoCmd InsertLeave * setlocal hlsearch]])
+autocmd("InsertLeave", {
+	desc = "enable search highlighting when leaving insert mode",
+	group = init_group,
+	pattern = "*",
+	command = "setlocal hlsearch",
+})
 
-vim.cmd([[autocmd InitAutoCmd WinEnter * checktime]]) -- check timestamp more for 'autoread'
-vim.cmd([[autocmd InitAutoCmd InsertLeave * if &paste | set nopaste | echo 'nopaste' | endif]]) -- disable paste
-vim.cmd([[autocmd InitAutoCmd InsertLeave * if &l:diff | diffupdate | endif]]) -- update diff
+autocmd("WinEnter", {
+	desc = "check timestamp more for 'autoread'",
+	group = init_group,
+	pattern = "*",
+	command = "checktime",
+})
 
--- auto format file types that don't have lsp formatters
-vim.cmd([[autocmd InitAutoCmd BufWritePost *.lua silent FormatWrite]])
+autocmd("InsertLeave", {
+	desc = "disable paste",
+	group = init_group,
+	pattern = "*",
+	command = "if &paste | set nopaste | echo 'nopaste' | endif",
+})
 
--- go back to previous position of cursor if any
-vim.cmd(
-	[[autocmd InitAutoCmd BufReadPost * if line("'\"") > 0 && line("'\"") <= line("$") |  execute 'normal! g`"zvzz' | endif]]
-)
+autocmd("InsertLeave", {
+	desc = "update diff",
+	group = init_group,
+	pattern = "*",
+	command = "if &l:diff | diffupdate | endif",
+})
+
+autocmd("BufWritePost", {
+	desc = "auto format file types that don't have lsp formatters",
+	group = init_group,
+	pattern = "*.lua",
+	command = "silent FormatWrite",
+})
+
+autocmd("BufReadPost", {
+	desc = "go back to previous position of cursor if any",
+	group = init_group,
+	pattern = "*",
+	callback = function()
+		local prev_line = vim.api.nvim_buf_get_mark(0, '"')[1]
+
+		if prev_line > 0 and prev_line <= vim.api.nvim_buf_line_count(0) then
+			local go_to_prev_mark = 'g`"'
+			local open_folds = "zv"
+			local redraw_line = "zz"
+			vim.cmd("normal!" .. go_to_prev_mark .. open_folds .. redraw_line)
+		end
+	end,
+})
 
 -- terminal autocommands
-vim.cmd([[autocmd TermOpen * nnoremap <buffer> <up> i<up>]]) -- switch to insert mode and press up when in terminal normal mode
-vim.cmd([[autocmd TermOpen * nnoremap <buffer> <c-r> i<c-r>]]) -- switch to insert mode and press <c-r> when in terminal normal mode
-vim.cmd([[autocmd TermOpen * nnoremap <buffer> q <nop>]]) -- disable macros in terminals
+autocmd("TermOpen", {
+	desc = "switch to insert mode and press up when in terminal normal mode",
+	pattern = "*",
+	command = "nnoremap <buffer> <up> i<up>",
+})
+autocmd("TermOpen", {
+	desc = "switch to insert mode and press <c-r> when in terminal normal mode",
+	pattern = "*",
+	command = "nnoremap <buffer> <c-r> i<c-r>",
+})
+autocmd("TermOpen", {
+	desc = "disable macros in terminals",
+	pattern = "*",
+	command = "nnoremap <buffer> q <nop>",
+})
 
 -- these two lines must be last
 vim.o.exrc = true -- enable per-directory .vimrc files
