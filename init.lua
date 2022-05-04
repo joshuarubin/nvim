@@ -70,7 +70,7 @@ require("packer").startup(function()
 	use("tpope/vim-fugitive")
 	use("folke/trouble.nvim")
 
-	use("akinsho/toggleterm.nvim")
+	use({ "akinsho/toggleterm.nvim", branch = "main" })
 	use("joshuarubin/rubix.vim")
 	use("joshuarubin/rubix-telescope.nvim")
 
@@ -80,7 +80,7 @@ require("packer").startup(function()
 		"nvim-lualine/lualine.nvim",
 		requires = { "kyazdani42/nvim-web-devicons", opt = true },
 	})
-	use("akinsho/bufferline.nvim")
+	use({ "akinsho/bufferline.nvim", branch = "main" })
 
 	-- file type icons
 	use("ryanoasis/vim-devicons")
@@ -107,6 +107,8 @@ require("packer").startup(function()
 			require("spellsitter").setup()
 		end,
 	})
+
+	use("knubie/vim-kitty-navigator")
 end)
 
 local backupdir = function()
@@ -190,79 +192,61 @@ end
 
 local nmap = function(lhs, rhs, opts)
 	opts = opts or {}
-	return vim.api.nvim_set_keymap("n", lhs, rhs, opts)
+	return vim.keymap.set("n", lhs, rhs, opts)
 end
 
-local nnoremap = function(lhs, rhs, opts)
+local nremap = function(lhs, rhs, opts)
 	opts = opts or {}
-	opts.noremap = true
+	opts.remap = true
 	return nmap(lhs, rhs, opts)
 end
 
 local imap = function(lhs, rhs, opts)
 	opts = opts or {}
-	return vim.api.nvim_set_keymap("i", lhs, rhs, opts)
-end
-
-local inoremap = function(lhs, rhs, opts)
-	opts = opts or {}
-	opts.noremap = true
-	return imap(lhs, rhs, opts)
+	return vim.keymap.set("i", lhs, rhs, opts)
 end
 
 local tmap = function(lhs, rhs, opts)
 	opts = opts or {}
-	return vim.api.nvim_set_keymap("t", lhs, rhs, opts)
+	return vim.keymap.set("t", lhs, rhs, opts)
 end
 
-local tnoremap = function(lhs, rhs, opts)
+local tremap = function(lhs, rhs, opts)
 	opts = opts or {}
-	opts.noremap = true
+	opts.remap = true
 	return tmap(lhs, rhs, opts)
 end
 
 local vmap = function(lhs, rhs, opts)
 	opts = opts or {}
-	return vim.api.nvim_set_keymap("v", lhs, rhs, opts)
-end
-
-local vnoremap = function(lhs, rhs, opts)
-	opts = opts or {}
-	opts.noremap = true
-	return vmap(lhs, rhs, opts)
+	return vim.keymap.set("v", lhs, rhs, opts)
 end
 
 local xmap = function(lhs, rhs, opts)
 	opts = opts or {}
-	return vim.api.nvim_set_keymap("x", lhs, rhs, opts)
+	return vim.keymap.set("x", lhs, rhs, opts)
 end
 
-local xnoremap = function(lhs, rhs, opts)
+local xremap = function(lhs, rhs, opts)
 	opts = opts or {}
-	opts.noremap = true
+	opts.remap = true
 	return xmap(lhs, rhs, opts)
 end
 
 local cmap = function(lhs, rhs, opts)
 	opts = opts or {}
-	return vim.api.nvim_set_keymap("c", lhs, rhs, opts)
-end
-
-local cnoremap = function(lhs, rhs, opts)
-	opts = opts or {}
-	opts.noremap = true
-	return cmap(lhs, rhs, opts)
+	return vim.keymap.set("c", lhs, rhs, opts)
 end
 
 -- bufsurf
-nnoremap("Z", t(":BufSurfBack<cr>"), { silent = true })
-nnoremap("X", t(":BufSurfForward<cr>"), { silent = true })
+nmap("Z", t(":BufSurfBack<cr>"), { silent = true })
+nmap("X", t(":BufSurfForward<cr>"), { silent = true })
 
 -- endwise
 vim.g.endwise_no_mappings = 1
 
 -- mundo
-nnoremap("<leader>u", ":MundoToggle<cr>")
+nmap("<leader>u", ":MundoToggle<cr>")
 
 -- editorconfig
 vim.fn["editorconfig#AddNewHook"](function(config)
@@ -272,16 +256,16 @@ vim.fn["editorconfig#AddNewHook"](function(config)
 	return 0 -- return 0 to show no error happened
 end)
 
-nnoremap("n", "<cmd>execute('normal! ' . v:count1 . 'n')<cr><cmd>lua require('hlslens').start()<cr>", {
+nmap("n", "<cmd>execute('normal! ' . v:count1 . 'n')<cr><cmd>lua require('hlslens').start()<cr>", {
 	silent = true,
 })
-nnoremap("N", "<cmd>execute('normal! ' . v:count1 . 'N')<cr><cmd>lua require('hlslens').start()<cr>", {
+nmap("N", "<cmd>execute('normal! ' . v:count1 . 'N')<cr><cmd>lua require('hlslens').start()<cr>", {
 	silent = true,
 })
-nnoremap("*", "*<cmd>lua require('hlslens').start()<cr>")
-nnoremap("#", "#<cmd>lua require('hlslens').start()<cr>")
-nnoremap("g*", "g*<cmd>lua require('hlslens').start()<cr>")
-nnoremap("g#", "g#<cmd>lua require('hlslens').start()<cr>")
+nmap("*", "*<cmd>lua require('hlslens').start()<cr>")
+nmap("#", "#<cmd>lua require('hlslens').start()<cr>")
+nmap("g*", "g*<cmd>lua require('hlslens').start()<cr>")
+nmap("g#", "g#<cmd>lua require('hlslens').start()<cr>")
 
 local bufferline = {
 	options = {
@@ -341,7 +325,7 @@ _G.copilot_accept = function()
 	return vim.fn["copilot#Accept"](t("<c-e>"))
 end
 
-inoremap("<c-e>", "v:lua.copilot_accept()", { silent = true, expr = true })
+imap("<c-e>", "v:lua.copilot_accept()", { silent = true, expr = true })
 
 require("todo-comments").setup({
 	keywords = {
@@ -366,19 +350,19 @@ autocmd("BufReadPost", {
 })
 
 vim.env.GIT_SSH_COMMAND = "ssh -o ControlPersist=no"
-nnoremap("<leader>gs", ":Git<cr>", { silent = true })
-nnoremap("<leader>gd", ":Gvdiffsplit<cr>", { silent = true })
-nnoremap("<leader>gc", ":Git commit<cr>", { silent = true })
-nnoremap("<leader>gb", ":Git blame<cr>", { silent = true })
-nnoremap("<leader>gl", ":Gclog<cr>", { silent = true })
-nnoremap("<leader>gp", ":Git push<cr>", { silent = true })
-nnoremap("<leader>gr", ":GRemove<cr>", { silent = true })
-nnoremap("<leader>gw", ":Gwrite<cr>", { silent = true })
-nnoremap("<leader>ge", ":Gedit<cr>", { silent = true })
-nnoremap("<leader>g.", ":Gcd<cr>:pwd<cr>", { silent = true })
-nnoremap("<leader>gu", ":Git pull<cr>", { silent = true })
-nnoremap("<leader>gn", ":Git merge<cr>", { silent = true })
-nnoremap("<leader>gf", ":Git fetch<cr>", { silent = true })
+nmap("<leader>gs", ":Git<cr>", { silent = true })
+nmap("<leader>gd", ":Gvdiffsplit<cr>", { silent = true })
+nmap("<leader>gc", ":Git commit<cr>", { silent = true })
+nmap("<leader>gb", ":Git blame<cr>", { silent = true })
+nmap("<leader>gl", ":Gclog<cr>", { silent = true })
+nmap("<leader>gp", ":Git push<cr>", { silent = true })
+nmap("<leader>gr", ":GRemove<cr>", { silent = true })
+nmap("<leader>gw", ":Gwrite<cr>", { silent = true })
+nmap("<leader>ge", ":Gedit<cr>", { silent = true })
+nmap("<leader>g.", ":Gcd<cr>:pwd<cr>", { silent = true })
+nmap("<leader>gu", ":Git pull<cr>", { silent = true })
+nmap("<leader>gn", ":Git merge<cr>", { silent = true })
+nmap("<leader>gf", ":Git fetch<cr>", { silent = true })
 
 local lualine = {
 	options = {
@@ -418,7 +402,7 @@ require("bufferline").setup(bufferline)
 require("lualine").setup(lualine)
 
 -- nvim-tree
-nnoremap("<c-n>", t(":NvimTreeFindFileToggle<cr>"), { silent = true })
+nmap("<c-n>", t(":NvimTreeFindFileToggle<cr>"), { silent = true })
 vim.g.nvim_tree_git_hl = 1
 
 require("nvim-tree").setup({
@@ -434,7 +418,94 @@ require("nvim-tree").setup({
 })
 
 require("nvim-treesitter.configs").setup({
-	ensure_installed = "maintained",
+	ensure_installed = {
+		"bash",
+		"beancount",
+		"bibtex",
+		"c",
+		"c_sharp",
+		"clojure",
+		"cmake",
+		"comment",
+		"commonlisp",
+		"cooklang",
+		"cpp",
+		"css",
+		"cuda",
+		"erlang",
+		"fennel",
+		"fish",
+		"fusion",
+		"gdscript",
+		"gleam",
+		"glimmer",
+		"glsl",
+		"go",
+		"godot_resource",
+		"gomod",
+		"gowork",
+		"graphql",
+		"hcl",
+		"heex",
+		"hjson",
+		"hocon",
+		"html",
+		"http",
+		"java",
+		"javascript",
+		"jsdoc",
+		"json",
+		"json5",
+		"jsonc",
+		"julia",
+		"kotlin",
+		"lalrpop",
+		"latex",
+		"ledger",
+		"llvm",
+		"lua",
+		"make",
+		"ninja",
+		"nix",
+		"norg",
+		"ocaml",
+		"ocaml_interface",
+		"ocamllex",
+		"pascal",
+		"perl",
+		"php",
+		"pioasm",
+		"prisma",
+		"pug",
+		"python",
+		"ql",
+		"query",
+		"r",
+		"rasi",
+		"regex",
+		"rst",
+		"ruby",
+		"rust",
+		"scala",
+		"scss",
+		"solidity",
+		"sparql",
+		"supercollider",
+		"surface",
+		"svelte",
+		"teal",
+		"tlaplus",
+		"toml",
+		"tsx",
+		"turtle",
+		"typescript",
+		"vala",
+		"vim",
+		"vue",
+		"yaml",
+		"yang",
+		"zig",
+	},
 	highlight = { enable = true },
 	-- indent = { enable = true },
 	context_commentstring = {
@@ -532,32 +603,32 @@ local on_attach = function(client, bufnr)
 		command = "silent! lua vim.lsp.codelens.refresh()",
 	})
 
-	local buf_nnoremap = function(lhs, rhs, opts)
+	local buf_nmap = function(lhs, rhs, opts)
 		opts = opts or {}
-		opts.noremap = true
 		opts.silent = true
-		return vim.api.nvim_buf_set_keymap(0, "n", lhs, rhs, opts)
+		opts.buffer = true
+		return nmap(lhs, rhs, opts)
 	end
 
-	buf_nnoremap("<leader>a", "<cmd>AerialToggle!<cr>")
-	buf_nnoremap("[[", "<cmd>AerialPrev<CR>")
-	buf_nnoremap("]]", "<cmd>AerialNext<CR>")
-	buf_nnoremap("{", "<cmd>AerialPrevUp<CR>")
-	buf_nnoremap("}", "<cmd>AerialNextUp<CR>")
+	buf_nmap("<leader>a", "<cmd>AerialToggle!<cr>")
+	buf_nmap("[[", "<cmd>AerialPrev<CR>")
+	buf_nmap("]]", "<cmd>AerialNext<CR>")
+	buf_nmap("{", "<cmd>AerialPrevUp<CR>")
+	buf_nmap("}", "<cmd>AerialNextUp<CR>")
 
-	buf_nnoremap("]c", "&diff ? ']c' : '<cmd>Gitsigns next_hunk<CR>'", { expr = true })
-	buf_nnoremap("[c", "&diff ? '[c' : '<cmd>Gitsigns prev_hunk<CR>'", { expr = true })
+	buf_nmap("]c", "&diff ? ']c' : '<cmd>Gitsigns next_hunk<CR>'", { expr = true })
+	buf_nmap("[c", "&diff ? '[c' : '<cmd>Gitsigns prev_hunk<CR>'", { expr = true })
 
-	buf_nnoremap("gD", "<cmd>lua vim.lsp.buf.declaration()<cr>")
-	buf_nnoremap("gd", "<cmd>lua vim.lsp.buf.definition()<cr>")
-	buf_nnoremap("K", "<cmd>lua vim.lsp.buf.hover()<cr>")
-	buf_nnoremap("gi", "<cmd>lua vim.lsp.buf.implementation()<cr>")
-	buf_nnoremap("gy", "<cmd>lua vim.lsp.buf.type_definition()<cr>")
-	buf_nnoremap("<leader>cr", "<cmd>lua vim.lsp.buf.rename()<cr>")
-	buf_nnoremap("<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<cr>")
-	buf_nnoremap("[d", "<cmd>lua vim.diagnostic.goto_prev()<cr>")
-	buf_nnoremap("]d", "<cmd>lua vim.diagnostic.goto_next()<cr>")
-	buf_nnoremap("<leader>cl", "<cmd>lua vim.lsp.codelens.run()<cr>")
+	buf_nmap("gD", "<cmd>lua vim.lsp.buf.declaration()<cr>")
+	buf_nmap("gd", "<cmd>lua vim.lsp.buf.definition()<cr>")
+	buf_nmap("K", "<cmd>lua vim.lsp.buf.hover()<cr>")
+	buf_nmap("gi", "<cmd>lua vim.lsp.buf.implementation()<cr>")
+	buf_nmap("gy", "<cmd>lua vim.lsp.buf.type_definition()<cr>")
+	buf_nmap("<leader>cr", "<cmd>lua vim.lsp.buf.rename()<cr>")
+	buf_nmap("<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<cr>")
+	buf_nmap("[d", "<cmd>lua vim.diagnostic.goto_prev()<cr>")
+	buf_nmap("]d", "<cmd>lua vim.diagnostic.goto_next()<cr>")
+	buf_nmap("<leader>cl", "<cmd>lua vim.lsp.codelens.run()<cr>")
 end
 
 local go_organize_imports = function(wait_ms)
@@ -827,7 +898,7 @@ cmp.setup({
 		end,
 	},
 })
-inoremap("<plug>Endwise", t("<c-r>=EndwiseDiscretionary()<cr>"), { silent = true })
+imap("<plug>Endwise", t("<c-r>=EndwiseDiscretionary()<cr>"), { silent = true })
 
 -- telescope
 local telescope = require("telescope")
@@ -883,15 +954,15 @@ require("neoclip").setup({
 	filter = nil,
 	history = 1000,
 })
-nmap("<c-b>", "<cmd>Telescope buffers<cr>", { silent = true })
-nmap("<leader>z", "<cmd>Telescope zoxide list<cr>", { silent = true })
-nmap("<c-p>", "<cmd>Telescope rubix find_files<cr>", { silent = true })
-nmap("<c-f>", "<cmd>Telescope rubix history<cr>", { silent = true })
-nmap("<c-s><c-s>", "<cmd>Telescope rubix grep_string<cr>", { silent = true })
-nmap("<c-s><c-d>", "<cmd>Telescope rubix live_grep<cr>", { silent = true })
-nmap("<leader>y", "<cmd>Telescope neoclip plus extra=star<cr>", { silent = true })
-tmap("<c-p>", "<cmd>Telescope rubix find_files<cr>", { silent = true })
-tmap("<c-b>", "<cmd>Telescope buffers<cr>", { silent = true })
+nremap("<c-b>", "<cmd>Telescope buffers<cr>", { silent = true })
+nremap("<leader>z", "<cmd>Telescope zoxide list<cr>", { silent = true })
+nremap("<c-p>", "<cmd>Telescope rubix find_files<cr>", { silent = true })
+nremap("<c-f>", "<cmd>Telescope rubix history<cr>", { silent = true })
+nremap("<c-s><c-s>", "<cmd>Telescope rubix grep_string<cr>", { silent = true })
+nremap("<c-s><c-d>", "<cmd>Telescope rubix live_grep<cr>", { silent = true })
+nremap("<leader>y", "<cmd>Telescope neoclip plus extra=star<cr>", { silent = true })
+tremap("<c-p>", "<cmd>Telescope rubix find_files<cr>", { silent = true })
+tremap("<c-b>", "<cmd>Telescope buffers<cr>", { silent = true })
 
 -- trouble
 require("trouble").setup({
@@ -938,18 +1009,18 @@ require("trouble").setup({
 	},
 	use_lsp_diagnostic_signs = false, -- enabling this will use the signs defined in your lsp client
 })
-nnoremap("<leader>xx", "<cmd>Trouble<cr>", { silent = true })
-nnoremap("<leader>xw", "<cmd>Trouble workspace_diagnostics<cr>", { silent = true })
-nnoremap("<leader>xd", "<cmd>Trouble document_diagnostics<cr>", { silent = true })
-nnoremap("<leader>xl", "<cmd>Trouble loclist<cr>", { silent = true })
-nnoremap("<leader>xq", "<cmd>Trouble quickfix<cr>", { silent = true })
-nnoremap("gr", "<cmd>Trouble lsp_references<cr>", { silent = true })
+nmap("<leader>xx", "<cmd>Trouble<cr>", { silent = true })
+nmap("<leader>xw", "<cmd>Trouble workspace_diagnostics<cr>", { silent = true })
+nmap("<leader>xd", "<cmd>Trouble document_diagnostics<cr>", { silent = true })
+nmap("<leader>xl", "<cmd>Trouble loclist<cr>", { silent = true })
+nmap("<leader>xq", "<cmd>Trouble quickfix<cr>", { silent = true })
+nmap("gr", "<cmd>Trouble lsp_references<cr>", { silent = true })
 
 -- rubix.vim
-nnoremap("<leader>m", ":call rubix#maximize_toggle()<cr>", { silent = true }) -- maximize current window
-nnoremap("<leader>fa", ":call rubix#preserve('normal gg=G')<cr>", { silent = true })
-nnoremap("<leader>f$", ":call rubix#trim()<cr>", { silent = true })
-nnoremap("<c-w><c-w>", ":confirm :Kwbd<cr>", { silent = true }) -- ctrl-w, ctrl-w to delete the current buffer without closing the window
+nmap("<leader>m", ":call rubix#maximize_toggle()<cr>", { silent = true }) -- maximize current window
+nmap("<leader>fa", ":call rubix#preserve('normal gg=G')<cr>", { silent = true })
+nmap("<leader>f$", ":call rubix#trim()<cr>", { silent = true })
+nmap("<c-w><c-w>", ":confirm :Kwbd<cr>", { silent = true }) -- ctrl-w, ctrl-w to delete the current buffer without closing the window
 
 -- toggleterm.nvim
 require("toggleterm").setup({
@@ -968,95 +1039,108 @@ require("toggleterm").setup({
 	},
 })
 
+-- vim-kitty-navigator
+vim.g.kitty_navigator_no_mappings = 1
+
 -- normal mode
-nnoremap("<leader>n", ":nohlsearch<cr>", { silent = true })
-nnoremap("<leader>fc", "/\\v^[<|=>]{7}( .*|$)<cr>") -- find merge conflict markers
-nnoremap("<leader>q", ":qa<cr>", { silent = true })
-nnoremap("<leader>Q", ":qa!<cr>", { silent = true })
-nnoremap("<leader>cd", ":lcd %:p:h<cr>:pwd<cr>") -- switch to the directory of the open buffer
-nnoremap("<leader>p", "<c-w>p") -- switch to previous window
-nnoremap("<leader>=", "<c-w>=") -- adjust viewports to the same size
-nnoremap("Q", ":q<cr>", { silent = true }) -- Q: Closes the window
-nnoremap("W", ":w<cr>", { silent = true }) -- W: Save
-nnoremap("_", ":sp<cr>", { silent = true }) -- _: Quick horizontal splits
-nnoremap("<bar>", ":vsp<cr>", { silent = true }) -- |: Quick vertical splits
-nnoremap("+", "<c-a>") -- +: Increment number
-nnoremap("-", "<c-x>") -- -: Decrement number
-nnoremap("d", '"_d') -- d: Delete into the blackhole register to not clobber the last yank
-nnoremap("dd", "dd") -- dd: I use this often to yank a single line, retain its original behavior
-nnoremap("c", '"_c') -- c: Change into the blackhole register to not clobber the last yank
-nnoremap("<c-a>r", ":redraw!<cr>", { silent = true }) -- ctrl-a r to redraw the screen now
-nnoremap("<c-h>", "<c-w>h") -- tmux style navigation
-nnoremap("<c-j>", "<c-w>j") -- tmux style navigation
-nnoremap("<c-k>", "<c-w>k") -- tmux style navigation
-nnoremap("<c-l>", "<c-w>l") -- tmux style navigation
-nnoremap("<c-a>H", "<c-w><") -- resize window
-nnoremap("<c-a>L", "<c-w>>") -- resize window
-nnoremap("<c-a>J", "<c-w>+") -- resize window
-nnoremap("<c-a>K", "<c-w>-") -- resize window
+nmap("<leader>n", ":nohlsearch<cr>", { silent = true })
+nmap("<leader>fc", "/\\v^[<|=>]{7}( .*|$)<cr>") -- find merge conflict markers
+nmap("<leader>q", ":qa<cr>", { silent = true })
+nmap("<leader>Q", ":qa!<cr>", { silent = true })
+nmap("<leader>cd", ":lcd %:p:h<cr>:pwd<cr>") -- switch to the directory of the open buffer
+nmap("<leader>p", "<c-w>p") -- switch to previous window
+nmap("<leader>=", "<c-w>=") -- adjust viewports to the same size
+nmap("Q", ":q<cr>", { silent = true }) -- Q: Closes the window
+nmap("W", ":w<cr>", { silent = true }) -- W: Save
+nmap("_", ":sp<cr>", { silent = true }) -- _: Quick horizontal splits
+nmap("<bar>", ":vsp<cr>", { silent = true }) -- |: Quick vertical splits
+nmap("+", "<c-a>") -- +: Increment number
+nmap("-", "<c-x>") -- -: Decrement number
+nmap("d", '"_d') -- d: Delete into the blackhole register to not clobber the last yank
+nmap("dd", "dd") -- dd: I use this often to yank a single line, retain its original behavior
+nmap("c", '"_c') -- c: Change into the blackhole register to not clobber the last yank
+nmap("<c-a>r", ":redraw!<cr>", { silent = true }) -- ctrl-a r to redraw the screen now
+nmap("<c-h>", ":KittyNavigateLeft<cr>", { silent = true }) -- tmux style navigation
+nmap("<c-j>", ":KittyNavigateDown<cr>", { silent = true }) -- tmux style navigation
+nmap("<c-k>", ":KittyNavigateUp<cr>", { silent = true }) -- tmux style navigation
+nmap("<c-l>", ":KittyNavigateRight<cr>", { silent = true }) -- tmux style navigation
+nmap("<c-a>H", "<c-w><") -- resize window
+nmap("<c-a>L", "<c-w>>") -- resize window
+nmap("<c-a>J", "<c-w>+") -- resize window
+nmap("<c-a>K", "<c-w>-") -- resize window
 
 for i = 1, 9 do
-	nnoremap("<leader>" .. i, ":" .. i .. "wincmd w<cr>", { silent = true }) -- <leader>[1-9]  move to window [1-9]
-	nnoremap("<leader>b" .. i, ":b" .. i .. "<cr>", { silent = true }) -- <leader>b[1-9] move to buffer [1-9]
+	nmap("<leader>" .. i, ":" .. i .. "wincmd w<cr>", { silent = true }) -- <leader>[1-9]  move to window [1-9]
+	nmap("<leader>b" .. i, ":b" .. i .. "<cr>", { silent = true }) -- <leader>b[1-9] move to buffer [1-9]
 end
 
 -- visual mode
-xnoremap("y", "y`]") -- y: Yank and go to end of selection
-xnoremap("p", '"_dP') -- p: Paste in visual mode should not replace the default register with the deleted text
-xnoremap("d", '"_d') -- d: Delete into the blackhole register to not clobber the last yank. To 'cut', use 'x' instead
-xnoremap("<cr>", 'y:let @/ = @"<cr>:set hlsearch<cr>', { silent = true }) -- enter: Highlight visual selections
-xnoremap("<", "<gv") -- <: Retain visual selection after indent
-xnoremap(">", ">gv") -- >: Retain visual selection after indent
-xnoremap(".", ":normal.<cr>", { silent = true }) -- .: repeats the last command on every line
-xnoremap("@", ":normal@@<cr>", { silent = true }) -- @: repeats the last macro on every line
-xmap("<tab>", ">") -- tab: Indent (allow recursive)
-xmap("<s-tab>", "<") -- shift-tab: unindent (allow recursive)
+xmap("y", "y`]") -- y: Yank and go to end of selection
+xmap("p", '"_dP') -- p: Paste in visual mode should not replace the default register with the deleted text
+xmap("d", '"_d') -- d: Delete into the blackhole register to not clobber the last yank. To 'cut', use 'x' instead
+xmap("<cr>", 'y:let @/ = @"<cr>:set hlsearch<cr>', { silent = true }) -- enter: Highlight visual selections
+xmap("<", "<gv") -- <: Retain visual selection after indent
+xmap(">", ">gv") -- >: Retain visual selection after indent
+xmap(".", ":normal.<cr>", { silent = true }) -- .: repeats the last command on every line
+xmap("@", ":normal@@<cr>", { silent = true }) -- @: repeats the last macro on every line
+xremap("<tab>", ">") -- tab: Indent (allow recursive)
+xremap("<s-tab>", "<") -- shift-tab: unindent (allow recursive)
 
 -- visual and select mode
-vnoremap("<leader>s", ":sort<cr>")
-vnoremap("<c-h>", "<c-w>h") -- tmux style navigation
-vnoremap("<c-j>", "<c-w>j") -- tmux style navigation
-vnoremap("<c-k>", "<c-w>k") -- tmux style navigation
-vnoremap("<c-l>", "<c-w>l") -- tmux style navigation
-vnoremap("<c-a>H", "<c-w><") -- resize window
-vnoremap("<c-a>L", "<c-w>>") -- resize window
-vnoremap("<c-a>J", "<c-w>+") -- resize window
-vnoremap("<c-a>K", "<c-w>-") -- resize window
+vmap("<leader>s", ":sort<cr>")
+vmap("<c-h>", ":<c-u>KittyNavigateLeft<cr>", { silent = true }) -- tmux style navigation
+vmap("<c-j>", ":<c-u>KittyNavigateDown<cr>", { silent = true }) -- tmux style navigation
+vmap("<c-k>", ":<c-u>KittyNavigateUp<cr>", { silent = true }) -- tmux style navigation
+vmap("<c-l>", ":<c-u>KittyNavigateRight<cr>", { silent = true }) -- tmux style navigation
+vmap("<c-a>H", "<c-w><") -- resize window
+vmap("<c-a>L", "<c-w>>") -- resize window
+vmap("<c-a>J", "<c-w>+") -- resize window
+vmap("<c-a>K", "<c-w>-") -- resize window
 
 -- command line mode
-cnoremap("<c-j>", "<down>")
-cnoremap("<c-k>", "<up>")
+cmap("<c-j>", "<down>")
+cmap("<c-k>", "<up>")
 
 -- insert mode
-inoremap("<c-w>", "<c-g>u<c-w>") -- ctrl-w: Delete previous word, create undo point
-inoremap("<c-h>", "<esc><c-w>h") -- tmux style navigation
-inoremap("<c-l>", "<esc><c-w>l") -- tmux style navigation
-inoremap(
-	"<c-j>",
-	'pumvisible() ? "<c-n>" : lua require("cmp").visible() ? lua require("cmp").select_next_item() : "<esc><c-w>j"',
-	{ expr = true }
-) -- tmux style navigation
-inoremap(
-	"<c-k>",
-	'pumvisible() ? "<c-p>" : lua require("cmp").visible() ? lua require("cmp").select_prev_item() : "<esc><c-w>k"',
-	{ expr = true }
-) -- tmux style navigation
-inoremap("<c-a>H", "<esc><c-w><a") -- resize window
-inoremap("<c-a>L", "<esc><c-w>>a") -- resize window
-inoremap("<c-a>J", "<esc><c-w>+a") -- resize window
-inoremap("<c-a>K", "<esc><c-w>-a") -- resize window
+imap("<c-w>", "<c-g>u<c-w>") -- ctrl-w: Delete previous word, create undo point
+imap("<c-h>", "<esc>:KittyNavigateLeft<cr>", { silent = true }) -- tmux style navigation
+imap("<c-j>", function()
+	-- tmux style navigation
+	if vim.fn.pumvisible() == 1 then
+		return "<c-n>"
+	end
+	if cmp.visible() then
+		return cmp.select_next_item()
+	end
+	return "<esc>:KittyNavigateDown<cr>"
+end, { expr = true, silent = true })
+imap("<c-k>", function()
+	-- tmux style navigation
+	if vim.fn.pumvisible() == 1 then
+		return "<c-p>"
+	end
+	if cmp.visible() then
+		return cmp.select_prev_item()
+	end
+	return "<esc>:KittyNavigateUp<cr>"
+end, { expr = true, silent = true })
+imap("<c-l>", "<esc>:KittyNavigateRight<cr>", { silent = true }) -- tmux style navigation
+imap("<c-a>H", "<esc><c-w><a") -- resize window
+imap("<c-a>L", "<esc><c-w>>a") -- resize window
+imap("<c-a>J", "<esc><c-w>+a") -- resize window
+imap("<c-a>K", "<esc><c-w>-a") -- resize window
 
 -- terminal mode
-tnoremap("<c-h>", "<c-\\><c-n><c-w>h") -- tmux style navigation
-tnoremap("<c-j>", "<c-\\><c-n><c-w>j") -- tmux style navigation
-tnoremap("<c-k>", "<c-\\><c-n><c-w>k") -- tmux style navigation
-tnoremap("<c-l>", "<c-\\><c-n><c-w>l") -- tmux style navigation
-tnoremap("<c-a>H", "<c-\\><c-n><c-w><i") -- resize window
-tnoremap("<c-a>L", "<c-\\><c-n><c-w>>i") -- resize window
-tnoremap("<c-a>J", "<c-\\><c-n><c-w>+i") -- resize window
-tnoremap("<c-a>K", "<c-\\><c-n><c-w>-i") -- resize window
-tnoremap("<c-y>", "<c-\\><c-n><c-y>") -- scroll up one line
-tnoremap("<c-u>", "<c-\\><c-n><c-u>") -- scroll up half a screen
+tmap("<c-h>", "<c-\\><c-n>:KittyNavigateLeft<cr>", { silent = true }) -- tmux style navigation
+tmap("<c-j>", "<c-\\><c-n>:KittyNavigateDown<cr>", { silent = true }) -- tmux style navigation
+tmap("<c-k>", "<c-\\><c-n>:KittyNavigateUp<cr>", { silent = true }) -- tmux style navigation
+tmap("<c-l>", "<c-\\><c-n>:KittyNavigateRight<cr>", { silent = true }) -- tmux style navigation
+tmap("<c-a>H", "<c-\\><c-n><c-w><i") -- resize window
+tmap("<c-a>L", "<c-\\><c-n><c-w>>i") -- resize window
+tmap("<c-a>J", "<c-\\><c-n><c-w>+i") -- resize window
+tmap("<c-a>K", "<c-\\><c-n><c-w>-i") -- resize window
+tmap("<c-y>", "<c-\\><c-n><c-y>") -- scroll up one line
+tmap("<c-u>", "<c-\\><c-n><c-u>") -- scroll up half a screen
 
 -- abbreviations
 vim.cmd([[iabbrev TODO TODO(jawa)]])
