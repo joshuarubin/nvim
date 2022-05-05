@@ -1113,7 +1113,7 @@ imap("<c-j>", function()
 		return cmp.select_next_item()
 	end
 	return "<esc>:KittyNavigateDown<cr>"
-end, { expr = true, silent = true })
+end, { silent = true })
 imap("<c-k>", function()
 	-- tmux style navigation
 	if vim.fn.pumvisible() == 1 then
@@ -1123,7 +1123,7 @@ imap("<c-k>", function()
 		return cmp.select_prev_item()
 	end
 	return "<esc>:KittyNavigateUp<cr>"
-end, { expr = true, silent = true })
+end, { silent = true })
 imap("<c-l>", "<esc>:KittyNavigateRight<cr>", { silent = true }) -- tmux style navigation
 imap("<c-a>H", "<esc><c-w><a") -- resize window
 imap("<c-a>L", "<esc><c-w>>a") -- resize window
