@@ -17,11 +17,10 @@ require("packer").startup(function()
 	use({
 		"numToStr/Comment.nvim",
 		config = function()
-			require("Comment").setup()
+			require("Comment").setup({})
 		end,
 	})
 	use("JoosepAlviste/nvim-ts-context-commentstring")
-	use("ludovicchabant/vim-gutentags") -- automatic tags management
 	use("editorconfig/editorconfig-vim")
 	use("kevinhwang91/nvim-hlslens") -- highlight search lens
 	use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" })
@@ -109,6 +108,8 @@ require("packer").startup(function()
 	})
 
 	use("knubie/vim-kitty-navigator")
+	use({ "ellisonleao/glow.nvim", branch = "main" })
+	use("joshuarubin/chezmoi.vim")
 end)
 
 local backupdir = function()
@@ -146,7 +147,7 @@ vim.o.diffopt = "internal,filler,closeoff,vertical"
 vim.o.winheight = 10
 vim.o.lazyredraw = true
 vim.o.conceallevel = 2
-vim.o.concealcursor = "niv"
+vim.o.concealcursor = "nv"
 vim.o.showmode = false
 vim.o.showtabline = 2 -- prevent flicker, lualine shows info anyway
 vim.o.showcmd = false
@@ -185,6 +186,7 @@ vim.o.spell = true
 vim.opt.isfname:remove({ "=" })
 
 vim.g.mapleader = ","
+vim.g.vim_json_conceal = 0
 
 local t = function(keys)
 	return vim.api.nvim_replace_termcodes(keys, true, true, true)
@@ -302,6 +304,7 @@ end
 
 -- colorscheme
 vim.o.termguicolors = true
+autocmd("ColorScheme", { pattern = "*", command = "highlight Comment gui=italic cterm=italic" })
 autocmd("ColorScheme", { pattern = "*", command = "highlight link HlSearchLens Comment" })
 autocmd("ColorScheme", { pattern = "*", command = "highlight link HlSearchLensNear Comment" })
 
@@ -454,7 +457,6 @@ require("nvim-treesitter.configs").setup({
 		"java",
 		"javascript",
 		"jsdoc",
-		"json",
 		"json5",
 		"jsonc",
 		"julia",
@@ -507,7 +509,7 @@ require("nvim-treesitter.configs").setup({
 		"zig",
 	},
 	highlight = { enable = true },
-	-- indent = { enable = true },
+	-- indent = { enable = true }, -- TODO(jawa) this is too experimental right now, enable when possible
 	context_commentstring = {
 		enable = true,
 	},
@@ -581,6 +583,7 @@ local lsp_format = function()
 	if filetype == "go" or filetype == "gomod" then
 		lsp_format_go()
 	else
+		-- TODO(jawa) add a setting to disable per buffer
 		vim.lsp.buf.formatting_seq_sync()
 	end
 end
@@ -697,7 +700,6 @@ nvim_lsp.gopls.setup({
 				unusedwrite = true,
 			},
 			gofumpt = true,
-			["local"] = "go.ngrok.com",
 			staticcheck = true,
 			expandWorkspaceToModule = true,
 		},
@@ -1042,13 +1044,17 @@ require("toggleterm").setup({
 -- vim-kitty-navigator
 vim.g.kitty_navigator_no_mappings = 1
 
+-- glow
+vim.g.glow_use_pager = true
+vim.g.glow_border = "rounded"
+nmap("<leader>p", ":Glow<cr>", { silent = true })
+
 -- normal mode
 nmap("<leader>n", ":nohlsearch<cr>", { silent = true })
 nmap("<leader>fc", "/\\v^[<|=>]{7}( .*|$)<cr>") -- find merge conflict markers
 nmap("<leader>q", ":qa<cr>", { silent = true })
 nmap("<leader>Q", ":qa!<cr>", { silent = true })
 nmap("<leader>cd", ":lcd %:p:h<cr>:pwd<cr>") -- switch to the directory of the open buffer
-nmap("<leader>p", "<c-w>p") -- switch to previous window
 nmap("<leader>=", "<c-w>=") -- adjust viewports to the same size
 nmap("Q", ":q<cr>", { silent = true }) -- Q: Closes the window
 nmap("W", ":w<cr>", { silent = true }) -- W: Save
@@ -1145,7 +1151,6 @@ tmap("<c-u>", "<c-\\><c-n><c-u>") -- scroll up half a screen
 -- abbreviations
 vim.cmd([[iabbrev TODO TODO(jawa)]])
 vim.cmd([[iabbrev meml me@jawa.dev]])
-vim.cmd([[iabbrev weml joshua@ngrok.com]])
 
 -- autocommands
 local init_group = augroup("InitAutoCmd")
@@ -1223,6 +1228,11 @@ autocmd("TermOpen", {
 	desc = "disable macros in terminals",
 	pattern = "*",
 	command = "nnoremap <buffer> q <nop>",
+})
+autocmd("TermOpen", {
+	desc = "disable line numbers in terminals",
+	pattern = "*",
+	command = "setlocal nonumber",
 })
 
 -- these two lines must be last
