@@ -406,7 +406,6 @@ require("lualine").setup(lualine)
 
 -- nvim-tree
 nmap("<c-n>", t(":NvimTreeFindFileToggle<cr>"), { silent = true })
-vim.g.nvim_tree_git_hl = 1
 
 require("nvim-tree").setup({
 	diagnostics = {
@@ -417,6 +416,9 @@ require("nvim-tree").setup({
 			warning = " ",
 			error = " ",
 		},
+	},
+	renderer = {
+		highlight_git = true,
 	},
 })
 
