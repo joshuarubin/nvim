@@ -1,9 +1,9 @@
 -- Install packer
 local install_path = vim.fn.stdpath("data") .. "/site/pack/packer/start/packer.nvim"
 
+local packer_bootstrap
 if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
-	vim.fn.system({ "git", "clone", "https://github.com/wbthomason/packer.nvim", install_path })
-	vim.cmd([[packadd packer.nvim]])
+	packer_bootstrap = vim.fn.system({ "git", "clone", "https://github.com/wbthomason/packer.nvim", install_path })
 end
 
 local use = require("packer").use
@@ -109,10 +109,19 @@ require("packer").startup(function()
 
 	use("knubie/vim-kitty-navigator")
 	use({ "ellisonleao/glow.nvim", branch = "main" })
+	use("kosayoda/nvim-lightbulb")
+	use("stevearc/dressing.nvim")
+	use("rcarriga/nvim-notify")
 	use("joshuarubin/chezmoi.vim")
+	use("lukas-reineke/indent-blankline.nvim")
+	use("petertriho/nvim-scrollbar")
+
+	if packer_bootstrap then
+		require("packer").sync()
+	end
 end)
 
-local backupdir = function()
+local function backupdir()
 	local ret = vim.fn.stdpath("data") .. "/backup"
 	if vim.fn.isdirectory(ret) ~= 1 then
 		vim.fn.mkdir(ret, "p", "0700")
@@ -168,7 +177,7 @@ vim.o.grepprg = "rg --with-filename --no-heading --line-number --column --hidden
 vim.o.grepformat = "%f:%l:%c:%m"
 vim.o.timeoutlen = 2000
 vim.o.ttimeoutlen = 10
-vim.o.updatetime = 300
+vim.o.updatetime = 250
 vim.o.virtualedit = "block"
 vim.o.formatoptions = "jcroqlt"
 vim.o.textwidth = 80
@@ -186,58 +195,49 @@ vim.o.spell = true
 vim.opt.isfname:remove({ "=" })
 
 vim.g.mapleader = ","
+vim.g.maplocalleader = ","
 vim.g.vim_json_conceal = 0
 
-local t = function(keys)
+local function t(keys)
 	return vim.api.nvim_replace_termcodes(keys, true, true, true)
 end
 
-local nmap = function(lhs, rhs, opts)
+local map = vim.keymap.set
+
+local function nmap(lhs, rhs, opts)
 	opts = opts or {}
-	return vim.keymap.set("n", lhs, rhs, opts)
+	return map("n", lhs, rhs, opts)
 end
 
-local nremap = function(lhs, rhs, opts)
+local function imap(lhs, rhs, opts)
 	opts = opts or {}
-	opts.remap = true
-	return nmap(lhs, rhs, opts)
+	return map("i", lhs, rhs, opts)
 end
 
-local imap = function(lhs, rhs, opts)
+local function tmap(lhs, rhs, opts)
 	opts = opts or {}
-	return vim.keymap.set("i", lhs, rhs, opts)
+	return map("t", lhs, rhs, opts)
 end
 
-local tmap = function(lhs, rhs, opts)
+local function vmap(lhs, rhs, opts)
 	opts = opts or {}
-	return vim.keymap.set("t", lhs, rhs, opts)
+	return map("v", lhs, rhs, opts)
 end
 
-local tremap = function(lhs, rhs, opts)
+local function xmap(lhs, rhs, opts)
 	opts = opts or {}
-	opts.remap = true
-	return tmap(lhs, rhs, opts)
+	return map("x", lhs, rhs, opts)
 end
 
-local vmap = function(lhs, rhs, opts)
-	opts = opts or {}
-	return vim.keymap.set("v", lhs, rhs, opts)
-end
-
-local xmap = function(lhs, rhs, opts)
-	opts = opts or {}
-	return vim.keymap.set("x", lhs, rhs, opts)
-end
-
-local xremap = function(lhs, rhs, opts)
+local function xremap(lhs, rhs, opts)
 	opts = opts or {}
 	opts.remap = true
 	return xmap(lhs, rhs, opts)
 end
 
-local cmap = function(lhs, rhs, opts)
+local function cmap(lhs, rhs, opts)
 	opts = opts or {}
-	return vim.keymap.set("c", lhs, rhs, opts)
+	return map("c", lhs, rhs, opts)
 end
 
 -- bufsurf
@@ -298,7 +298,7 @@ require("gitsigns").setup({
 })
 
 local autocmd = vim.api.nvim_create_autocmd
-local augroup = function(name)
+local function augroup(name)
 	vim.api.nvim_create_augroup(name, {})
 end
 
@@ -512,6 +512,15 @@ require("nvim-treesitter.configs").setup({
 	},
 	highlight = { enable = true },
 	-- indent = { enable = true }, -- TODO(jawa) this is too experimental right now, enable when possible
+	incremental_selection = {
+		enable = true,
+		keymaps = {
+			init_selection = "gnn",
+			node_incremental = "grn",
+			scope_incremental = "grc",
+			node_decremental = "grm",
+		},
+	},
 	context_commentstring = {
 		enable = true,
 	},
@@ -549,22 +558,26 @@ require("nvim-treesitter.configs").setup({
 	},
 })
 
--- formatter
-require("formatter").setup({
+-- formatter for filetypes that don't have lsp formatting support
+local formatter = {
 	filetype = {
-		lua = {
-			function()
-				return {
-					exe = "stylua",
-					args = {
-						"-",
-					},
-					stdin = true,
-				}
-			end,
-		},
+		lua = require("formatter.filetypes.lua").stylua(),
 	},
-})
+}
+
+-- add support for b:autoformat to formatter filetypes
+for filetype, value in pairs(formatter.filetype) do
+	formatter.filetype[filetype] = {
+		function()
+			if vim.b.autoformat ~= 1 then
+				return
+			end
+			return value
+		end,
+	}
+end
+
+require("formatter").setup(formatter)
 
 local lsp_signature = require("lsp_signature")
 lsp_signature.setup({})
@@ -580,19 +593,33 @@ autocmd("FileType", {
 -- lsp
 local nvim_lsp = require("lspconfig")
 
-local lsp_format = function()
+local function lsp_format()
+	if vim.b.autoformat ~= 1 then
+		return
+	end
+
 	local filetype = vim.api.nvim_buf_get_option(0, "filetype")
+
+	if formatter.filetype[filetype] ~= nil then
+		return
+	end
+
 	if filetype == "go" or filetype == "gomod" then
 		lsp_format_go()
 	else
-		-- TODO(jawa) add a setting to disable per buffer
 		vim.lsp.buf.formatting_seq_sync()
 	end
 end
 
-local on_attach = function(client, bufnr)
+local telescope_builtin = require("telescope.builtin")
+
+local function on_attach(client, bufnr)
 	aerial.on_attach(client, bufnr)
 	lsp_signature.on_attach()
+
+	if vim.b.autoformat == nil then
+		vim.b.autoformat = 1
+	end
 
 	autocmd("BufWritePre", {
 		buffer = 0,
@@ -605,10 +632,14 @@ local on_attach = function(client, bufnr)
 		"InsertLeave",
 	}, {
 		buffer = 0,
-		command = "silent! lua vim.lsp.codelens.refresh()",
+		callback = function()
+			if client.server_capabilities.codeLensProvider ~= nil then
+				vim.lsp.codelens.refresh()
+			end
+		end,
 	})
 
-	local buf_nmap = function(lhs, rhs, opts)
+	local function buf_nmap(lhs, rhs, opts)
 		opts = opts or {}
 		opts.silent = true
 		opts.buffer = true
@@ -624,25 +655,27 @@ local on_attach = function(client, bufnr)
 	buf_nmap("]c", "&diff ? ']c' : '<cmd>Gitsigns next_hunk<CR>'", { expr = true })
 	buf_nmap("[c", "&diff ? '[c' : '<cmd>Gitsigns prev_hunk<CR>'", { expr = true })
 
-	buf_nmap("gD", "<cmd>lua vim.lsp.buf.declaration()<cr>")
-	buf_nmap("gd", "<cmd>lua vim.lsp.buf.definition()<cr>")
-	buf_nmap("K", "<cmd>lua vim.lsp.buf.hover()<cr>")
-	buf_nmap("gi", "<cmd>lua vim.lsp.buf.implementation()<cr>")
-	buf_nmap("gy", "<cmd>lua vim.lsp.buf.type_definition()<cr>")
-	buf_nmap("<leader>cr", "<cmd>lua vim.lsp.buf.rename()<cr>")
-	buf_nmap("<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<cr>")
-	buf_nmap("[d", "<cmd>lua vim.diagnostic.goto_prev()<cr>")
-	buf_nmap("]d", "<cmd>lua vim.diagnostic.goto_next()<cr>")
-	buf_nmap("<leader>cl", "<cmd>lua vim.lsp.codelens.run()<cr>")
+	buf_nmap("gD", vim.lsp.buf.declaration)
+	buf_nmap("gd", vim.lsp.buf.definition)
+	buf_nmap("K", vim.lsp.buf.hover)
+	buf_nmap("gi", vim.lsp.buf.implementation)
+	buf_nmap("gy", vim.lsp.buf.type_definition)
+	buf_nmap("<leader>cr", vim.lsp.buf.rename)
+	buf_nmap("<leader>ca", vim.lsp.buf.code_action)
+	buf_nmap("<leader>so", telescope_builtin.lsp_document_symbols)
+	buf_nmap("<leader>e", vim.diagnostic.open_float)
+	buf_nmap("[d", vim.diagnostic.goto_prev)
+	buf_nmap("]d", vim.diagnostic.goto_next)
+	buf_nmap("<leader>cl", vim.lsp.codelens.run)
 end
 
-local go_organize_imports = function(wait_ms)
+local function go_organize_imports(wait_ms)
 	local params = vim.lsp.util.make_range_params()
 	params.context = { only = { "source.organizeImports" } }
 	return vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, wait_ms)
 end
 
-local go_format = function(result)
+local function go_format(result)
 	for _, res in pairs(result or {}) do
 		for _, r in pairs(res.result or {}) do
 			if r.edit then
@@ -664,7 +697,7 @@ end
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = require("cmp_nvim_lsp").update_capabilities(capabilities)
 
-local servers = { "clangd", "cmake" }
+local servers = { "clangd", "cmake", "pyright" }
 for _, lsp in ipairs(servers) do
 	nvim_lsp[lsp].setup({
 		on_attach = on_attach,
@@ -763,6 +796,9 @@ nvim_lsp.sumneko_lua.setup({
 				library = vim.api.nvim_get_runtime_file("", true),
 				preloadFileSize = 150,
 			},
+			telemetry = {
+				enable = false,
+			},
 		},
 	},
 })
@@ -777,7 +813,6 @@ local luasnip = require("luasnip")
 require("luasnip/loaders/from_vscode").lazy_load()
 
 -- completion
-local cmp = require("cmp")
 cmp.setup({
 	preselect = require("cmp.types").cmp.PreselectMode.None,
 	sources = {
@@ -799,7 +834,7 @@ cmp.setup({
 		["<c-n>"] = cmp.mapping.select_next_item(),
 		["<c-d>"] = cmp.mapping.scroll_docs(-4),
 		["<c-f>"] = cmp.mapping.scroll_docs(4),
-		["<c-space>"] = cmp.mapping.complete(),
+		["<c-space>"] = cmp.mapping.complete({}),
 		["<c-e>"] = cmp.mapping(function(fallback)
 			fallback()
 		end),
@@ -844,6 +879,8 @@ cmp.setup({
 				vim.fn.feedkeys(t("<c-n>"), "n")
 			elseif cmp.visible() then
 				cmp.select_next_item()
+			elseif luasnip.expand_or_jumpable() then
+				luasnip.expand_or_jump()
 			else
 				fallback()
 			end
@@ -857,7 +894,7 @@ cmp.setup({
 			elseif cmp.visible() then
 				cmp.select_prev_item()
 			elseif luasnip.jumpable(-1) then
-				vim.fn.feedkeys(t("<plug>luasnip-jump-prev"))
+				luasnip.jump(-1)
 			else
 				fallback()
 			end
@@ -953,20 +990,25 @@ telescope.load_extension("fzf")
 telescope.load_extension("zoxide")
 telescope.load_extension("rubix")
 telescope.load_extension("neoclip")
+
+require("dressing").setup({})
+vim.notify = require("notify")
+
 require("neoclip").setup({
 	default_register = { "+", "*" },
 	filter = nil,
 	history = 1000,
 })
-nremap("<c-b>", "<cmd>Telescope buffers<cr>", { silent = true })
-nremap("<leader>z", "<cmd>Telescope zoxide list<cr>", { silent = true })
-nremap("<c-p>", "<cmd>Telescope rubix find_files<cr>", { silent = true })
-nremap("<c-f>", "<cmd>Telescope rubix history<cr>", { silent = true })
-nremap("<c-s><c-s>", "<cmd>Telescope rubix grep_string<cr>", { silent = true })
-nremap("<c-s><c-d>", "<cmd>Telescope rubix live_grep<cr>", { silent = true })
-nremap("<leader>y", "<cmd>Telescope neoclip plus extra=star<cr>", { silent = true })
-tremap("<c-p>", "<cmd>Telescope rubix find_files<cr>", { silent = true })
-tremap("<c-b>", "<cmd>Telescope buffers<cr>", { silent = true })
+
+map({ "n", "t" }, "<c-b>", telescope_builtin.buffers)
+nmap("<leader>z", telescope.extensions.zoxide.list)
+map({ "n", "t" }, "<c-p>", telescope.extensions.rubix.find_files)
+nmap("<c-f>", telescope.extensions.rubix.history)
+nmap("<c-s><c-s>", telescope.extensions.rubix.grep_string)
+nmap("<c-s><c-d>", telescope.extensions.rubix.live_grep)
+nmap("<leader>y", function()
+	telescope.extensions.neoclip.plus({ extra = "star" })
+end)
 
 -- trouble
 require("trouble").setup({
@@ -1051,6 +1093,24 @@ vim.g.glow_use_pager = true
 vim.g.glow_border = "rounded"
 nmap("<leader>p", ":Glow<cr>", { silent = true })
 
+require("nvim-lightbulb").setup({
+	sign = {
+		enabled = false,
+	},
+	virtual_text = {
+		enabled = true,
+	},
+	autocmd = {
+		enabled = true,
+		pattern = { "*" },
+		events = { "CursorHold", "CursorHoldI" },
+	},
+})
+
+require("indent_blankline").setup({
+	show_trailing_blankline_indent = false,
+})
+
 -- normal mode
 nmap("<leader>n", ":nohlsearch<cr>", { silent = true })
 nmap("<leader>fc", "/\\v^[<|=>]{7}( .*|$)<cr>") -- find merge conflict markers
@@ -1076,6 +1136,10 @@ nmap("<c-a>H", "<c-w><") -- resize window
 nmap("<c-a>L", "<c-w>>") -- resize window
 nmap("<c-a>J", "<c-w>+") -- resize window
 nmap("<c-a>K", "<c-w>-") -- resize window
+
+-- Remap for dealing with word wrap
+nmap("k", "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
+nmap("j", "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
 
 for i = 1, 9 do
 	nmap("<leader>" .. i, ":" .. i .. "wincmd w<cr>", { silent = true }) -- <leader>[1-9]  move to window [1-9]
@@ -1195,7 +1259,7 @@ autocmd("InsertLeave", {
 autocmd("BufWritePost", {
 	desc = "auto format file types that don't have lsp formatters",
 	group = init_group,
-	pattern = "*.lua",
+	pattern = "*",
 	command = "silent FormatWrite",
 })
 
@@ -1212,6 +1276,15 @@ autocmd("BufReadPost", {
 			local redraw_line = "zz"
 			vim.cmd("normal!" .. go_to_prev_mark .. open_folds .. redraw_line)
 		end
+	end,
+})
+
+autocmd("TextYankPost", {
+	desc = "highlight on yank",
+	group = init_group,
+	pattern = "*",
+	callback = function()
+		vim.highlight.on_yank()
 	end,
 })
 
@@ -1236,6 +1309,14 @@ autocmd("TermOpen", {
 	pattern = "*",
 	command = "setlocal nonumber",
 })
+
+vim.api.nvim_create_user_command("ToggleAutoFormat", function()
+	if vim.b.autoformat ~= 1 then
+		vim.b.autoformat = 1
+	else
+		vim.b.autoformat = 0
+	end
+end, {})
 
 -- these two lines must be last
 vim.o.exrc = true -- enable per-directory .vimrc files
