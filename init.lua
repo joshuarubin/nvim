@@ -14,6 +14,7 @@ require("packer").startup(function()
 	use("tpope/vim-repeat") -- enable repeating supported plugin maps with `.`
 	use("tpope/vim-eunuch") -- helpers for unix
 	use("tpope/vim-endwise") -- wisely add "end" in ruby, endfunction/endif/more in vim script, etc.
+	use("tpope/vim-abolish") -- easily search for, substitute, and abbreviate multiple variants of a word
 	use({
 		"numToStr/Comment.nvim",
 		config = function()
@@ -64,9 +65,8 @@ require("packer").startup(function()
 	use({ "nvim-telescope/telescope.nvim", requires = { "nvim-lua/popup.nvim", "nvim-lua/plenary.nvim" } })
 	use({ "nvim-telescope/telescope-fzf-native.nvim", run = "make" })
 	use("jvgrootveld/telescope-zoxide")
-	use("AckslD/nvim-neoclip.lua")
+	use("gbprod/yanky.nvim")
 
-	use("tpope/vim-fugitive")
 	use("folke/trouble.nvim")
 
 	use({ "akinsho/toggleterm.nvim", branch = "main" })
@@ -74,6 +74,8 @@ require("packer").startup(function()
 	use("joshuarubin/rubix-telescope.nvim")
 
 	use({ "lewis6991/gitsigns.nvim", requires = { "nvim-lua/plenary.nvim" } })
+	use({ "TimUntersberger/neogit", requires = "nvim-lua/plenary.nvim" })
+	use({ "sindrets/diffview.nvim", requires = "nvim-lua/plenary.nvim" })
 
 	use({
 		"nvim-lualine/lualine.nvim",
@@ -113,8 +115,19 @@ require("packer").startup(function()
 	use("stevearc/dressing.nvim")
 	use("rcarriga/nvim-notify")
 	use("joshuarubin/chezmoi.vim")
+	use({
+		"joshuarubin/go-return.nvim",
+		branch = "main",
+		requires = { "nvim-treesitter/nvim-treesitter", "L3MON4D3/LuaSnip" },
+		config = function()
+			require("go-return").setup()
+		end,
+	})
 	use("lukas-reineke/indent-blankline.nvim")
 	use("petertriho/nvim-scrollbar")
+	use("axieax/urlview.nvim")
+	use("rmagatti/goto-preview")
+	use("haringsrob/nvim_context_vt")
 
 	if packer_bootstrap then
 		require("packer").sync()
@@ -286,6 +299,14 @@ local bufferline = {
 	},
 }
 
+local neogit = require("neogit")
+neogit.setup({
+	kind = "split",
+	integrations = {
+		diffview = true,
+	},
+})
+
 -- gitsigns
 require("gitsigns").setup({
 	signs = {
@@ -295,7 +316,77 @@ require("gitsigns").setup({
 		topdelete = { hl = "GitGutterDelete", text = "█▔" },
 		changedelete = { hl = "GitGutterChange", text = "█▟" },
 	},
+	on_attach = function(bufnr)
+		local gs = package.loaded.gitsigns
+
+		local function buf_map(mode, l, r, opts)
+			opts = opts or {}
+			opts.buffer = bufnr
+			vim.keymap.set(mode, l, r, opts)
+		end
+
+		-- Navigation
+		buf_map("n", "]c", function()
+			if vim.wo.diff then
+				return "]c"
+			end
+			vim.schedule(function()
+				gs.next_hunk()
+			end)
+			return "<Ignore>"
+		end, { expr = true })
+
+		buf_map("n", "[c", function()
+			if vim.wo.diff then
+				return "[c"
+			end
+			vim.schedule(function()
+				gs.prev_hunk()
+			end)
+			return "<Ignore>"
+		end, { expr = true })
+
+		-- Actions
+		buf_map({ "n", "v" }, "<leader>hs", ":Gitsigns stage_hunk<CR>")
+		buf_map({ "n", "v" }, "<leader>hr", ":Gitsigns reset_hunk<CR>")
+		buf_map("n", "<leader>hS", gs.stage_buffer)
+		buf_map("n", "<leader>hu", gs.undo_stage_hunk)
+		buf_map("n", "<leader>hR", gs.reset_buffer)
+		buf_map("n", "<leader>hp", gs.preview_hunk)
+		buf_map("n", "<leader>hb", function()
+			gs.blame_line({ full = true })
+		end)
+		buf_map("n", "<leader>gw", function()
+			gs.blame_line({ full = true })
+		end)
+		buf_map("n", "<leader>tb", gs.toggle_current_line_blame)
+		buf_map("n", "<leader>hd", gs.diffthis)
+		buf_map("n", "<leader>gd", gs.diffthis)
+		buf_map("n", "<leader>hD", function()
+			gs.diffthis("~")
+		end)
+		buf_map("n", "<leader>td", gs.toggle_deleted)
+
+		-- Text object
+		buf_map({ "o", "x" }, "ih", ":<C-U>Gitsigns select_hunk<CR>")
+	end,
 })
+
+require("scrollbar").setup({
+	handle = {
+		highlight = "Pmenu",
+	},
+	marks = {
+		Search = {
+			highlight = "Green",
+		},
+	},
+	handlers = {
+		diagnostic = true,
+		search = true,
+	},
+})
+require("scrollbar.handlers.search").setup()
 
 local autocmd = vim.api.nvim_create_autocmd
 local function augroup(name)
@@ -343,29 +434,48 @@ require("todo-comments").setup({
 	},
 })
 
--- fugitive
-local fugitive_group = augroup("InitFugitive")
-autocmd("BufReadPost", {
-	desc = "delete fugitive buffers when they are left",
-	group = fugitive_group,
-	pattern = "fugitive://*",
-	command = "set bufhidden=delete",
+vim.env.GIT_SSH_COMMAND = "ssh -o ControlPersist=no"
+
+local git_dir
+nmap("<leader>gs", function()
+	git_dir = vim.fn.expand("%:p:h")
+	neogit.open({ cwd = vim.fn.expand("%:p:h") })
+end)
+
+local neogit_bindings = {
+	["<leader>gc"] = "commit",
+	["<leader>gl"] = "log",
+	["<leader>gp"] = "push",
+	["<leader>gu"] = "pull",
+	["<leader>gr"] = "rebase",
+	["<leader>gz"] = "stash",
+	["<leader>gZ"] = "stash",
+	["<leader>gb"] = "branch",
+}
+
+for k, v in pairs(neogit_bindings) do
+	nmap(k, function()
+		git_dir = vim.fn.expand("%:p:h")
+		neogit.open({ v })
+	end)
+end
+
+autocmd("FileType", {
+	pattern = "Neogit*",
+	callback = function()
+		vim.cmd("lcd " .. git_dir)
+	end,
 })
 
-vim.env.GIT_SSH_COMMAND = "ssh -o ControlPersist=no"
-nmap("<leader>gs", ":Git<cr>", { silent = true })
-nmap("<leader>gd", ":Gvdiffsplit<cr>", { silent = true })
-nmap("<leader>gc", ":Git commit<cr>", { silent = true })
-nmap("<leader>gb", ":Git blame<cr>", { silent = true })
-nmap("<leader>gl", ":Gclog<cr>", { silent = true })
-nmap("<leader>gp", ":Git push<cr>", { silent = true })
-nmap("<leader>gr", ":GRemove<cr>", { silent = true })
-nmap("<leader>gw", ":Gwrite<cr>", { silent = true })
-nmap("<leader>ge", ":Gedit<cr>", { silent = true })
-nmap("<leader>g.", ":Gcd<cr>:pwd<cr>", { silent = true })
-nmap("<leader>gu", ":Git pull<cr>", { silent = true })
-nmap("<leader>gn", ":Git merge<cr>", { silent = true })
-nmap("<leader>gf", ":Git fetch<cr>", { silent = true })
+nmap("<leader>g.", function()
+	vim.cmd("lcd " .. vim.fn.expand("%:p:h"))
+	local dir = vim.fn.system("git rev-parse --git-dir"):gsub(".git", "")
+	dir = vim.trim(dir)
+	if dir ~= "" then
+		dir = vim.fn.fnamemodify(dir, ":p")
+		vim.cmd("lcd " .. dir)
+	end
+end)
 
 local lualine = {
 	options = {
@@ -398,7 +508,7 @@ local lualine = {
 		lualine_z = {},
 	},
 	tabline = {},
-	extensions = { "fugitive", "nvim-tree", "quickfix", "toggleterm" },
+	extensions = { "nvim-tree", "quickfix", "toggleterm" },
 }
 
 require("bufferline").setup(bufferline)
@@ -651,9 +761,6 @@ local function on_attach(client, bufnr)
 	buf_nmap("]]", "<cmd>AerialNext<CR>")
 	buf_nmap("{", "<cmd>AerialPrevUp<CR>")
 	buf_nmap("}", "<cmd>AerialNextUp<CR>")
-
-	buf_nmap("]c", "&diff ? ']c' : '<cmd>Gitsigns next_hunk<CR>'", { expr = true })
-	buf_nmap("[c", "&diff ? '[c' : '<cmd>Gitsigns prev_hunk<CR>'", { expr = true })
 
 	buf_nmap("gD", vim.lsp.buf.declaration)
 	buf_nmap("gd", vim.lsp.buf.definition)
@@ -989,16 +1096,17 @@ telescope.setup({
 telescope.load_extension("fzf")
 telescope.load_extension("zoxide")
 telescope.load_extension("rubix")
-telescope.load_extension("neoclip")
+require("yanky").setup()
+telescope.load_extension("yank_history")
+map({ "n", "x" }, "p", "<Plug>(YankyPutAfter)")
+map({ "n", "x" }, "P", "<Plug>(YankyPutBefore)")
+map({ "n", "x" }, "gp", "<Plug>(YankyGPutAfter)")
+map({ "n", "x" }, "gP", "<Plug>(YankyGPutBefore)")
+nmap("<leader>p", "<Plug>(YankyCycleForward)")
+nmap("<leader>o", "<Plug>(YankyCycleBackward)")
 
 require("dressing").setup({})
 vim.notify = require("notify")
-
-require("neoclip").setup({
-	default_register = { "+", "*" },
-	filter = nil,
-	history = 1000,
-})
 
 map({ "n", "t" }, "<c-b>", telescope_builtin.buffers)
 nmap("<leader>z", telescope.extensions.zoxide.list)
@@ -1006,9 +1114,6 @@ map({ "n", "t" }, "<c-p>", telescope.extensions.rubix.find_files)
 nmap("<c-f>", telescope.extensions.rubix.history)
 nmap("<c-s><c-s>", telescope.extensions.rubix.grep_string)
 nmap("<c-s><c-d>", telescope.extensions.rubix.live_grep)
-nmap("<leader>y", function()
-	telescope.extensions.neoclip.plus({ extra = "star" })
-end)
 
 -- trouble
 require("trouble").setup({
@@ -1060,7 +1165,6 @@ nmap("<leader>xw", "<cmd>Trouble workspace_diagnostics<cr>", { silent = true })
 nmap("<leader>xd", "<cmd>Trouble document_diagnostics<cr>", { silent = true })
 nmap("<leader>xl", "<cmd>Trouble loclist<cr>", { silent = true })
 nmap("<leader>xq", "<cmd>Trouble quickfix<cr>", { silent = true })
-nmap("gr", "<cmd>Trouble lsp_references<cr>", { silent = true })
 
 -- rubix.vim
 nmap("<leader>m", ":call rubix#maximize_toggle()<cr>", { silent = true }) -- maximize current window
@@ -1072,18 +1176,39 @@ nmap("<c-w><c-w>", ":confirm :Kwbd<cr>", { silent = true }) -- ctrl-w, ctrl-w to
 require("toggleterm").setup({
 	size = function(term)
 		if term.direction == "horizontal" then
-			return 10
+			return 15
 		elseif term.direction == "vertical" then
 			return 80
 		end
 	end,
+	shade_terminals = false,
 	open_mapping = "<c-x>",
-	direction = "float", -- "vertical" | "horizontal" | "window" | "float"
+	direction = "horizontal", -- "vertical" | "horizontal" | "window" | "float"
 	float_opts = {
-		border = "curved", -- "single" | "double" | "shadow" | "curved"
+		border = "single", -- "single" | "double" | "shadow" | "curved"
 		winblend = 20,
 	},
 })
+
+local Terminal = require("toggleterm.terminal").Terminal
+nmap("<leader>gg", function()
+	Terminal
+		:new({
+			cmd = "lazygit",
+			dir = vim.fn.expand("%:p:h"),
+			direction = "float",
+		})
+		:toggle()
+end)
+
+local goto_preview = require("goto-preview")
+goto_preview.setup({})
+nmap("gpd", goto_preview.goto_preview_definition)
+nmap("gpi", goto_preview.goto_preview_implementation)
+nmap("gr", goto_preview.goto_preview_references)
+nmap("gP", goto_preview.close_all_win)
+
+require("nvim_context_vt").setup()
 
 -- vim-kitty-navigator
 vim.g.kitty_navigator_no_mappings = 1
@@ -1091,7 +1216,6 @@ vim.g.kitty_navigator_no_mappings = 1
 -- glow
 vim.g.glow_use_pager = true
 vim.g.glow_border = "rounded"
-nmap("<leader>p", ":Glow<cr>", { silent = true })
 
 require("nvim-lightbulb").setup({
 	sign = {
@@ -1276,6 +1400,15 @@ autocmd("BufReadPost", {
 			local redraw_line = "zz"
 			vim.cmd("normal!" .. go_to_prev_mark .. open_folds .. redraw_line)
 		end
+	end,
+})
+
+autocmd("FileType", {
+	desc = "set glow preview mapping for markdown files",
+	group = init_group,
+	pattern = "markdown",
+	callback = function()
+		nmap("<leader>p", ":Glow<cr>", { silent = true, buffer = true })
 	end,
 })
 
