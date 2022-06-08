@@ -44,7 +44,6 @@ require("packer").startup(function()
 		requires = { "nvim-lua/plenary.nvim" },
 	})
 	use("jose-elias-alvarez/nvim-lsp-ts-utils")
-	use("mhartington/formatter.nvim")
 
 	-- completion
 	use("hrsh7th/nvim-cmp")
@@ -668,27 +667,6 @@ require("nvim-treesitter.configs").setup({
 	},
 })
 
--- formatter for filetypes that don't have lsp formatting support
-local formatter = {
-	filetype = {
-		lua = require("formatter.filetypes.lua").stylua(),
-	},
-}
-
--- add support for b:autoformat to formatter filetypes
-for filetype, value in pairs(formatter.filetype) do
-	formatter.filetype[filetype] = {
-		function()
-			if vim.b.autoformat ~= 1 then
-				return
-			end
-			return value
-		end,
-	}
-end
-
-require("formatter").setup(formatter)
-
 local lsp_signature = require("lsp_signature")
 lsp_signature.setup({})
 
@@ -703,19 +681,42 @@ autocmd("FileType", {
 -- lsp
 local nvim_lsp = require("lspconfig")
 
-local function lsp_format()
+local function go_organize_imports(bufnr, wait_ms)
+	local params = vim.lsp.util.make_range_params()
+	params.context = { only = { "source.organizeImports" } }
+	return vim.lsp.buf_request_sync(bufnr, "textDocument/codeAction", params, wait_ms)
+end
+
+local function go_format(result)
+	for _, res in pairs(result or {}) do
+		for _, r in pairs(res.result or {}) do
+			if r.edit then
+				vim.lsp.util.apply_workspace_edit(r.edit, "utf-8")
+			else
+				vim.lsp.buf.execute_command(r.command)
+			end
+		end
+	end
+
+	vim.lsp.buf.formatting_seq_sync()
+end
+
+local function lsp_format_go(bufnr, timeout_ms)
+	local result = go_organize_imports(bufnr, timeout_ms)
+	go_format(result)
+end
+
+local function lsp_format(opts)
+	opts = opts or { buf = 0 }
+
 	if vim.b.autoformat ~= 1 then
 		return
 	end
 
-	local filetype = vim.api.nvim_buf_get_option(0, "filetype")
-
-	if formatter.filetype[filetype] ~= nil then
-		return
-	end
+	local filetype = vim.api.nvim_buf_get_option(opts.buf, "filetype")
 
 	if filetype == "go" or filetype == "gomod" then
-		lsp_format_go()
+		lsp_format_go(opts.buf)
 	else
 		vim.lsp.buf.formatting_seq_sync()
 	end
@@ -725,14 +726,14 @@ local telescope_builtin = require("telescope.builtin")
 
 local function on_attach(client, bufnr)
 	aerial.on_attach(client, bufnr)
-	lsp_signature.on_attach()
+	lsp_signature.on_attach(nil, bufnr)
 
 	if vim.b.autoformat == nil then
 		vim.b.autoformat = 1
 	end
 
 	autocmd("BufWritePre", {
-		buffer = 0,
+		buffer = bufnr,
 		callback = lsp_format,
 	})
 
@@ -741,7 +742,7 @@ local function on_attach(client, bufnr)
 		"CursorHoldI",
 		"InsertLeave",
 	}, {
-		buffer = 0,
+		buffer = bufnr,
 		callback = function()
 			if client.server_capabilities.codeLensProvider ~= nil then
 				vim.lsp.codelens.refresh()
@@ -752,7 +753,7 @@ local function on_attach(client, bufnr)
 	local function buf_nmap(lhs, rhs, opts)
 		opts = opts or {}
 		opts.silent = true
-		opts.buffer = true
+		opts.buffer = bufnr
 		return nmap(lhs, rhs, opts)
 	end
 
@@ -774,31 +775,6 @@ local function on_attach(client, bufnr)
 	buf_nmap("[d", vim.diagnostic.goto_prev)
 	buf_nmap("]d", vim.diagnostic.goto_next)
 	buf_nmap("<leader>cl", vim.lsp.codelens.run)
-end
-
-local function go_organize_imports(wait_ms)
-	local params = vim.lsp.util.make_range_params()
-	params.context = { only = { "source.organizeImports" } }
-	return vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, wait_ms)
-end
-
-local function go_format(result)
-	for _, res in pairs(result or {}) do
-		for _, r in pairs(res.result or {}) do
-			if r.edit then
-				vim.lsp.util.apply_workspace_edit(r.edit, "utf-8")
-			else
-				vim.lsp.buf.execute_command(r.command)
-			end
-		end
-	end
-
-	vim.lsp.buf.formatting_seq_sync()
-end
-
-_G.lsp_format_go = function(timeout_ms)
-	local result = go_organize_imports(timeout_ms)
-	go_format(result)
 end
 
 local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -853,19 +829,26 @@ nvim_lsp.gopls.setup({
 
 local null_ls = require("null-ls")
 null_ls.setup({
+	on_attach = on_attach,
 	sources = {
-		null_ls.builtins.diagnostics.eslint.with({
-			prefer_local = "node_modules/.bin",
-		}), -- eslint or eslint_d
-		null_ls.builtins.code_actions.eslint.with({
-			prefer_local = "node_modules/.bin",
-		}), -- eslint or eslint_d
-		null_ls.builtins.formatting.prettier.with({
-			prefer_local = "node_modules/.bin",
-		}), -- prettier, eslint, eslint_d, or prettierd
+		null_ls.builtins.code_actions.eslint.with({ prefer_local = "node_modules/.bin" }), -- javascript, typescript, react and tsx
+		null_ls.builtins.code_actions.shellcheck, -- sh
+		null_ls.builtins.code_actions.statix, -- nix
+		null_ls.builtins.diagnostics.buf, -- proto
+		null_ls.builtins.diagnostics.deadnix, -- nix
+		null_ls.builtins.diagnostics.eslint.with({ prefer_local = "node_modules/.bin" }), -- javascript, typescript, react and tsx,
+		null_ls.builtins.diagnostics.shellcheck, -- sh
+		null_ls.builtins.diagnostics.statix, -- nix
+		null_ls.builtins.diagnostics.vale, -- markdown, tex, asciidoc
+		null_ls.builtins.formatting.alejandra, -- nix
+		null_ls.builtins.formatting.buf, -- proto
+		null_ls.builtins.formatting.prettier.with({ prefer_local = "node_modules/.bin" }), -- javascript, typescript, react, vue, css, scss, less, html, json, yaml, markdown, graphql, handlebars
+		null_ls.builtins.formatting.stylua, -- lua
+		null_ls.builtins.hover.dictionary, -- text, markdown
 	},
 })
 
+-- javascript, typescript, react and tsx
 nvim_lsp.tsserver.setup({
 	init_options = require("nvim-lsp-ts-utils").init_options,
 	on_attach = function(client, bufnr)
@@ -888,7 +871,13 @@ table.insert(lua_path, "lua/?/init.lua")
 
 nvim_lsp.sumneko_lua.setup({
 	cmd = { "lua-language-server", "-E", "/usr/share/lua-language-server/main.lua" },
-	on_attach = on_attach,
+	on_attach = function(client, bufnr)
+		-- disable sumneko formatting (done by null-ls.stylua)
+		client.resolved_capabilities.document_formatting = false
+		client.resolved_capabilities.document_range_formatting = false
+
+		on_attach(client, bufnr)
+	end,
 	capabilities = capabilities,
 	settings = {
 		Lua = {
@@ -1378,13 +1367,6 @@ autocmd("InsertLeave", {
 	group = init_group,
 	pattern = "*",
 	command = "if &l:diff | diffupdate | endif",
-})
-
-autocmd("BufWritePost", {
-	desc = "auto format file types that don't have lsp formatters",
-	group = init_group,
-	pattern = "*",
-	command = "silent FormatWrite",
 })
 
 autocmd("BufReadPost", {
