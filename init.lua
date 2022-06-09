@@ -9,7 +9,6 @@ end
 local use = require("packer").use
 require("packer").startup(function()
 	use("wbthomason/packer.nvim") -- package manager
-	use("ton/vim-bufsurf") -- switch buffers based on viewing history per window
 	use("tpope/vim-surround") -- quoting/parenthesizing made simple
 	use("tpope/vim-repeat") -- enable repeating supported plugin maps with `.`
 	use("tpope/vim-eunuch") -- helpers for unix
@@ -30,7 +29,7 @@ require("packer").startup(function()
 
 	use({
 		"goolord/alpha-nvim", -- lua powered greeter like startify
-		requires = { "kyazdani42/nvim-web-devicons" },
+		requires = "kyazdani42/nvim-web-devicons",
 		config = function()
 			require("alpha").setup(require("alpha.themes.startify").opts)
 		end,
@@ -41,7 +40,7 @@ require("packer").startup(function()
 	use("simrat39/rust-tools.nvim")
 	use({
 		"jose-elias-alvarez/null-ls.nvim",
-		requires = { "nvim-lua/plenary.nvim" },
+		requires = "nvim-lua/plenary.nvim",
 	})
 	use("jose-elias-alvarez/nvim-lsp-ts-utils")
 
@@ -72,7 +71,10 @@ require("packer").startup(function()
 	use("joshuarubin/rubix.vim")
 	use("joshuarubin/rubix-telescope.nvim")
 
-	use({ "lewis6991/gitsigns.nvim", requires = { "nvim-lua/plenary.nvim" } })
+	use({
+		"lewis6991/gitsigns.nvim",
+		requires = "nvim-lua/plenary.nvim",
+	})
 	use({ "TimUntersberger/neogit", requires = "nvim-lua/plenary.nvim" })
 	use({ "sindrets/diffview.nvim", requires = "nvim-lua/plenary.nvim" })
 
@@ -115,6 +117,12 @@ require("packer").startup(function()
 	use("rcarriga/nvim-notify")
 	use("joshuarubin/chezmoi.vim")
 	use({
+		"joshuarubin/terminal.nvim",
+		config = function()
+			require("terminal").setup()
+		end,
+	})
+	use({
 		"joshuarubin/go-return.nvim",
 		branch = "main",
 		requires = { "nvim-treesitter/nvim-treesitter", "L3MON4D3/LuaSnip" },
@@ -125,8 +133,26 @@ require("packer").startup(function()
 	use("lukas-reineke/indent-blankline.nvim")
 	use("petertriho/nvim-scrollbar")
 	use("axieax/urlview.nvim")
-	use("rmagatti/goto-preview")
-	use("haringsrob/nvim_context_vt")
+
+	use({
+		"ghillb/cybu.nvim",
+		requires = { "kyazdani42/nvim-web-devicons", opt = true },
+		config = function()
+			local ok, cybu = pcall(require, "cybu")
+			if not ok then
+				return
+			end
+			cybu.setup({
+				display_time = 1500,
+			})
+			vim.keymap.set("n", "Z", function()
+				cybu.cycle("prev")
+			end)
+			vim.keymap.set("n", "X", function()
+				cybu.cycle("next")
+			end)
+		end,
+	})
 
 	if packer_bootstrap then
 		require("packer").sync()
@@ -157,14 +183,14 @@ vim.o.showbreak = "=>"
 vim.o.whichwrap = "b,s,<,>,[,]"
 vim.o.breakindent = true
 vim.o.shortmess = "filnxtToOFcI"
-vim.o.wildmode = "list:longest,full"
+vim.o.wildmode = "longest,full"
 vim.o.wildignorecase = true
 vim.o.wildignore = "*.o,*.obj,*~,*.so,*.swp,*.DS_Store" -- stuff to ignore when tab completing
 vim.o.showfulltag = true
 vim.o.completeopt = "noinsert,menuone,noselect"
 vim.o.splitright = true
 vim.o.splitbelow = true
-vim.o.diffopt = "internal,filler,closeoff,vertical"
+vim.o.diffopt = "internal,filler,closeoff,vertical,foldcolumn:0"
 vim.o.winheight = 10
 vim.o.lazyredraw = true
 vim.o.conceallevel = 2
@@ -214,53 +240,11 @@ local function t(keys)
 	return vim.api.nvim_replace_termcodes(keys, true, true, true)
 end
 
-local map = vim.keymap.set
-
-local function nmap(lhs, rhs, opts)
-	opts = opts or {}
-	return map("n", lhs, rhs, opts)
-end
-
-local function imap(lhs, rhs, opts)
-	opts = opts or {}
-	return map("i", lhs, rhs, opts)
-end
-
-local function tmap(lhs, rhs, opts)
-	opts = opts or {}
-	return map("t", lhs, rhs, opts)
-end
-
-local function vmap(lhs, rhs, opts)
-	opts = opts or {}
-	return map("v", lhs, rhs, opts)
-end
-
-local function xmap(lhs, rhs, opts)
-	opts = opts or {}
-	return map("x", lhs, rhs, opts)
-end
-
-local function xremap(lhs, rhs, opts)
-	opts = opts or {}
-	opts.remap = true
-	return xmap(lhs, rhs, opts)
-end
-
-local function cmap(lhs, rhs, opts)
-	opts = opts or {}
-	return map("c", lhs, rhs, opts)
-end
-
--- bufsurf
-nmap("Z", t(":BufSurfBack<cr>"), { silent = true })
-nmap("X", t(":BufSurfForward<cr>"), { silent = true })
-
 -- endwise
 vim.g.endwise_no_mappings = 1
 
 -- mundo
-nmap("<leader>u", ":MundoToggle<cr>")
+vim.keymap.set("n", "<leader>u", ":MundoToggle<cr>")
 
 -- editorconfig
 vim.fn["editorconfig#AddNewHook"](function(config)
@@ -270,16 +254,16 @@ vim.fn["editorconfig#AddNewHook"](function(config)
 	return 0 -- return 0 to show no error happened
 end)
 
-nmap("n", "<cmd>execute('normal! ' . v:count1 . 'n')<cr><cmd>lua require('hlslens').start()<cr>", {
+vim.keymap.set("n", "n", "<cmd>execute('normal! ' . v:count1 . 'n')<cr><cmd>lua require('hlslens').start()<cr>", {
 	silent = true,
 })
-nmap("N", "<cmd>execute('normal! ' . v:count1 . 'N')<cr><cmd>lua require('hlslens').start()<cr>", {
+vim.keymap.set("n", "N", "<cmd>execute('normal! ' . v:count1 . 'N')<cr><cmd>lua require('hlslens').start()<cr>", {
 	silent = true,
 })
-nmap("*", "*<cmd>lua require('hlslens').start()<cr>")
-nmap("#", "#<cmd>lua require('hlslens').start()<cr>")
-nmap("g*", "g*<cmd>lua require('hlslens').start()<cr>")
-nmap("g#", "g#<cmd>lua require('hlslens').start()<cr>")
+vim.keymap.set("n", "*", "*<cmd>lua require('hlslens').start()<cr>")
+vim.keymap.set("n", "#", "#<cmd>lua require('hlslens').start()<cr>")
+vim.keymap.set("n", "g*", "g*<cmd>lua require('hlslens').start()<cr>")
+vim.keymap.set("n", "g#", "g#<cmd>lua require('hlslens').start()<cr>")
 
 local bufferline = {
 	options = {
@@ -315,17 +299,12 @@ require("gitsigns").setup({
 		topdelete = { hl = "GitGutterDelete", text = "█▔" },
 		changedelete = { hl = "GitGutterChange", text = "█▟" },
 	},
+	trouble = true,
 	on_attach = function(bufnr)
 		local gs = package.loaded.gitsigns
 
-		local function buf_map(mode, l, r, opts)
-			opts = opts or {}
-			opts.buffer = bufnr
-			vim.keymap.set(mode, l, r, opts)
-		end
-
 		-- Navigation
-		buf_map("n", "]c", function()
+		vim.keymap.set("n", "]c", function()
 			if vim.wo.diff then
 				return "]c"
 			end
@@ -333,9 +312,9 @@ require("gitsigns").setup({
 				gs.next_hunk()
 			end)
 			return "<Ignore>"
-		end, { expr = true })
+		end, { expr = true, buffer = bufnr })
 
-		buf_map("n", "[c", function()
+		vim.keymap.set("n", "[c", function()
 			if vim.wo.diff then
 				return "[c"
 			end
@@ -343,31 +322,31 @@ require("gitsigns").setup({
 				gs.prev_hunk()
 			end)
 			return "<Ignore>"
-		end, { expr = true })
+		end, { expr = true, buffer = bufnr })
 
 		-- Actions
-		buf_map({ "n", "v" }, "<leader>hs", ":Gitsigns stage_hunk<CR>")
-		buf_map({ "n", "v" }, "<leader>hr", ":Gitsigns reset_hunk<CR>")
-		buf_map("n", "<leader>hS", gs.stage_buffer)
-		buf_map("n", "<leader>hu", gs.undo_stage_hunk)
-		buf_map("n", "<leader>hR", gs.reset_buffer)
-		buf_map("n", "<leader>hp", gs.preview_hunk)
-		buf_map("n", "<leader>hb", function()
+		vim.keymap.set({ "n", "v" }, "<leader>hs", ":Gitsigns stage_hunk<CR>", { buffer = bufnr })
+		vim.keymap.set({ "n", "v" }, "<leader>hr", ":Gitsigns reset_hunk<CR>", { buffer = bufnr })
+		vim.keymap.set("n", "<leader>hS", gs.stage_buffer, { buffer = bufnr })
+		vim.keymap.set("n", "<leader>hu", gs.undo_stage_hunk, { buffer = bufnr })
+		vim.keymap.set("n", "<leader>hR", gs.reset_buffer, { buffer = bufnr })
+		vim.keymap.set("n", "<leader>hp", gs.preview_hunk, { buffer = bufnr })
+		vim.keymap.set("n", "<leader>hb", function()
 			gs.blame_line({ full = true })
-		end)
-		buf_map("n", "<leader>gw", function()
+		end, { buffer = bufnr })
+		vim.keymap.set("n", "<leader>gw", function()
 			gs.blame_line({ full = true })
-		end)
-		buf_map("n", "<leader>tb", gs.toggle_current_line_blame)
-		buf_map("n", "<leader>hd", gs.diffthis)
-		buf_map("n", "<leader>gd", gs.diffthis)
-		buf_map("n", "<leader>hD", function()
+		end, { buffer = bufnr })
+		vim.keymap.set("n", "<leader>tb", gs.toggle_current_line_blame, { buffer = bufnr })
+		vim.keymap.set("n", "<leader>hd", gs.diffthis, { buffer = bufnr })
+		vim.keymap.set("n", "<leader>gd", gs.diffthis, { buffer = bufnr })
+		vim.keymap.set("n", "<leader>hD", function()
 			gs.diffthis("~")
-		end)
-		buf_map("n", "<leader>td", gs.toggle_deleted)
+		end, { buffer = bufnr })
+		vim.keymap.set("n", "<leader>td", gs.toggle_deleted, { buffer = bufnr })
 
 		-- Text object
-		buf_map({ "o", "x" }, "ih", ":<C-U>Gitsigns select_hunk<CR>")
+		vim.keymap.set({ "o", "x" }, "ih", ":<C-U>Gitsigns select_hunk<CR>", { buffer = bufnr })
 	end,
 })
 
@@ -387,16 +366,11 @@ require("scrollbar").setup({
 })
 require("scrollbar.handlers.search").setup()
 
-local autocmd = vim.api.nvim_create_autocmd
-local function augroup(name)
-	vim.api.nvim_create_augroup(name, {})
-end
-
 -- colorscheme
 vim.o.termguicolors = true
-autocmd("ColorScheme", { pattern = "*", command = "highlight Comment gui=italic cterm=italic" })
-autocmd("ColorScheme", { pattern = "*", command = "highlight link HlSearchLens Comment" })
-autocmd("ColorScheme", { pattern = "*", command = "highlight link HlSearchLensNear Comment" })
+vim.api.nvim_create_autocmd("ColorScheme", { pattern = "*", command = "highlight Comment gui=italic cterm=italic" })
+vim.api.nvim_create_autocmd("ColorScheme", { pattern = "*", command = "highlight link HlSearchLens Comment" })
+vim.api.nvim_create_autocmd("ColorScheme", { pattern = "*", command = "highlight link HlSearchLensNear Comment" })
 
 vim.g.gruvbox_material_background = "hard"
 vim.g.gruvbox_material_palette = "original"
@@ -407,18 +381,24 @@ vim.g.gruvbox_material_diagnostic_virtual_text = "colored"
 vim.g.gruvbox_material_statusline_style = "original"
 vim.cmd([[colorscheme gruvbox-material]])
 
-vim.g.copilot_no_maps = 1
+vim.g.copilot_no_tab_map = 1
 vim.g.copilot_assume_mapped = 1
 
+local cmp = require("cmp")
+
+-- not sure why, but this has func has to be available to vim
 _G.copilot_accept = function()
-	-- close cmp unconditionally (don't abort as it retains inserted text)
-	require("cmp").mapping.close()
+	if cmp.visible() then
+		cmp.abort()
+		return ""
+	end
 
 	-- do copilot completion if possible
 	return vim.fn["copilot#Accept"](t("<c-e>"))
 end
 
-imap("<c-e>", "v:lua.copilot_accept()", { silent = true, expr = true })
+-- not sure why, but the func here has to be called from vim and not lua to work properly
+vim.keymap.set("i", "<c-e>", "v:lua.copilot_accept()", { silent = true, expr = true })
 
 require("todo-comments").setup({
 	keywords = {
@@ -436,7 +416,7 @@ require("todo-comments").setup({
 vim.env.GIT_SSH_COMMAND = "ssh -o ControlPersist=no"
 
 local git_dir
-nmap("<leader>gs", function()
+vim.keymap.set("n", "<leader>gs", function()
 	git_dir = vim.fn.expand("%:p:h")
 	neogit.open({ cwd = vim.fn.expand("%:p:h") })
 end)
@@ -453,20 +433,20 @@ local neogit_bindings = {
 }
 
 for k, v in pairs(neogit_bindings) do
-	nmap(k, function()
+	vim.keymap.set("n", k, function()
 		git_dir = vim.fn.expand("%:p:h")
 		neogit.open({ v })
 	end)
 end
 
-autocmd("FileType", {
+vim.api.nvim_create_autocmd("FileType", {
 	pattern = "Neogit*",
 	callback = function()
 		vim.cmd("lcd " .. git_dir)
 	end,
 })
 
-nmap("<leader>g.", function()
+vim.keymap.set("n", "<leader>g.", function()
 	vim.cmd("lcd " .. vim.fn.expand("%:p:h"))
 	local dir = vim.fn.system("git rev-parse --git-dir"):gsub(".git", "")
 	dir = vim.trim(dir)
@@ -514,7 +494,9 @@ require("bufferline").setup(bufferline)
 require("lualine").setup(lualine)
 
 -- nvim-tree
-nmap("<c-n>", t(":NvimTreeFindFileToggle<cr>"), { silent = true })
+vim.keymap.set("n", "<c-n>", function()
+	vim.api.nvim_command("NvimTreeFindFileToggle")
+end)
 
 require("nvim-tree").setup({
 	diagnostics = {
@@ -673,7 +655,7 @@ lsp_signature.setup({})
 -- aerial
 local aerial = require("aerial")
 aerial.setup({})
-autocmd("FileType", {
+vim.api.nvim_create_autocmd("FileType", {
 	pattern = "aerial",
 	command = "set nospell",
 })
@@ -732,12 +714,12 @@ local function on_attach(client, bufnr)
 		vim.b.autoformat = 1
 	end
 
-	autocmd("BufWritePre", {
+	vim.api.nvim_create_autocmd("BufWritePre", {
 		buffer = bufnr,
 		callback = lsp_format,
 	})
 
-	autocmd({
+	vim.api.nvim_create_autocmd({
 		"CursorHold",
 		"CursorHoldI",
 		"InsertLeave",
@@ -750,31 +732,24 @@ local function on_attach(client, bufnr)
 		end,
 	})
 
-	local function buf_nmap(lhs, rhs, opts)
-		opts = opts or {}
-		opts.silent = true
-		opts.buffer = bufnr
-		return nmap(lhs, rhs, opts)
-	end
+	vim.keymap.set("n", "<leader>a", "<cmd>AerialToggle!<cr>", { buffer = bufnr, silent = true })
+	vim.keymap.set("n", "[[", "<cmd>AerialPrev<CR>", { buffer = bufnr, silent = true })
+	vim.keymap.set("n", "]]", "<cmd>AerialNext<CR>", { buffer = bufnr, silent = true })
+	vim.keymap.set("n", "{", "<cmd>AerialPrevUp<CR>", { buffer = bufnr, silent = true })
+	vim.keymap.set("n", "}", "<cmd>AerialNextUp<CR>", { buffer = bufnr, silent = true })
 
-	buf_nmap("<leader>a", "<cmd>AerialToggle!<cr>")
-	buf_nmap("[[", "<cmd>AerialPrev<CR>")
-	buf_nmap("]]", "<cmd>AerialNext<CR>")
-	buf_nmap("{", "<cmd>AerialPrevUp<CR>")
-	buf_nmap("}", "<cmd>AerialNextUp<CR>")
-
-	buf_nmap("gD", vim.lsp.buf.declaration)
-	buf_nmap("gd", vim.lsp.buf.definition)
-	buf_nmap("K", vim.lsp.buf.hover)
-	buf_nmap("gi", vim.lsp.buf.implementation)
-	buf_nmap("gy", vim.lsp.buf.type_definition)
-	buf_nmap("<leader>cr", vim.lsp.buf.rename)
-	buf_nmap("<leader>ca", vim.lsp.buf.code_action)
-	buf_nmap("<leader>so", telescope_builtin.lsp_document_symbols)
-	buf_nmap("<leader>e", vim.diagnostic.open_float)
-	buf_nmap("[d", vim.diagnostic.goto_prev)
-	buf_nmap("]d", vim.diagnostic.goto_next)
-	buf_nmap("<leader>cl", vim.lsp.codelens.run)
+	vim.keymap.set("n", "gD", vim.lsp.buf.declaration, { buffer = bufnr })
+	vim.keymap.set("n", "gd", vim.lsp.buf.definition, { buffer = bufnr })
+	vim.keymap.set("n", "K", vim.lsp.buf.hover, { buffer = bufnr })
+	vim.keymap.set("n", "gi", vim.lsp.buf.implementation, { buffer = bufnr })
+	vim.keymap.set("n", "gy", vim.lsp.buf.type_definition, { buffer = bufnr })
+	vim.keymap.set("n", "<leader>cr", vim.lsp.buf.rename, { buffer = bufnr })
+	vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { buffer = bufnr })
+	vim.keymap.set("n", "<leader>so", telescope_builtin.lsp_document_symbols, { buffer = bufnr })
+	vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { buffer = bufnr })
+	vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { buffer = bufnr })
+	vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { buffer = bufnr })
+	vim.keymap.set("n", "<leader>cl", vim.lsp.codelens.run, { buffer = bufnr })
 end
 
 local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -839,6 +814,7 @@ null_ls.setup({
 		null_ls.builtins.diagnostics.eslint.with({ prefer_local = "node_modules/.bin" }), -- javascript, typescript, react and tsx,
 		null_ls.builtins.diagnostics.shellcheck, -- sh
 		null_ls.builtins.diagnostics.statix, -- nix
+		null_ls.builtins.diagnostics.teal, -- teal
 		null_ls.builtins.diagnostics.vale, -- markdown, tex, asciidoc
 		null_ls.builtins.formatting.alejandra, -- nix
 		null_ls.builtins.formatting.buf, -- proto
@@ -890,7 +866,6 @@ nvim_lsp.sumneko_lua.setup({
 			},
 			workspace = {
 				library = vim.api.nvim_get_runtime_file("", true),
-				preloadFileSize = 150,
 			},
 			telemetry = {
 				enable = false,
@@ -1035,7 +1010,7 @@ cmp.setup({
 		end,
 	},
 })
-imap("<plug>Endwise", t("<c-r>=EndwiseDiscretionary()<cr>"), { silent = true })
+vim.keymap.set("i", "<plug>Endwise", t("<c-r>=EndwiseDiscretionary()<cr>"), { silent = true })
 
 -- telescope
 local telescope = require("telescope")
@@ -1087,22 +1062,27 @@ telescope.load_extension("zoxide")
 telescope.load_extension("rubix")
 require("yanky").setup()
 telescope.load_extension("yank_history")
-map({ "n", "x" }, "p", "<Plug>(YankyPutAfter)")
-map({ "n", "x" }, "P", "<Plug>(YankyPutBefore)")
-map({ "n", "x" }, "gp", "<Plug>(YankyGPutAfter)")
-map({ "n", "x" }, "gP", "<Plug>(YankyGPutBefore)")
-nmap("<leader>p", "<Plug>(YankyCycleForward)")
-nmap("<leader>o", "<Plug>(YankyCycleBackward)")
+
+vim.keymap.set("i", "<c-v>", "<c-\\><c-n>gPa", { remap = true })
+vim.keymap.set("c", "<c-v>", "<c-r>+")
+vim.keymap.set({ "n", "x" }, "p", "<plug>(YankyPutAfter)")
+vim.keymap.set({ "n", "x" }, "P", "<plug>(YankyPutBefore)")
+vim.keymap.set({ "n", "x" }, "gp", "<plug>(YankyGPutAfter)")
+vim.keymap.set({ "n", "x" }, "gP", "<plug>(YankyGPutBefore)")
+vim.keymap.set({ "n", "x" }, "<c-v>", "<plug>(YankyGPutAfter)")
+vim.keymap.set({ "n", "x" }, "y", "<plug>(YankyYank)")
+vim.keymap.set("n", "<leader>p", "<plug>(YankyCycleForward)")
+vim.keymap.set("n", "<leader>o", "<plug>(YankyCycleBackward)")
 
 require("dressing").setup({})
 vim.notify = require("notify")
 
-map({ "n", "t" }, "<c-b>", telescope_builtin.buffers)
-nmap("<leader>z", telescope.extensions.zoxide.list)
-map({ "n", "t" }, "<c-p>", telescope.extensions.rubix.find_files)
-nmap("<c-f>", telescope.extensions.rubix.history)
-nmap("<c-s><c-s>", telescope.extensions.rubix.grep_string)
-nmap("<c-s><c-d>", telescope.extensions.rubix.live_grep)
+vim.keymap.set({ "n", "t" }, "<c-b>", telescope_builtin.buffers)
+vim.keymap.set("n", "<leader>z", telescope.extensions.zoxide.list)
+vim.keymap.set({ "n", "t" }, "<c-p>", telescope.extensions.rubix.find_files)
+vim.keymap.set("n", "<c-f>", telescope.extensions.rubix.history)
+vim.keymap.set("n", "<c-s><c-s>", telescope.extensions.rubix.grep_string)
+vim.keymap.set("n", "<c-s><c-d>", telescope.extensions.rubix.live_grep)
 
 -- trouble
 require("trouble").setup({
@@ -1149,17 +1129,17 @@ require("trouble").setup({
 	},
 	use_lsp_diagnostic_signs = false, -- enabling this will use the signs defined in your lsp client
 })
-nmap("<leader>xx", "<cmd>Trouble<cr>", { silent = true })
-nmap("<leader>xw", "<cmd>Trouble workspace_diagnostics<cr>", { silent = true })
-nmap("<leader>xd", "<cmd>Trouble document_diagnostics<cr>", { silent = true })
-nmap("<leader>xl", "<cmd>Trouble loclist<cr>", { silent = true })
-nmap("<leader>xq", "<cmd>Trouble quickfix<cr>", { silent = true })
+vim.keymap.set("n", "<leader>xx", "<cmd>Trouble<cr>", { silent = true })
+vim.keymap.set("n", "<leader>xw", "<cmd>Trouble workspace_diagnostics<cr>", { silent = true })
+vim.keymap.set("n", "<leader>xd", "<cmd>Trouble document_diagnostics<cr>", { silent = true })
+vim.keymap.set("n", "<leader>xl", "<cmd>Trouble loclist<cr>", { silent = true })
+vim.keymap.set("n", "<leader>xq", "<cmd>Trouble quickfix<cr>", { silent = true })
 
 -- rubix.vim
-nmap("<leader>m", ":call rubix#maximize_toggle()<cr>", { silent = true }) -- maximize current window
-nmap("<leader>fa", ":call rubix#preserve('normal gg=G')<cr>", { silent = true })
-nmap("<leader>f$", ":call rubix#trim()<cr>", { silent = true })
-nmap("<c-w><c-w>", ":confirm :Kwbd<cr>", { silent = true }) -- ctrl-w, ctrl-w to delete the current buffer without closing the window
+vim.keymap.set("n", "<leader>m", ":call rubix#maximize_toggle()<cr>", { silent = true }) -- maximize current window
+vim.keymap.set("n", "<leader>fa", ":call rubix#preserve('normal gg=G')<cr>", { silent = true })
+vim.keymap.set("n", "<leader>f$", ":call rubix#trim()<cr>", { silent = true })
+vim.keymap.set("n", "<c-w><c-w>", ":confirm :Kwbd<cr>", { silent = true }) -- ctrl-w, ctrl-w to delete the current buffer without closing the window
 
 -- toggleterm.nvim
 require("toggleterm").setup({
@@ -1172,6 +1152,7 @@ require("toggleterm").setup({
 	end,
 	shade_terminals = false,
 	open_mapping = "<c-x>",
+	start_in_insert = false,
 	direction = "horizontal", -- "vertical" | "horizontal" | "window" | "float"
 	float_opts = {
 		border = "single", -- "single" | "double" | "shadow" | "curved"
@@ -1180,7 +1161,7 @@ require("toggleterm").setup({
 })
 
 local Terminal = require("toggleterm.terminal").Terminal
-nmap("<leader>gg", function()
+vim.keymap.set("n", "<leader>gg", function()
 	Terminal
 		:new({
 			cmd = "lazygit",
@@ -1189,15 +1170,6 @@ nmap("<leader>gg", function()
 		})
 		:toggle()
 end)
-
-local goto_preview = require("goto-preview")
-goto_preview.setup({})
-nmap("gpd", goto_preview.goto_preview_definition)
-nmap("gpi", goto_preview.goto_preview_implementation)
-nmap("gr", goto_preview.goto_preview_references)
-nmap("gP", goto_preview.close_all_win)
-
-require("nvim_context_vt").setup()
 
 -- vim-kitty-navigator
 vim.g.kitty_navigator_no_mappings = 1
@@ -1224,72 +1196,81 @@ require("indent_blankline").setup({
 	show_trailing_blankline_indent = false,
 })
 
+local term = require("terminal")
+
 -- normal mode
-nmap("<leader>n", ":nohlsearch<cr>", { silent = true })
-nmap("<leader>fc", "/\\v^[<|=>]{7}( .*|$)<cr>") -- find merge conflict markers
-nmap("<leader>q", ":qa<cr>", { silent = true })
-nmap("<leader>Q", ":qa!<cr>", { silent = true })
-nmap("<leader>cd", ":lcd %:p:h<cr>:pwd<cr>") -- switch to the directory of the open buffer
-nmap("<leader>=", "<c-w>=") -- adjust viewports to the same size
-nmap("Q", ":q<cr>", { silent = true }) -- Q: Closes the window
-nmap("W", ":w<cr>", { silent = true }) -- W: Save
-nmap("_", ":sp<cr>", { silent = true }) -- _: Quick horizontal splits
-nmap("<bar>", ":vsp<cr>", { silent = true }) -- |: Quick vertical splits
-nmap("+", "<c-a>") -- +: Increment number
-nmap("-", "<c-x>") -- -: Decrement number
-nmap("d", '"_d') -- d: Delete into the blackhole register to not clobber the last yank
-nmap("dd", "dd") -- dd: I use this often to yank a single line, retain its original behavior
-nmap("c", '"_c') -- c: Change into the blackhole register to not clobber the last yank
-nmap("<c-a>r", ":redraw!<cr>", { silent = true }) -- ctrl-a r to redraw the screen now
-nmap("<c-h>", ":KittyNavigateLeft<cr>", { silent = true }) -- tmux style navigation
-nmap("<c-j>", ":KittyNavigateDown<cr>", { silent = true }) -- tmux style navigation
-nmap("<c-k>", ":KittyNavigateUp<cr>", { silent = true }) -- tmux style navigation
-nmap("<c-l>", ":KittyNavigateRight<cr>", { silent = true }) -- tmux style navigation
-nmap("<c-a>H", "<c-w><") -- resize window
-nmap("<c-a>L", "<c-w>>") -- resize window
-nmap("<c-a>J", "<c-w>+") -- resize window
-nmap("<c-a>K", "<c-w>-") -- resize window
+vim.keymap.set("n", "<leader>n", ":nohlsearch<cr>", { silent = true })
+vim.keymap.set("n", "<leader>fc", "/\\v^[<|=>]{7}( .*|$)<cr>") -- find merge conflict markers
+vim.keymap.set("n", "<leader>q", ":qa<cr>", { silent = true })
+vim.keymap.set("n", "<leader>Q", ":qa!<cr>", { silent = true })
+vim.keymap.set("n", "<leader>cd", ":lcd %:p:h<cr>:pwd<cr>") -- switch to the directory of the open buffer
+vim.keymap.set("n", "<leader>=", "<c-w>=") -- adjust viewports to the same size
+vim.keymap.set("n", "Q", ":q<cr>", { silent = true }) -- Q: Closes the window
+vim.keymap.set("n", "W", ":w<cr>", { silent = true }) -- W: Save
+vim.keymap.set("n", "_", ":sp<cr>", { silent = true }) -- _: Quick horizontal splits
+vim.keymap.set("n", "<bar>", ":vsp<cr>", { silent = true }) -- |: Quick vertical splits
+vim.keymap.set("n", "+", "<c-a>") -- +: Increment number
+vim.keymap.set("n", "=", "<c-a>") -- =: Increment number
+vim.keymap.set("n", "-", "<c-x>") -- -: Decrement number
+vim.keymap.set("n", "d", '"_d') -- d: Delete into the blackhole register to not clobber the last yank
+vim.keymap.set("n", "dd", "dd") -- dd: I use this often to yank a single line, retain its original behavior
+vim.keymap.set("n", "c", '"_c') -- c: Change into the blackhole register to not clobber the last yank
+vim.keymap.set("n", "<c-a>r", ":redraw!<cr>", { silent = true }) -- ctrl-a r to redraw the screen now
+term.save.wrap("n", "<c-h>", ":KittyNavigateLeft<cr>") -- tmux style navigation
+term.save.wrap("n", "<c-j>", ":KittyNavigateDown<cr>") -- tmux style navigation
+term.save.wrap("n", "<c-k>", ":KittyNavigateUp<cr>") -- tmux style navigation
+term.save.wrap("n", "<c-l>", ":KittyNavigateRight<cr>") -- tmux style navigation
+vim.keymap.set("n", "<c-a>H", "<c-w><") -- resize window
+vim.keymap.set("n", "<c-a>L", "<c-w>>") -- resize window
+vim.keymap.set("n", "<c-a>J", "<c-w>+") -- resize window
+vim.keymap.set("n", "<c-a>K", "<c-w>-") -- resize window
 
 -- Remap for dealing with word wrap
-nmap("k", "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
-nmap("j", "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
+vim.keymap.set("n", "k", "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
+vim.keymap.set("n", "j", "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
 
 for i = 1, 9 do
-	nmap("<leader>" .. i, ":" .. i .. "wincmd w<cr>", { silent = true }) -- <leader>[1-9]  move to window [1-9]
-	nmap("<leader>b" .. i, ":b" .. i .. "<cr>", { silent = true }) -- <leader>b[1-9] move to buffer [1-9]
+	vim.keymap.set("n", "<leader>" .. i, ":" .. i .. "wincmd w<cr>", { silent = true }) -- <leader>[1-9]  move to window [1-9]
+	vim.keymap.set("n", "<leader>b" .. i, ":b" .. i .. "<cr>", { silent = true }) -- <leader>b[1-9] move to buffer [1-9]
 end
 
 -- visual mode
-xmap("y", "y`]") -- y: Yank and go to end of selection
-xmap("p", '"_dP') -- p: Paste in visual mode should not replace the default register with the deleted text
-xmap("d", '"_d') -- d: Delete into the blackhole register to not clobber the last yank. To 'cut', use 'x' instead
-xmap("<cr>", 'y:let @/ = @"<cr>:set hlsearch<cr>', { silent = true }) -- enter: Highlight visual selections
-xmap("<", "<gv") -- <: Retain visual selection after indent
-xmap(">", ">gv") -- >: Retain visual selection after indent
-xmap(".", ":normal.<cr>", { silent = true }) -- .: repeats the last command on every line
-xmap("@", ":normal@@<cr>", { silent = true }) -- @: repeats the last macro on every line
-xremap("<tab>", ">") -- tab: Indent (allow recursive)
-xremap("<s-tab>", "<") -- shift-tab: unindent (allow recursive)
+vim.keymap.set("x", "y", "y`]") -- y: Yank and go to end of selection
+vim.keymap.set("x", "p", '"_dP') -- p: Paste in visual mode should not replace the default register with the deleted text
+vim.keymap.set("x", "d", '"_d') -- d: Delete into the blackhole register to not clobber the last yank. To 'cut', use 'x' instead
+vim.keymap.set("x", "<cr>", 'y:let @/ = @"<cr>:set hlsearch<cr>', { silent = true }) -- enter: Highlight visual selections
+vim.keymap.set("x", "<", "<gv") -- <: Retain visual selection after indent
+vim.keymap.set("x", ">", ">gv") -- >: Retain visual selection after indent
+vim.keymap.set("x", ".", ":normal.<cr>", { silent = true }) -- .: repeats the last command on every line
+vim.keymap.set("x", "@", ":normal@@<cr>", { silent = true }) -- @: repeats the last macro on every line
+vim.keymap.set("x", "<tab>", ">", { remap = true }) -- tab: Indent (allow recursive)
+vim.keymap.set("x", "<s-tab>", "<", { remap = true }) -- shift-tab: unindent (allow recursive)
 
 -- visual and select mode
-vmap("<leader>s", ":sort<cr>")
-vmap("<c-h>", ":<c-u>KittyNavigateLeft<cr>", { silent = true }) -- tmux style navigation
-vmap("<c-j>", ":<c-u>KittyNavigateDown<cr>", { silent = true }) -- tmux style navigation
-vmap("<c-k>", ":<c-u>KittyNavigateUp<cr>", { silent = true }) -- tmux style navigation
-vmap("<c-l>", ":<c-u>KittyNavigateRight<cr>", { silent = true }) -- tmux style navigation
-vmap("<c-a>H", "<c-w><") -- resize window
-vmap("<c-a>L", "<c-w>>") -- resize window
-vmap("<c-a>J", "<c-w>+") -- resize window
-vmap("<c-a>K", "<c-w>-") -- resize window
+vim.keymap.set("v", "<leader>s", ":sort<cr>")
+term.save.wrap("v", "<c-h>", ":<c-u>KittyNavigateLeft<cr>") -- tmux style navigation
+term.save.wrap("v", "<c-j>", ":<c-u>KittyNavigateDown<cr>") -- tmux style navigation
+term.save.wrap("v", "<c-k>", ":<c-u>KittyNavigateUp<cr>") -- tmux style navigation
+term.save.wrap("v", "<c-l>", ":<c-u>KittyNavigateRight<cr>") -- tmux style navigation
+vim.keymap.set("v", "<c-a>H", "<c-w><") -- resize window
+vim.keymap.set("v", "<c-a>L", "<c-w>>") -- resize window
+vim.keymap.set("v", "<c-a>J", "<c-w>+") -- resize window
+vim.keymap.set("v", "<c-a>K", "<c-w>-") -- resize window
 
 -- command line mode
-cmap("<c-j>", "<down>")
-cmap("<c-k>", "<up>")
+vim.keymap.set("c", "<c-j>", "<down>")
+vim.keymap.set("c", "<c-k>", "<up>")
+vim.keymap.set("c", "<cr>", function()
+	if vim.fn.wildmenumode() == 1 then
+		return "<c-y>"
+	end
+	return "<cr>"
+end, { expr = true })
 
 -- insert mode
-imap("<c-w>", "<c-g>u<c-w>") -- ctrl-w: Delete previous word, create undo point
-imap("<c-h>", "<esc>:KittyNavigateLeft<cr>", { silent = true }) -- tmux style navigation
-imap("<c-j>", function()
+vim.keymap.set("i", "<c-w>", "<c-g>u<c-w>") -- ctrl-w: Delete previous word, create undo point
+vim.keymap.set("i", "<c-h>", "<esc>:KittyNavigateLeft<cr>", { silent = true }) -- tmux style navigation
+vim.keymap.set("i", "<c-j>", function()
 	-- tmux style navigation
 	if vim.fn.pumvisible() == 1 then
 		return "<c-n>"
@@ -1299,7 +1280,7 @@ imap("<c-j>", function()
 	end
 	return "<esc>:KittyNavigateDown<cr>"
 end, { silent = true })
-imap("<c-k>", function()
+vim.keymap.set("i", "<c-k>", function()
 	-- tmux style navigation
 	if vim.fn.pumvisible() == 1 then
 		return "<c-p>"
@@ -1309,67 +1290,67 @@ imap("<c-k>", function()
 	end
 	return "<esc>:KittyNavigateUp<cr>"
 end, { silent = true })
-imap("<c-l>", "<esc>:KittyNavigateRight<cr>", { silent = true }) -- tmux style navigation
-imap("<c-a>H", "<esc><c-w><a") -- resize window
-imap("<c-a>L", "<esc><c-w>>a") -- resize window
-imap("<c-a>J", "<esc><c-w>+a") -- resize window
-imap("<c-a>K", "<esc><c-w>-a") -- resize window
+vim.keymap.set("i", "<c-l>", "<esc>:KittyNavigateRight<cr>", { silent = true }) -- tmux style navigation
+vim.keymap.set("i", "<c-a>H", "<esc><c-w><a") -- resize window
+vim.keymap.set("i", "<c-a>L", "<esc><c-w>>a") -- resize window
+vim.keymap.set("i", "<c-a>J", "<esc><c-w>+a") -- resize window
+vim.keymap.set("i", "<c-a>K", "<esc><c-w>-a") -- resize window
 
 -- terminal mode
-tmap("<c-h>", "<c-\\><c-n>:KittyNavigateLeft<cr>", { silent = true }) -- tmux style navigation
-tmap("<c-j>", "<c-\\><c-n>:KittyNavigateDown<cr>", { silent = true }) -- tmux style navigation
-tmap("<c-k>", "<c-\\><c-n>:KittyNavigateUp<cr>", { silent = true }) -- tmux style navigation
-tmap("<c-l>", "<c-\\><c-n>:KittyNavigateRight<cr>", { silent = true }) -- tmux style navigation
-tmap("<c-a>H", "<c-\\><c-n><c-w><i") -- resize window
-tmap("<c-a>L", "<c-\\><c-n><c-w>>i") -- resize window
-tmap("<c-a>J", "<c-\\><c-n><c-w>+i") -- resize window
-tmap("<c-a>K", "<c-\\><c-n><c-w>-i") -- resize window
-tmap("<c-y>", "<c-\\><c-n><c-y>") -- scroll up one line
-tmap("<c-u>", "<c-\\><c-n><c-u>") -- scroll up half a screen
+term.save.wrap("t", "<c-h>", "<c-\\><c-n>:KittyNavigateLeft<cr>") -- tmux style navigation
+term.save.wrap("t", "<c-j>", "<c-\\><c-n>:KittyNavigateDown<cr>") -- tmux style navigation
+term.save.wrap("t", "<c-k>", "<c-\\><c-n>:KittyNavigateUp<cr>") -- tmux style navigation
+term.save.wrap("t", "<c-l>", "<c-\\><c-n>:KittyNavigateRight<cr>") -- tmux style navigation
+vim.keymap.set("t", "<c-a>H", "<c-\\><c-n><c-w><i") -- resize window
+vim.keymap.set("t", "<c-a>L", "<c-\\><c-n><c-w>>i") -- resize window
+vim.keymap.set("t", "<c-a>J", "<c-\\><c-n><c-w>+i") -- resize window
+vim.keymap.set("t", "<c-a>K", "<c-\\><c-n><c-w>-i") -- resize window
+vim.keymap.set("t", "<c-y>", "<c-\\><c-n><c-y>") -- scroll up one line
+vim.keymap.set("t", "<c-u>", "<c-\\><c-n><c-u>") -- scroll up half a screen
 
 -- abbreviations
 vim.cmd([[iabbrev TODO TODO(jawa)]])
 vim.cmd([[iabbrev meml me@jawa.dev]])
 
 -- autocommands
-local init_group = augroup("InitAutoCmd")
+local init_group = vim.api.nvim_create_augroup("InitAutoCmd", {})
 
-autocmd("InsertEnter", {
+vim.api.nvim_create_autocmd("InsertEnter", {
 	desc = "disable search highlighting in insert mode",
 	group = init_group,
 	pattern = "*",
 	command = "setlocal nohlsearch",
 })
 
-autocmd("InsertLeave", {
+vim.api.nvim_create_autocmd("InsertLeave", {
 	desc = "enable search highlighting when leaving insert mode",
 	group = init_group,
 	pattern = "*",
 	command = "setlocal hlsearch",
 })
 
-autocmd("WinEnter", {
+vim.api.nvim_create_autocmd("WinEnter", {
 	desc = "check timestamp more for 'autoread'",
 	group = init_group,
 	pattern = "*",
 	command = "checktime",
 })
 
-autocmd("InsertLeave", {
+vim.api.nvim_create_autocmd("InsertLeave", {
 	desc = "disable paste",
 	group = init_group,
 	pattern = "*",
 	command = "if &paste | set nopaste | echo 'nopaste' | endif",
 })
 
-autocmd("InsertLeave", {
+vim.api.nvim_create_autocmd("InsertLeave", {
 	desc = "update diff",
 	group = init_group,
 	pattern = "*",
 	command = "if &l:diff | diffupdate | endif",
 })
 
-autocmd("BufReadPost", {
+vim.api.nvim_create_autocmd("BufReadPost", {
 	desc = "go back to previous position of cursor if any",
 	group = init_group,
 	pattern = "*",
@@ -1385,16 +1366,16 @@ autocmd("BufReadPost", {
 	end,
 })
 
-autocmd("FileType", {
+vim.api.nvim_create_autocmd("FileType", {
 	desc = "set glow preview mapping for markdown files",
 	group = init_group,
 	pattern = "markdown",
 	callback = function()
-		nmap("<leader>p", ":Glow<cr>", { silent = true, buffer = true })
+		vim.keymap.set("n", "<leader>p", ":Glow<cr>", { silent = true, buffer = true })
 	end,
 })
 
-autocmd("TextYankPost", {
+vim.api.nvim_create_autocmd("TextYankPost", {
 	desc = "highlight on yank",
 	group = init_group,
 	pattern = "*",
@@ -1404,25 +1385,20 @@ autocmd("TextYankPost", {
 })
 
 -- terminal autocommands
-autocmd("TermOpen", {
+vim.api.nvim_create_autocmd("TermOpen", {
 	desc = "switch to insert mode and press up when in terminal normal mode",
 	pattern = "*",
 	command = "nnoremap <buffer> <up> i<up>",
 })
-autocmd("TermOpen", {
+vim.api.nvim_create_autocmd("TermOpen", {
 	desc = "switch to insert mode and press <c-r> when in terminal normal mode",
 	pattern = "*",
 	command = "nnoremap <buffer> <c-r> i<c-r>",
 })
-autocmd("TermOpen", {
+vim.api.nvim_create_autocmd("TermOpen", {
 	desc = "disable macros in terminals",
 	pattern = "*",
 	command = "nnoremap <buffer> q <nop>",
-})
-autocmd("TermOpen", {
-	desc = "disable line numbers in terminals",
-	pattern = "*",
-	command = "setlocal nonumber",
 })
 
 vim.api.nvim_create_user_command("ToggleAutoFormat", function()
