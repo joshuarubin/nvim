@@ -36,7 +36,10 @@ require("packer").startup(function()
 	})
 
 	-- lsp
-	use("neovim/nvim-lspconfig")
+	use({
+		"williamboman/nvim-lsp-installer",
+		"neovim/nvim-lspconfig",
+	})
 	use("simrat39/rust-tools.nvim")
 	use({
 		"jose-elias-alvarez/null-ls.nvim",
@@ -661,6 +664,10 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 -- lsp
+require("nvim-lsp-installer").setup({
+	automatic_installation = true,
+})
+
 local nvim_lsp = require("lspconfig")
 
 local function go_organize_imports(bufnr, wait_ms)
@@ -846,7 +853,6 @@ table.insert(lua_path, "lua/?.lua")
 table.insert(lua_path, "lua/?/init.lua")
 
 nvim_lsp.sumneko_lua.setup({
-	cmd = { "lua-language-server", "-E", "/usr/share/lua-language-server/main.lua" },
 	on_attach = function(client, bufnr)
 		-- disable sumneko formatting (done by null-ls.stylua)
 		client.resolved_capabilities.document_formatting = false
