@@ -46,6 +46,7 @@ require("packer").startup(function()
 		requires = "nvim-lua/plenary.nvim",
 	})
 	use("jose-elias-alvarez/nvim-lsp-ts-utils")
+	use("mfussenegger/nvim-dap")
 
 	-- completion
 	use("hrsh7th/nvim-cmp")
@@ -707,7 +708,8 @@ local function lsp_format(opts)
 	if filetype == "go" or filetype == "gomod" then
 		lsp_format_go(opts.buf)
 	else
-		vim.lsp.buf.formatting_seq_sync()
+		-- TODO(jawa) this changes format in neovim 0.8+
+		vim.lsp.buf.formatting_seq_sync(nil, 5000)
 	end
 end
 
@@ -762,7 +764,7 @@ end
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = require("cmp_nvim_lsp").update_capabilities(capabilities)
 
-local servers = { "clangd", "cmake", "pyright" }
+local servers = { "bashls", "clangd", "cmake", "dockerls", "pyright", "vimls", "zls" }
 for _, lsp in ipairs(servers) do
 	nvim_lsp[lsp].setup({
 		on_attach = on_attach,
@@ -819,13 +821,17 @@ null_ls.setup({
 		null_ls.builtins.diagnostics.buf, -- proto
 		null_ls.builtins.diagnostics.deadnix, -- nix
 		null_ls.builtins.diagnostics.eslint.with({ prefer_local = "node_modules/.bin" }), -- javascript, typescript, react and tsx,
-		null_ls.builtins.diagnostics.shellcheck, -- sh
+		null_ls.builtins.diagnostics.sqlfluff.with({ extra_args = { "--dialect", "postgres" } }), -- sql
 		null_ls.builtins.diagnostics.statix, -- nix
 		null_ls.builtins.diagnostics.teal, -- teal
 		null_ls.builtins.diagnostics.vale, -- markdown, tex, asciidoc
 		null_ls.builtins.formatting.alejandra, -- nix
 		null_ls.builtins.formatting.buf, -- proto
 		null_ls.builtins.formatting.prettier.with({ prefer_local = "node_modules/.bin" }), -- javascript, typescript, react, vue, css, scss, less, html, json, yaml, markdown, graphql, handlebars
+		null_ls.builtins.formatting.shfmt.with({
+			args = {},
+		}), -- sh
+		null_ls.builtins.formatting.sqlfluff.with({ extra_args = { "--dialect", "postgres" } }), -- javascript, typescript, react and tsx
 		null_ls.builtins.formatting.stylua, -- lua
 		null_ls.builtins.hover.dictionary, -- text, markdown
 	},
@@ -1069,7 +1075,7 @@ telescope.load_extension("rubix")
 require("yanky").setup()
 telescope.load_extension("yank_history")
 
-vim.keymap.set("i", "<c-v>", "<c-\\><c-n>gPa", { remap = true })
+vim.keymap.set("i", "<c-v>", "<c-\\><c-n>pa", { remap = true })
 vim.keymap.set("c", "<c-v>", "<c-r>+")
 vim.keymap.set({ "n", "x" }, "p", "<plug>(YankyPutAfter)")
 vim.keymap.set({ "n", "x" }, "P", "<plug>(YankyPutBefore)")
