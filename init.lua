@@ -1274,7 +1274,11 @@ vim.keymap.set("c", "<c-j>", "<down>")
 vim.keymap.set("c", "<c-k>", "<up>")
 vim.keymap.set("c", "<cr>", function()
 	if vim.fn.wildmenumode() == 1 then
-		return "<c-y>"
+		vim.fn.feedkeys(t("<c-y>"))
+		if not vim.fn.getcmdline():match("/$") then
+			vim.fn.feedkeys(t("<cr>"))
+		end
+		return ""
 	end
 	return "<cr>"
 end, { expr = true })
