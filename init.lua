@@ -670,7 +670,9 @@ vim.api.nvim_create_autocmd("FileType", {
 
 -- lsp
 require("nvim-lsp-installer").setup({
-	automatic_installation = true,
+	automatic_installation = {
+		exclude = { "hls" },
+	},
 })
 
 local nvim_lsp = require("lspconfig")
