@@ -163,6 +163,10 @@ require("packer").startup(function()
 	end
 end)
 
+if vim.env.GROQ_CONFIG then
+	vim.cmd("source " .. vim.env.GROQ_CONFIG .. "/vim/groq.vim")
+end
+
 local function backupdir()
 	local ret = vim.fn.stdpath("data") .. "/backup"
 	if vim.fn.isdirectory(ret) ~= 1 then
