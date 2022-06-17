@@ -138,6 +138,20 @@ require("packer").startup(function()
 	use("petertriho/nvim-scrollbar")
 	use("axieax/urlview.nvim")
 
+	use("ixru/nvim-markdown")
+	use({
+		"iamcco/markdown-preview.nvim",
+		run = function()
+			vim.fn["mkdp#util#install"]()
+		end,
+		config = function()
+			vim.g.mkdp_auto_close = 0
+		end,
+	})
+
+	use("junegunn/goyo.vim")
+	use("junegunn/limelight.vim")
+
 	use({
 		"ghillb/cybu.nvim",
 		requires = { "kyazdani42/nvim-web-devicons", opt = true },
@@ -185,6 +199,7 @@ vim.o.synmaxcol = 512
 vim.o.list = true
 vim.o.listchars = "tab:│ ,trail:•,precedes:❮,nbsp:.,conceal:Δ"
 vim.o.fillchars = "vert:│,fold:-"
+vim.o.foldcolumn = "auto:9"
 vim.o.title = true
 vim.o.linebreak = true -- wrap lines at convenient points
 vim.o.showbreak = "=>"
@@ -202,7 +217,7 @@ vim.o.diffopt = "internal,filler,closeoff,vertical,foldcolumn:0"
 vim.o.winheight = 10
 vim.o.lazyredraw = true
 vim.o.conceallevel = 2
-vim.o.concealcursor = "nv"
+vim.o.concealcursor = ""
 vim.o.showmode = false
 vim.o.showtabline = 2 -- prevent flicker, lualine shows info anyway
 vim.o.showcmd = false
@@ -1408,8 +1423,39 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 
 vim.api.nvim_create_autocmd("FileType", {
 	desc = "set nospell for certain file types",
+	group = init_group,
 	pattern = { "aerial", "man" },
 	command = "set nospell",
+})
+
+vim.api.nvim_create_autocmd("User", {
+	desc = "When starting goyo...",
+	group = init_group,
+	pattern = "GoyoEnter",
+	nested = true,
+	callback = function()
+		vim.w.goyospell = vim.wo.spell
+		vim.wo.spell = false
+		vim.cmd("ScrollbarHide")
+		vim.diagnostic.disable()
+		vim.cmd("Gitsigns toggle_signs")
+	end,
+})
+
+vim.api.nvim_create_autocmd("User", {
+	desc = "When leaving goyo...",
+	group = init_group,
+	pattern = "GoyoLeave",
+	nested = true,
+	callback = function()
+		if vim.w.goyospell then
+			vim.wo.spell = true
+		end
+		vim.w.gotospell = nil
+		vim.cmd("ScrollbarShow")
+		vim.diagnostic.enable()
+		vim.cmd("Gitsigns toggle_signs")
+	end,
 })
 
 -- terminal autocommands
