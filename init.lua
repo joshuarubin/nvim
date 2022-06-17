@@ -768,6 +768,10 @@ capabilities = require("cmp_nvim_lsp").update_capabilities(capabilities)
 
 local servers = { "bashls", "clangd", "cmake", "dockerls", "hls", "pyright", "vimls", "zls" }
 for _, lsp in ipairs(servers) do
+	if lsp == "clangd" then
+		-- required to get rid of a warning about multiple different offset encodings
+		capabilities.offsetEncoding = { "utf-16" }
+	end
 	nvim_lsp[lsp].setup({
 		on_attach = on_attach,
 		capabilities = capabilities,
