@@ -663,10 +663,6 @@ lsp_signature.setup({})
 -- aerial
 local aerial = require("aerial")
 aerial.setup({})
-vim.api.nvim_create_autocmd("FileType", {
-	pattern = "aerial",
-	command = "set nospell",
-})
 
 -- lsp
 require("nvim-lsp-installer").setup({
@@ -1404,6 +1400,12 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 	callback = function()
 		vim.highlight.on_yank()
 	end,
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+	desc = "set nospell for certain file types",
+	pattern = { "aerial", "man" },
+	command = "set nospell",
 })
 
 -- terminal autocommands
