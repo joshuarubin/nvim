@@ -252,6 +252,9 @@ vim.o.smartcase = true -- smart case matching
 vim.o.tags = "./tags;/,~/.vimtags"
 vim.o.mouse = "nv"
 vim.o.spell = true
+vim.o.guifont = "JetBrainsMono Nerd Font:h12.5"
+
+vim.g.neovide_cursor_animation_length = 0
 
 vim.opt.isfname:remove({ "=" })
 
@@ -895,7 +898,7 @@ nvim_lsp.sumneko_lua.setup({
 				path = lua_path,
 			},
 			diagnostics = {
-				globals = { "vim" },
+				globals = { "vim", "hs" },
 			},
 			workspace = {
 				library = vim.api.nvim_get_runtime_file("", true),
@@ -1316,7 +1319,7 @@ vim.keymap.set("i", "<c-j>", function()
 		return cmp.select_next_item()
 	end
 	return "<esc>:KittyNavigateDown<cr>"
-end, { silent = true })
+end, { silent = true, expr = true })
 vim.keymap.set("i", "<c-k>", function()
 	-- tmux style navigation
 	if vim.fn.pumvisible() == 1 then
@@ -1326,7 +1329,7 @@ vim.keymap.set("i", "<c-k>", function()
 		return cmp.select_prev_item()
 	end
 	return "<esc>:KittyNavigateUp<cr>"
-end, { silent = true })
+end, { silent = true, expr = true })
 vim.keymap.set("i", "<c-l>", "<esc>:KittyNavigateRight<cr>", { silent = true }) -- tmux style navigation
 vim.keymap.set("i", "<c-a>H", "<esc><c-w><a") -- resize window
 vim.keymap.set("i", "<c-a>L", "<esc><c-w>>a") -- resize window
