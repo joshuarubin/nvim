@@ -244,7 +244,7 @@ return require("packer").startup(function(use)
 		end,
 	})
 
-	use("nvim-treesitter/nvim-treesitter-textobjects")
+	use({ "nvim-treesitter/nvim-treesitter-textobjects", after = "nvim-treesitter" })
 
 	use({
 		"folke/todo-comments.nvim",
@@ -309,33 +309,35 @@ return require("packer").startup(function(use)
 	use("hrsh7th/cmp-nvim-lua")
 	use("saadparwaiz1/cmp_luasnip")
 
-	use({
-		"github/copilot.vim",
-		after = "nvim-cmp",
-		config = function()
-			vim.g.copilot_no_tab_map = 1
-			vim.g.copilot_assume_mapped = 1
+	if vim.env.COPILOT_DISABLED ~= "1" then
+		use({
+			"github/copilot.vim",
+			after = "nvim-cmp",
+			config = function()
+				vim.g.copilot_no_tab_map = 1
+				vim.g.copilot_assume_mapped = 1
 
-			local ok, cmp = pcall(require, "cmp")
-			if not ok then
-				return
-			end
-
-			-- not sure why, but this has func has to be available to vim
-			_G.copilot_accept = function()
-				if cmp.visible() then
-					cmp.abort()
-					return ""
+				local ok, cmp = pcall(require, "cmp")
+				if not ok then
+					return
 				end
 
-				-- do copilot completion if possible
-				return vim.fn["copilot#Accept"](vim.api.nvim_replace_termcodes("<c-e>", true, true, true))
-			end
+				-- not sure why, but this has func has to be available to vim
+				_G.copilot_accept = function()
+					if cmp.visible() then
+						cmp.abort()
+						return ""
+					end
 
-			-- not sure why, but the func here has to be called from vim and not lua to work properly
-			vim.keymap.set("i", "<c-e>", "v:lua.copilot_accept()", { silent = true, expr = true })
-		end,
-	})
+					-- do copilot completion if possible
+					return vim.fn["copilot#Accept"](vim.api.nvim_replace_termcodes("<c-e>", true, true, true))
+				end
+
+				-- not sure why, but the func here has to be called from vim and not lua to work properly
+				vim.keymap.set("i", "<c-e>", "v:lua.copilot_accept()", { silent = true, expr = true })
+			end,
+		})
+	end
 
 	-- snippets
 	use("L3MON4D3/LuaSnip")
