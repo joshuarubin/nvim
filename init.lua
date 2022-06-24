@@ -138,10 +138,7 @@ end)
 local function go_organize_imports(bufnr, wait_ms)
 	local params = vim.lsp.util.make_range_params()
 	params.context = { only = { "source.organizeImports" } }
-	return vim.lsp.buf_request_sync(bufnr, "textDocument/codeAction", params, wait_ms)
-end
-
-local function go_format(result)
+	local result = vim.lsp.buf_request_sync(bufnr, "textDocument/codeAction", params, wait_ms)
 	for _, res in pairs(result or {}) do
 		for _, r in pairs(res.result or {}) do
 			if r.edit then
@@ -151,13 +148,6 @@ local function go_format(result)
 			end
 		end
 	end
-
-	vim.lsp.buf.formatting_seq_sync()
-end
-
-local function lsp_format_go(bufnr, timeout_ms)
-	local result = go_organize_imports(bufnr, timeout_ms)
-	go_format(result)
 end
 
 local function lsp_format(opts)
@@ -170,11 +160,10 @@ local function lsp_format(opts)
 	local filetype = vim.api.nvim_buf_get_option(opts.buf, "filetype")
 
 	if filetype == "go" or filetype == "gomod" then
-		lsp_format_go(opts.buf)
-	else
-		-- TODO(jawa) this changes format in neovim 0.8+
-		vim.lsp.buf.formatting_seq_sync(nil, 5000)
+		go_organize_imports(opts.buf, 5000)
 	end
+
+	vim.lsp.buf.formatting_sync(nil, 5000)
 end
 
 local function on_attach(client, bufnr)
@@ -190,10 +179,12 @@ local function on_attach(client, bufnr)
 		vim.b.autoformat = 1
 	end
 
-	vim.api.nvim_create_autocmd("BufWritePre", {
-		buffer = bufnr,
-		callback = lsp_format,
-	})
+	if client.supports_method("textDocument/formatting") then
+		vim.api.nvim_create_autocmd("BufWritePre", {
+			buffer = bufnr,
+			callback = lsp_format,
+		})
+	end
 
 	vim.api.nvim_create_autocmd({
 		"CursorHold",
@@ -343,6 +334,27 @@ safe_require("rust-tools", function(rust_tools)
 end)
 
 safe_require("null-ls", function(null_ls)
+	local helpers = require("null-ls.helpers")
+
+	local cpplint = {
+		name = "cpplint",
+		method = null_ls.methods.DIAGNOSTICS,
+		filetypes = { "cpp" },
+		generator = null_ls.generator({
+			command = "cpplint",
+			args = { "$FILENAME" },
+			to_temp_file = true,
+			from_stderr = true,
+			format = "line",
+			on_output = helpers.diagnostics.from_patterns({
+				{
+					pattern = [[:(%d+): (.*)]],
+					groups = { "row", "message" },
+				},
+			}),
+		}),
+	}
+
 	null_ls.setup({
 		on_attach = on_attach,
 		sources = {
@@ -356,12 +368,11 @@ safe_require("null-ls", function(null_ls)
 			null_ls.builtins.diagnostics.statix, -- nix
 			null_ls.builtins.diagnostics.teal, -- teal
 			null_ls.builtins.diagnostics.vale, -- markdown, tex, asciidoc
+			cpplint,
 			null_ls.builtins.formatting.alejandra, -- nix
 			null_ls.builtins.formatting.buf, -- proto
 			null_ls.builtins.formatting.prettier.with({ prefer_local = "node_modules/.bin" }), -- javascript, typescript, react, vue, css, scss, less, html, json, yaml, markdown, graphql, handlebars
-			null_ls.builtins.formatting.shfmt.with({
-				args = {},
-			}), -- sh
+			null_ls.builtins.formatting.shfmt.with({ args = {} }), -- sh
 			null_ls.builtins.formatting.sqlfluff.with({ extra_args = { "--dialect", "postgres" } }), -- javascript, typescript, react and tsx
 			null_ls.builtins.formatting.stylua, -- lua
 			null_ls.builtins.hover.dictionary, -- text, markdown
