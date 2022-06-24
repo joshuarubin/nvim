@@ -349,7 +349,7 @@ safe_require("null-ls", function(null_ls)
 			null_ls.builtins.code_actions.eslint.with({ prefer_local = "node_modules/.bin" }), -- javascript, typescript, react and tsx
 			null_ls.builtins.code_actions.shellcheck, -- sh
 			null_ls.builtins.code_actions.statix, -- nix
-			null_ls.builtins.diagnostics.buf, -- proto
+			null_ls.builtins.diagnostics.buf.with({ args = { "lint", "--path", "$DIRNAME" } }), -- proto
 			null_ls.builtins.diagnostics.deadnix, -- nix
 			null_ls.builtins.diagnostics.eslint.with({ prefer_local = "node_modules/.bin" }), -- javascript, typescript, react and tsx,
 			null_ls.builtins.diagnostics.sqlfluff.with({ extra_args = { "--dialect", "postgres" } }), -- sql
