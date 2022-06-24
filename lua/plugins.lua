@@ -855,65 +855,6 @@ return require("packer").startup(function(use)
 	})
 
 	use({
-		"knubie/vim-kitty-navigator",
-		after = { "nvim-cmp", "terminal.nvim" },
-		config = function()
-			vim.g.kitty_navigator_no_mappings = 1
-
-			local ok, term = pcall(require, "terminal")
-			if not ok then
-				return
-			end
-
-			local cmp
-			ok, cmp = pcall(require, "cmp")
-			if not ok then
-				return
-			end
-
-			term.save.wrap("n", "<c-h>", ":KittyNavigateLeft<cr>") -- tmux style navigation
-			term.save.wrap("n", "<c-j>", ":KittyNavigateDown<cr>") -- tmux style navigation
-			term.save.wrap("n", "<c-k>", ":KittyNavigateUp<cr>") -- tmux style navigation
-			term.save.wrap("n", "<c-l>", ":KittyNavigateRight<cr>") -- tmux style navigation
-
-			term.save.wrap("v", "<c-h>", ":<c-u>KittyNavigateLeft<cr>") -- tmux style navigation
-			term.save.wrap("v", "<c-j>", ":<c-u>KittyNavigateDown<cr>") -- tmux style navigation
-			term.save.wrap("v", "<c-k>", ":<c-u>KittyNavigateUp<cr>") -- tmux style navigation
-			term.save.wrap("v", "<c-l>", ":<c-u>KittyNavigateRight<cr>") -- tmux style navigation
-
-			term.save.wrap("t", "<c-h>", "<c-\\><c-n>:KittyNavigateLeft<cr>") -- tmux style navigation
-			term.save.wrap("t", "<c-j>", "<c-\\><c-n>:KittyNavigateDown<cr>") -- tmux style navigation
-			term.save.wrap("t", "<c-k>", "<c-\\><c-n>:KittyNavigateUp<cr>") -- tmux style navigation
-			term.save.wrap("t", "<c-l>", "<c-\\><c-n>:KittyNavigateRight<cr>") -- tmux style navigation
-
-			vim.keymap.set("i", "<c-h>", "<esc>:KittyNavigateLeft<cr>", { silent = true }) -- tmux style navigation
-			vim.keymap.set("i", "<c-j>", function()
-				-- tmux style navigation
-				if vim.fn.pumvisible() == 1 then
-					return "<c-n>"
-				end
-				if cmp.visible() then
-					return cmp.select_next_item()
-				end
-				return "<esc>:KittyNavigateDown<cr>"
-			end, { silent = true, expr = true })
-
-			vim.keymap.set("i", "<c-k>", function()
-				-- tmux style navigation
-				if vim.fn.pumvisible() == 1 then
-					return "<c-p>"
-				end
-				if cmp.visible() then
-					return cmp.select_prev_item()
-				end
-				return "<esc>:KittyNavigateUp<cr>"
-			end, { silent = true, expr = true })
-
-			vim.keymap.set("i", "<c-l>", "<esc>:KittyNavigateRight<cr>", { silent = true }) -- tmux style navigation
-		end,
-	})
-
-	use({
 		"ellisonleao/glow.nvim",
 		branch = "main",
 		config = function()
@@ -982,13 +923,54 @@ return require("packer").startup(function(use)
 
 	use({
 		"joshuarubin/terminal.nvim",
+		after = { "nvim-cmp" },
 		config = function()
 			local ok, term = pcall(require, "terminal")
 			if not ok then
 				return
 			end
 
+			local cmp
+			ok, cmp = pcall(require, "cmp")
+			if not ok then
+				return
+			end
+
 			term.setup()
+
+			-- tmux style navigation
+			term.save.wrap({ "n", "v" }, "<c-h>", "<c-w>h")
+			term.save.wrap({ "n", "v" }, "<c-j>", "<c-w>j")
+			term.save.wrap({ "n", "v" }, "<c-k>", "<c-w>k")
+			term.save.wrap({ "n", "v" }, "<c-l>", "<c-w>l")
+
+			term.save.wrap("t", "<c-h>", "<c-\\><c-n><c-w>h")
+			term.save.wrap("t", "<c-j>", "<c-\\><c-n><c-w>j")
+			term.save.wrap("t", "<c-k>", "<c-\\><c-n><c-w>k")
+			term.save.wrap("t", "<c-l>", "<c-\\><c-n><c-w>l")
+
+			vim.keymap.set("i", "<c-h>", "<esc><c-w>h")
+			vim.keymap.set("i", "<c-j>", function()
+				if vim.fn.pumvisible() == 1 then
+					return "<c-n>"
+				end
+				if cmp.visible() then
+					return cmp.select_next_item()
+				end
+				return "<esc><c-w>j"
+			end, { expr = true })
+
+			vim.keymap.set("i", "<c-k>", function()
+				if vim.fn.pumvisible() == 1 then
+					return "<c-p>"
+				end
+				if cmp.visible() then
+					return cmp.select_prev_item()
+				end
+				return "<esc><c-w>k"
+			end, { expr = true })
+
+			vim.keymap.set("i", "<c-l>", "<esc><c-w>l")
 		end,
 	})
 
