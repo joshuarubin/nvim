@@ -135,16 +135,68 @@ safe_require("nvim-lsp-installer", function(nvim_lsp_installer)
 	})
 end)
 
-local function go_organize_imports(bufnr, wait_ms)
+local function switch_source_header(bufnr, wait_ms)
+	bufnr = bufnr or 0
+	wait_ms = wait_ms or 5000
+
+	local result = vim.lsp.buf_request_sync(
+		bufnr,
+		"textDocument/switchSourceHeader",
+		vim.lsp.util.make_text_document_params(),
+		wait_ms
+	)
+	for _, res in pairs(result or {}) do
+		if res.result then
+			vim.cmd("edit " .. res.result)
+		end
+	end
+end
+
+-- if there's only one code action available, just execute it, otherwise, show
+-- the menu
+local function code_action(context)
+	context = context or {}
+	local bufnr = vim.api.nvim_get_current_buf()
 	local params = vim.lsp.util.make_range_params()
-	params.context = { only = { "source.organizeImports" } }
+	params.context = {
+		diagnostics = vim.lsp.diagnostic.get_line_diagnostics(bufnr),
+	}
+
+	local method = "textDocument/codeAction"
+	local num = {}
+	vim.lsp.buf_request_all(bufnr, method, params, function(results)
+		for _, res in pairs(results or {}) do
+			for _, r in pairs(res.result or {}) do
+				table.insert(num, r)
+			end
+		end
+		if #num == 1 then
+			if num[1].edit then
+				vim.lsp.util.apply_workspace_edit(num[1].edit, "utf-8")
+			else
+				vim.lsp.buf.execute_command(num[1].command)
+			end
+		else
+			vim.lsp.buf.code_action()
+		end
+	end)
+end
+
+local function organize_imports(bufnr, wait_ms)
+	local params = vim.lsp.util.make_range_params()
+	params.context = {
+		only = { "source.organizeImports" },
+		diagnostics = vim.lsp.diagnostic.get_line_diagnostics(bufnr),
+	}
 	local result = vim.lsp.buf_request_sync(bufnr, "textDocument/codeAction", params, wait_ms)
 	for _, res in pairs(result or {}) do
 		for _, r in pairs(res.result or {}) do
-			if r.edit then
-				vim.lsp.util.apply_workspace_edit(r.edit, "utf-8")
-			else
-				vim.lsp.buf.execute_command(r.command)
+			if r.kind == "source.organizeImports" then
+				if r.edit then
+					vim.lsp.util.apply_workspace_edit(r.edit, "utf-8")
+				else
+					vim.lsp.buf.execute_command(r.command)
+				end
 			end
 		end
 	end
@@ -157,15 +209,12 @@ local function lsp_format(opts)
 		return
 	end
 
-	local filetype = vim.api.nvim_buf_get_option(opts.buf, "filetype")
-
-	if filetype == "go" or filetype == "gomod" then
-		go_organize_imports(opts.buf, 5000)
-	end
+	organize_imports(opts.buf, 5000)
 
 	vim.lsp.buf.formatting_sync(nil, 5000)
 end
 
+local lsp_formatting_group = vim.api.nvim_create_augroup("LspFormatting", {})
 local function on_attach(client, bufnr)
 	safe_require("aerial", function(aerial)
 		aerial.on_attach(client, bufnr)
@@ -180,7 +229,13 @@ local function on_attach(client, bufnr)
 	end
 
 	if client.supports_method("textDocument/formatting") then
+		vim.api.nvim_clear_autocmds({
+			group = lsp_formatting_group,
+			buffer = bufnr,
+		})
+
 		vim.api.nvim_create_autocmd("BufWritePre", {
+			group = lsp_formatting_group,
 			buffer = bufnr,
 			callback = lsp_format,
 		})
@@ -211,7 +266,7 @@ local function on_attach(client, bufnr)
 	vim.keymap.set("n", "gi", vim.lsp.buf.implementation, { buffer = bufnr })
 	vim.keymap.set("n", "gy", vim.lsp.buf.type_definition, { buffer = bufnr })
 	vim.keymap.set("n", "<leader>cr", vim.lsp.buf.rename, { buffer = bufnr })
-	vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { buffer = bufnr })
+	vim.keymap.set("n", "<leader>ca", code_action, { buffer = bufnr })
 	vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { buffer = bufnr })
 	vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { buffer = bufnr })
 	vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { buffer = bufnr })
@@ -220,6 +275,10 @@ local function on_attach(client, bufnr)
 	safe_require("telescope.builtin", function(telescope_builtin)
 		vim.keymap.set("n", "<leader>so", telescope_builtin.lsp_document_symbols, { buffer = bufnr })
 	end)
+
+	if client.supports_method("textDocument/switchSourceHeader") then
+		vim.keymap.set("n", "<leader>cs", switch_source_header, { buffer = bufnr })
+	end
 end
 
 local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -229,17 +288,23 @@ safe_require("cmp_nvim_lsp", function(cmp_nvim_lsp)
 end)
 
 safe_require("lspconfig", function(nvim_lsp)
-	local servers = { "bashls", "clangd", "cmake", "dockerls", "hls", "pyright", "vimls", "zls" }
+	local servers = { "bashls", "cmake", "dockerls", "hls", "pyright", "vimls", "zls" }
 	for _, lsp in ipairs(servers) do
-		if lsp == "clangd" then
-			-- required to get rid of a warning about multiple different offset encodings
-			capabilities.offsetEncoding = { "utf-16" }
-		end
 		nvim_lsp[lsp].setup({
 			on_attach = on_attach,
 			capabilities = capabilities,
 		})
 	end
+
+	local clangd_capabilities = vim.deepcopy(capabilities)
+	-- required to get rid of a warning about multiple different offset encodings
+	clangd_capabilities.offsetEncoding = { "utf-16" }
+	clangd_capabilities.textDocument.publishDiagnostics.categorySupport = true
+	clangd_capabilities.textDocument.publishDiagnostics.codeActionsInline = true
+	nvim_lsp.clangd.setup({
+		on_attach = on_attach,
+		capabilities = clangd_capabilities,
+	})
 
 	nvim_lsp.gopls.setup({
 		on_attach = on_attach,
@@ -334,27 +399,6 @@ safe_require("rust-tools", function(rust_tools)
 end)
 
 safe_require("null-ls", function(null_ls)
-	local helpers = require("null-ls.helpers")
-
-	local cpplint = {
-		name = "cpplint",
-		method = null_ls.methods.DIAGNOSTICS,
-		filetypes = { "cpp" },
-		generator = null_ls.generator({
-			command = "cpplint",
-			args = { "$FILENAME" },
-			to_temp_file = true,
-			from_stderr = true,
-			format = "line",
-			on_output = helpers.diagnostics.from_patterns({
-				{
-					pattern = [[:(%d+): (.*)]],
-					groups = { "row", "message" },
-				},
-			}),
-		}),
-	}
-
 	null_ls.setup({
 		on_attach = on_attach,
 		sources = {
@@ -368,7 +412,6 @@ safe_require("null-ls", function(null_ls)
 			null_ls.builtins.diagnostics.statix, -- nix
 			null_ls.builtins.diagnostics.teal, -- teal
 			null_ls.builtins.diagnostics.vale, -- markdown, tex, asciidoc
-			cpplint,
 			null_ls.builtins.formatting.alejandra, -- nix
 			null_ls.builtins.formatting.buf, -- proto
 			null_ls.builtins.formatting.prettier.with({ prefer_local = "node_modules/.bin" }), -- javascript, typescript, react, vue, css, scss, less, html, json, yaml, markdown, graphql, handlebars
