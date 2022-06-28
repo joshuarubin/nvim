@@ -152,6 +152,16 @@ local function switch_source_header(bufnr, wait_ms)
 	end
 end
 
+local function lsp_supports_method(method, bufnr)
+	bufnr = bufnr or 0
+	for _, client in pairs(vim.lsp.buf_get_clients(bufnr)) do
+		if client.supports_method(method) then
+			return true
+		end
+	end
+	return false
+end
+
 -- if there's only one code action available, just execute it, otherwise, show
 -- the menu
 local function code_action(context)
@@ -163,6 +173,11 @@ local function code_action(context)
 	}
 
 	local method = "textDocument/codeAction"
+
+	if not lsp_supports_method(method, bufnr) then
+		return
+	end
+
 	local num = {}
 	vim.lsp.buf_request_all(bufnr, method, params, function(results)
 		for _, res in pairs(results or {}) do
@@ -183,12 +198,18 @@ local function code_action(context)
 end
 
 local function organize_imports(bufnr, wait_ms)
+	local method = "textDocument/codeAction"
+
+	if not lsp_supports_method(method, bufnr) then
+		return
+	end
+
 	local params = vim.lsp.util.make_range_params()
 	params.context = {
 		only = { "source.organizeImports" },
 		diagnostics = vim.lsp.diagnostic.get_line_diagnostics(bufnr),
 	}
-	local result = vim.lsp.buf_request_sync(bufnr, "textDocument/codeAction", params, wait_ms)
+	local result = vim.lsp.buf_request_sync(bufnr, method, params, wait_ms)
 	for _, res in pairs(result or {}) do
 		for _, r in pairs(res.result or {}) do
 			if r.kind == "source.organizeImports" then
