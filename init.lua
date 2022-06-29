@@ -87,11 +87,11 @@ local function t(keys)
 	return vim.api.nvim_replace_termcodes(keys, true, true, true)
 end
 
-if vim.g.neovide then
-	vim.g.neovide_cursor_animation_length = 0
-	vim.g.neovide_scroll__animation_length = 0
-	vim.g.neovide_input_use_logo = 1
+vim.g.neovide_cursor_animation_length = 0
+vim.g.neovide_scroll__animation_length = 0
+vim.g.neovide_input_use_logo = 1
 
+if vim.g.neovide then
 	-- paste
 	vim.keymap.set({ "n", "x" }, "<d-v>", '"+p')
 	vim.keymap.set("c", "<d-v>", "<c-r>+")
