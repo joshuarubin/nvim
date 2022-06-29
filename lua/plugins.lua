@@ -438,6 +438,10 @@ return require("packer").startup(function(use)
 			vim.keymap.set({ "n", "x" }, "y", "<plug>(YankyYank)")
 			vim.keymap.set("n", "<leader>p", "<plug>(YankyCycleForward)")
 			vim.keymap.set("n", "<leader>o", "<plug>(YankyCycleBackward)")
+
+			if vim.g.neovide then
+				vim.keymap.set({ "n", "x" }, "<d-c>", "<plug>(YankyYank)")
+			end
 		end,
 	})
 

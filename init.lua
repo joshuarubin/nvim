@@ -75,9 +75,7 @@ vim.o.smartcase = true -- smart case matching
 vim.o.tags = "./tags;/,~/.vimtags"
 vim.o.mouse = "nv"
 vim.o.spell = true
-vim.o.guifont = "JetBrainsMono Nerd Font:h12.5"
-
-vim.g.neovide_cursor_animation_length = 0
+vim.o.guifont = "JetBrainsMono Nerd Font Rubix:h12"
 
 vim.opt.isfname:remove({ "=" })
 
@@ -87,6 +85,41 @@ vim.g.vim_json_conceal = 0
 
 local function t(keys)
 	return vim.api.nvim_replace_termcodes(keys, true, true, true)
+end
+
+if vim.g.neovide then
+	vim.g.neovide_cursor_animation_length = 0
+	vim.g.neovide_scroll__animation_length = 0
+	vim.g.neovide_input_use_logo = 1
+
+	-- paste
+	vim.keymap.set({ "n", "x" }, "<d-v>", '"+p')
+	vim.keymap.set("c", "<d-v>", "<c-r>+")
+	vim.keymap.set("t", "<d-v>", '<c-\\><c-n>"+pa')
+	vim.keymap.set("i", "<d-v>", "<c-r>+")
+
+	-- undo
+	vim.keymap.set("n", "<d-z>", "<undo>")
+	vim.keymap.set("i", "<d-z>", function()
+		vim.cmd(t("normal <undo>"))
+		vim.api.nvim_feedkeys(t("<right>"), "n", false)
+	end)
+
+	-- resize
+	vim.keymap.set({ "n", "v" }, "<d-h>", "<c-w><")
+	vim.keymap.set({ "n", "v" }, "<d-j>", "<c-w>+")
+	vim.keymap.set({ "n", "v" }, "<d-k>", "<c-w>-")
+	vim.keymap.set({ "n", "v" }, "<d-l>", "<c-w>>")
+
+	vim.keymap.set("i", "<d-h>", "<esc><c-w><a")
+	vim.keymap.set("i", "<d-j>", "<esc><c-w>+a")
+	vim.keymap.set("i", "<d-k>", "<esc><c-w>-a")
+	vim.keymap.set("i", "<d-l>", "<esc><c-w>>a")
+
+	vim.keymap.set("t", "<d-h>", "<c-\\><c-n><c-w><i")
+	vim.keymap.set("t", "<d-j>", "<c-\\><c-n><c-w>+i")
+	vim.keymap.set("t", "<d-k>", "<c-\\><c-n><c-w>-i")
+	vim.keymap.set("t", "<d-l>", "<c-\\><c-n><c-w>>i")
 end
 
 -- colorscheme
