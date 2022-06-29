@@ -795,6 +795,7 @@ return require("packer").startup(function(use)
 			end
 
 			nvim_tree.setup({
+				disable_netrw = true,
 				diagnostics = {
 					enable = true,
 					icons = {
@@ -1009,6 +1010,10 @@ return require("packer").startup(function(use)
 	use({
 		"petertriho/nvim-scrollbar",
 		config = function()
+			if vim.g.gonvim_running == 1 then
+				return
+			end
+
 			local ok, scrollbar = pcall(require, "scrollbar")
 			if not ok then
 				return

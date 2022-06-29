@@ -91,37 +91,6 @@ vim.g.neovide_cursor_animation_length = 0
 vim.g.neovide_scroll__animation_length = 0
 vim.g.neovide_input_use_logo = 1
 
-if vim.g.neovide then
-	-- paste
-	vim.keymap.set({ "n", "x" }, "<d-v>", '"+p')
-	vim.keymap.set("c", "<d-v>", "<c-r>+")
-	vim.keymap.set("t", "<d-v>", '<c-\\><c-n>"+pa')
-	vim.keymap.set("i", "<d-v>", "<c-r>+")
-
-	-- undo
-	vim.keymap.set("n", "<d-z>", "<undo>")
-	vim.keymap.set("i", "<d-z>", function()
-		vim.cmd(t("normal <undo>"))
-		vim.api.nvim_feedkeys(t("<right>"), "n", false)
-	end)
-
-	-- resize
-	vim.keymap.set({ "n", "v" }, "<d-h>", "<c-w><")
-	vim.keymap.set({ "n", "v" }, "<d-j>", "<c-w>+")
-	vim.keymap.set({ "n", "v" }, "<d-k>", "<c-w>-")
-	vim.keymap.set({ "n", "v" }, "<d-l>", "<c-w>>")
-
-	vim.keymap.set("i", "<d-h>", "<esc><c-w><a")
-	vim.keymap.set("i", "<d-j>", "<esc><c-w>+a")
-	vim.keymap.set("i", "<d-k>", "<esc><c-w>-a")
-	vim.keymap.set("i", "<d-l>", "<esc><c-w>>a")
-
-	vim.keymap.set("t", "<d-h>", "<c-\\><c-n><c-w><i")
-	vim.keymap.set("t", "<d-j>", "<c-\\><c-n><c-w>+i")
-	vim.keymap.set("t", "<d-k>", "<c-\\><c-n><c-w>-i")
-	vim.keymap.set("t", "<d-l>", "<c-\\><c-n><c-w>>i")
-end
-
 -- colorscheme
 vim.o.termguicolors = true
 vim.api.nvim_create_autocmd("ColorScheme", { pattern = "*", command = "highlight Comment gui=italic cterm=italic" })
@@ -613,8 +582,51 @@ safe_require({ "luasnip", "cmp" }, function(luasnip, cmp)
 	})
 end)
 
-vim.keymap.set("i", "<c-v>", "<c-\\><c-n>pa", { remap = true })
-vim.keymap.set("c", "<c-v>", "<c-r>+")
+-- paste
+for _, lhs in ipairs({ "<c-v>", "<d-v>" }) do
+	vim.keymap.set({ "n", "x" }, lhs, '"+p', { remap = true })
+	vim.keymap.set("i", lhs, "<c-r>+", { remap = true })
+	vim.keymap.set("t", lhs, '<c-\\><c-n>"+pa', { remap = true })
+	vim.keymap.set("c", lhs, "<c-r>+")
+end
+
+-- undo
+vim.keymap.set("n", "<d-z>", "<undo>")
+vim.keymap.set("i", "<d-z>", function()
+	vim.cmd(t("normal <undo>"))
+	vim.api.nvim_feedkeys(t("<right>"), "n", false)
+end)
+
+-- resize
+vim.keymap.set({ "n", "v" }, "<c-a>H", "<c-w><")
+vim.keymap.set({ "n", "v" }, "<c-a>J", "<c-w>+")
+vim.keymap.set({ "n", "v" }, "<c-a>K", "<c-w>-")
+vim.keymap.set({ "n", "v" }, "<c-a>L", "<c-w>>")
+
+vim.keymap.set({ "n", "v" }, "<d-h>", "<c-w><")
+vim.keymap.set({ "n", "v" }, "<d-j>", "<c-w>+")
+vim.keymap.set({ "n", "v" }, "<d-k>", "<c-w>-")
+vim.keymap.set({ "n", "v" }, "<d-l>", "<c-w>>")
+
+vim.keymap.set("i", "<c-a>H", '<c-r>=execute("normal! \\<lt>c-w><")<cr>', { silent = true })
+vim.keymap.set("i", "<c-a>J", '<c-r>=execute("normal! \\<lt>c-w>+")<cr>', { silent = true })
+vim.keymap.set("i", "<c-a>K", '<c-r>=execute("normal! \\<lt>c-w>-")<cr>', { silent = true })
+vim.keymap.set("i", "<c-a>L", '<c-r>=execute("normal! \\<lt>c-w>>")<cr>', { silent = true })
+
+vim.keymap.set("i", "<d-h>", '<c-r>=execute("normal! \\<lt>c-w><")<cr>', { silent = true })
+vim.keymap.set("i", "<d-j>", '<c-r>=execute("normal! \\<lt>c-w>+")<cr>', { silent = true })
+vim.keymap.set("i", "<d-k>", '<c-r>=execute("normal! \\<lt>c-w>-")<cr>', { silent = true })
+vim.keymap.set("i", "<d-l>", '<c-r>=execute("normal! \\<lt>c-w>>")<cr>', { silent = true })
+
+vim.keymap.set("t", "<c-a>H", "<c-\\><c-n><c-w><i")
+vim.keymap.set("t", "<c-a>J", "<c-\\><c-n><c-w>+i")
+vim.keymap.set("t", "<c-a>K", "<c-\\><c-n><c-w>-i")
+vim.keymap.set("t", "<c-a>L", "<c-\\><c-n><c-w>>i")
+
+vim.keymap.set("t", "<d-h>", "<c-\\><c-n><c-w><i")
+vim.keymap.set("t", "<d-j>", "<c-\\><c-n><c-w>+i")
+vim.keymap.set("t", "<d-k>", "<c-\\><c-n><c-w>-i")
+vim.keymap.set("t", "<d-l>", "<c-\\><c-n><c-w>>i")
 
 -- normal mode
 vim.keymap.set("n", "<leader>n", ":nohlsearch<cr>", { silent = true })
@@ -634,10 +646,6 @@ vim.keymap.set("n", "d", '"_d') -- d: Delete into the blackhole register to not 
 vim.keymap.set("n", "dd", "dd") -- dd: I use this often to yank a single line, retain its original behavior
 vim.keymap.set("n", "c", '"_c') -- c: Change into the blackhole register to not clobber the last yank
 vim.keymap.set("n", "<c-a>r", ":redraw!<cr>", { silent = true }) -- ctrl-a r to redraw the screen now
-vim.keymap.set("n", "<c-a>H", "<c-w><") -- resize window
-vim.keymap.set("n", "<c-a>L", "<c-w>>") -- resize window
-vim.keymap.set("n", "<c-a>J", "<c-w>+") -- resize window
-vim.keymap.set("n", "<c-a>K", "<c-w>-") -- resize window
 
 -- Remap for dealing with word wrap
 vim.keymap.set("n", "k", "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
@@ -662,10 +670,6 @@ vim.keymap.set("x", "<s-tab>", "<", { remap = true }) -- shift-tab: unindent (al
 
 -- visual and select mode
 vim.keymap.set("v", "<leader>s", ":sort<cr>")
-vim.keymap.set("v", "<c-a>H", "<c-w><") -- resize window
-vim.keymap.set("v", "<c-a>L", "<c-w>>") -- resize window
-vim.keymap.set("v", "<c-a>J", "<c-w>+") -- resize window
-vim.keymap.set("v", "<c-a>K", "<c-w>-") -- resize window
 
 -- command line mode
 vim.keymap.set("c", "<c-j>", "<down>")
@@ -684,16 +688,7 @@ end, { expr = true })
 -- insert mode
 vim.keymap.set("i", "<c-w>", "<c-g>u<c-w>") -- ctrl-w: Delete previous word, create undo point
 
-vim.keymap.set("i", "<c-a>H", "<esc><c-w><a") -- resize window
-vim.keymap.set("i", "<c-a>L", "<esc><c-w>>a") -- resize window
-vim.keymap.set("i", "<c-a>J", "<esc><c-w>+a") -- resize window
-vim.keymap.set("i", "<c-a>K", "<esc><c-w>-a") -- resize window
-
 -- terminal mode
-vim.keymap.set("t", "<c-a>H", "<c-\\><c-n><c-w><i") -- resize window
-vim.keymap.set("t", "<c-a>L", "<c-\\><c-n><c-w>>i") -- resize window
-vim.keymap.set("t", "<c-a>J", "<c-\\><c-n><c-w>+i") -- resize window
-vim.keymap.set("t", "<c-a>K", "<c-\\><c-n><c-w>-i") -- resize window
 vim.keymap.set("t", "<c-y>", "<c-\\><c-n><c-y>") -- scroll up one line
 vim.keymap.set("t", "<c-u>", "<c-\\><c-n><c-u>") -- scroll up half a screen
 
