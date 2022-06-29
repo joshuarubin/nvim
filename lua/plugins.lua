@@ -920,6 +920,7 @@ return require("packer").startup(function(use)
 				return
 			end
 
+			notify.setup({})
 			vim.notify = notify
 		end,
 	})
