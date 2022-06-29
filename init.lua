@@ -87,8 +87,6 @@ local function t(keys)
 	return vim.api.nvim_replace_termcodes(keys, true, true, true)
 end
 
-vim.g.neovide_cursor_animation_length = 0
-vim.g.neovide_scroll__animation_length = 0
 vim.g.neovide_input_use_logo = 1
 
 -- colorscheme
