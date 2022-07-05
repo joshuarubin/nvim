@@ -118,6 +118,7 @@ local function safe_require(modules, callback)
 	for _, module in ipairs(modules) do
 		local ok, mod = pcall(require, module)
 		if not ok then
+			vim.notify(module .. " not found", vim.log.levels.WARN)
 			return
 		end
 
