@@ -1247,8 +1247,5 @@ return require("packer").startup({
 	end,
 	config = {
 		max_jobs = 8,
-		git = {
-			clone_timeout = 10,
-		},
 	},
 })
