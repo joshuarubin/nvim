@@ -283,6 +283,59 @@ return require("packer").startup(function(use)
 		end,
 	})
 
+	use({
+		"rmagatti/auto-session",
+		requires = "nvim-lua/plenary.nvim",
+		config = function()
+			local ok, auto_session = pcall(require, "auto-session")
+			if not ok then
+				return
+			end
+
+			local function restore_nvim_tree()
+				local nvim_tree = require("nvim-tree")
+				nvim_tree.change_dir(vim.fn.getcwd())
+
+				local reloaders = require("nvim-tree.actions.reloaders")
+				reloaders.reload_explorer()
+			end
+
+			auto_session.setup({
+				auto_session_enable_last_session = false,
+				auto_save_enabled = true,
+				auto_restore_enabled = true,
+				auto_session_suppress_dirs = { "~/" },
+				pre_save_cmds = { "tabdo NvimTreeClose" },
+				post_save_cmds = { "tabdo NvimTreeOpen", "tabdo wincmd p" },
+				post_restore_cmds = { restore_nvim_tree, "tabdo NvimTreeOpen", "tabdo wincmd p" },
+			})
+
+			vim.keymap.set("n", "<leader>s", "<cmd>SearchSession<cr>")
+		end,
+	})
+
+	use({
+		"rmagatti/session-lens",
+		requires = { "rmagatti/auto-session", "nvim-telescope/telescope.nvim" },
+		after = { "telescope.nvim" },
+		config = function()
+			local ok, session_lens = pcall(require, "session-lens")
+			if not ok then
+				return
+			end
+
+			session_lens.setup({})
+
+			local telescope
+			ok, telescope = pcall(require, "telescope")
+			if not ok then
+				return
+			end
+
+			telescope.load_extension("session-lens")
+		end,
+	})
+
 	-- lsp
 	use({
 		"williamboman/nvim-lsp-installer",
@@ -309,35 +362,36 @@ return require("packer").startup(function(use)
 	use("hrsh7th/cmp-nvim-lua")
 	use("saadparwaiz1/cmp_luasnip")
 
-	if vim.env.COPILOT_DISABLED ~= "1" then
-		use({
-			"github/copilot.vim",
-			after = "nvim-cmp",
-			config = function()
-				vim.g.copilot_no_tab_map = 1
-				vim.g.copilot_assume_mapped = 1
+	use({
+		"github/copilot.vim",
+		after = "nvim-cmp",
+		cond = function()
+			return vim.env.COPILOT_DISABLED ~= "1"
+		end,
+		config = function()
+			vim.g.copilot_no_tab_map = 1
+			vim.g.copilot_assume_mapped = 1
 
-				local ok, cmp = pcall(require, "cmp")
-				if not ok then
-					return
+			local ok, cmp = pcall(require, "cmp")
+			if not ok then
+				return
+			end
+
+			-- not sure why, but this has func has to be available to vim
+			_G.copilot_accept = function()
+				if cmp.visible() then
+					cmp.abort()
+					return ""
 				end
 
-				-- not sure why, but this has func has to be available to vim
-				_G.copilot_accept = function()
-					if cmp.visible() then
-						cmp.abort()
-						return ""
-					end
+				-- do copilot completion if possible
+				return vim.fn["copilot#Accept"](vim.api.nvim_replace_termcodes("<c-e>", true, true, true))
+			end
 
-					-- do copilot completion if possible
-					return vim.fn["copilot#Accept"](vim.api.nvim_replace_termcodes("<c-e>", true, true, true))
-				end
-
-				-- not sure why, but the func here has to be called from vim and not lua to work properly
-				vim.keymap.set("i", "<c-e>", "v:lua.copilot_accept()", { silent = true, expr = true })
-			end,
-		})
-	end
+			-- not sure why, but the func here has to be called from vim and not lua to work properly
+			vim.keymap.set("i", "<c-e>", "v:lua.copilot_accept()", { silent = true, expr = true })
+		end,
+	})
 
 	-- snippets
 	use("L3MON4D3/LuaSnip")
@@ -347,12 +401,6 @@ return require("packer").startup(function(use)
 	use({
 		"nvim-telescope/telescope.nvim",
 		requires = { "nvim-lua/popup.nvim", "nvim-lua/plenary.nvim" },
-		after = {
-			"telescope-fzf-native.nvim",
-			"telescope-zoxide",
-			"rubix-telescope.nvim",
-			"yanky.nvim",
-		},
 		config = function()
 			local ok, telescope = pcall(require, "telescope")
 			if not ok then
@@ -402,26 +450,46 @@ return require("packer").startup(function(use)
 					},
 				},
 			})
-			telescope.load_extension("fzf")
-			telescope.load_extension("zoxide")
-			telescope.load_extension("rubix")
-			telescope.load_extension("yank_history")
 
-			vim.keymap.set("n", "<leader>z", telescope.extensions.zoxide.list)
-			vim.keymap.set({ "n", "t" }, "<c-p>", telescope.extensions.rubix.find_files)
-			vim.keymap.set("n", "<c-f>", telescope.extensions.rubix.history)
-			vim.keymap.set("n", "<c-s><c-s>", telescope.extensions.rubix.grep_string)
-			vim.keymap.set("n", "<c-s><c-d>", telescope.extensions.rubix.live_grep)
 			vim.keymap.set({ "n", "t" }, "<c-b>", require("telescope.builtin").buffers)
 		end,
 	})
 
-	use({ "nvim-telescope/telescope-fzf-native.nvim", run = "make" })
+	use({
+		"nvim-telescope/telescope-fzf-native.nvim",
+		requires = { "nvim-telescope/telescope.nvim" },
+		after = { "telescope.nvim" },
+		run = "make",
+		config = function()
+			local ok, telescope = pcall(require, "telescope")
+			if not ok then
+				return
+			end
 
-	use("jvgrootveld/telescope-zoxide")
+			telescope.load_extension("fzf")
+		end,
+	})
+
+	use({
+		"jvgrootveld/telescope-zoxide",
+		requires = { "nvim-telescope/telescope.nvim" },
+		after = { "telescope.nvim" },
+		config = function()
+			local ok, telescope = pcall(require, "telescope")
+			if not ok then
+				return
+			end
+
+			telescope.load_extension("zoxide")
+
+			vim.keymap.set("n", "<leader>z", telescope.extensions.zoxide.list)
+		end,
+	})
 
 	use({
 		"gbprod/yanky.nvim",
+		requires = { "nvim-telescope/telescope.nvim" },
+		after = { "telescope.nvim" },
 		config = function()
 			local ok, yanky = pcall(require, "yanky")
 			if not ok then
@@ -442,6 +510,14 @@ return require("packer").startup(function(use)
 			if vim.g.neovide then
 				vim.keymap.set({ "n", "x" }, "<d-c>", "<plug>(YankyYank)")
 			end
+
+			local telescope
+			ok, telescope = pcall(require, "telescope")
+			if not ok then
+				return
+			end
+
+			telescope.load_extension("yank_history")
 		end,
 	})
 
@@ -556,7 +632,24 @@ return require("packer").startup(function(use)
 		end,
 	})
 
-	use("joshuarubin/rubix-telescope.nvim")
+	use({
+		"joshuarubin/rubix-telescope.nvim",
+		requires = { "nvim-telescope/telescope.nvim" },
+		after = { "telescope.nvim" },
+		config = function()
+			local ok, telescope = pcall(require, "telescope")
+			if not ok then
+				return
+			end
+
+			telescope.load_extension("rubix")
+
+			vim.keymap.set({ "n", "t" }, "<c-p>", telescope.extensions.rubix.find_files)
+			vim.keymap.set("n", "<c-f>", telescope.extensions.rubix.history)
+			vim.keymap.set("n", "<c-s><c-s>", telescope.extensions.rubix.grep_string)
+			vim.keymap.set("n", "<c-s><c-d>", telescope.extensions.rubix.live_grep)
+		end,
+	})
 
 	use({
 		"lewis6991/gitsigns.nvim",
@@ -682,8 +775,15 @@ return require("packer").startup(function(use)
 	use({
 		"nvim-lualine/lualine.nvim",
 		requires = { "kyazdani42/nvim-web-devicons", opt = true },
+		after = { "auto-session" },
 		config = function()
 			local ok, lualine = pcall(require, "lualine")
+			if not ok then
+				return
+			end
+
+			local auto_session_lib
+			ok, auto_session_lib = pcall(require, "auto-session-library")
 			if not ok then
 				return
 			end
@@ -695,7 +795,10 @@ return require("packer").startup(function(use)
 					section_separators = { left = "", right = "" },
 				},
 				sections = {
-					lualine_a = { "mode" },
+					lualine_a = {
+						"mode",
+						auto_session_lib.current_session_name,
+					},
 					lualine_b = {
 						"branch",
 						"diff",
@@ -807,6 +910,9 @@ return require("packer").startup(function(use)
 				},
 				renderer = {
 					highlight_git = true,
+				},
+				filters = {
+					custom = { "^\\.git" },
 				},
 			})
 

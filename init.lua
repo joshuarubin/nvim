@@ -75,6 +75,7 @@ vim.o.smartcase = true -- smart case matching
 vim.o.tags = "./tags;/,~/.vimtags"
 vim.o.mouse = "nv"
 vim.o.spell = true
+vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal"
 vim.o.guifont = "JetBrainsMono Nerd Font Rubix:h12"
 
 vim.opt.isfname:remove({ "=" })
