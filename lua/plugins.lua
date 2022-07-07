@@ -1231,6 +1231,12 @@ return require("packer").startup({
 				end
 				cybu.setup({
 					display_time = 1500,
+					style = {
+						highlights = {
+							current_buffer = "Comment",
+							adjacent_buffers = "Visual",
+						},
+					},
 				})
 				vim.keymap.set("n", "Z", function()
 					cybu.cycle("prev")
