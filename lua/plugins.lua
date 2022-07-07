@@ -313,7 +313,13 @@ return require("packer").startup({
 					auto_session_suppress_dirs = { "~/" },
 					pre_save_cmds = { "tabdo NvimTreeClose" },
 					post_save_cmds = { "tabdo NvimTreeOpen", "tabdo wincmd p" },
-					post_restore_cmds = { restore_nvim_tree, "tabdo NvimTreeOpen", "tabdo wincmd p" },
+					pre_restore_cmds = { "let g:terminal_autoinsert = 0" },
+					post_restore_cmds = {
+						restore_nvim_tree,
+						"tabdo NvimTreeOpen",
+						"tabdo wincmd p",
+						"unlet g:terminal_autoinsert",
+					},
 				})
 
 				vim.keymap.set("n", "<leader>s", "<cmd>SearchSession<cr>")
@@ -1064,49 +1070,7 @@ return require("packer").startup({
 					vim.notify("terminal not found", vim.log.levels.WARN)
 					return
 				end
-
-				local cmp
-				ok, cmp = pcall(require, "cmp")
-				if not ok then
-					vim.notify("cmp not found", vim.log.levels.WARN)
-					return
-				end
-
 				term.setup()
-
-				-- tmux style navigation
-				term.save.wrap({ "n", "v" }, "<c-h>", "<c-w>h")
-				term.save.wrap({ "n", "v" }, "<c-j>", "<c-w>j")
-				term.save.wrap({ "n", "v" }, "<c-k>", "<c-w>k")
-				term.save.wrap({ "n", "v" }, "<c-l>", "<c-w>l")
-
-				term.save.wrap("t", "<c-h>", "<c-\\><c-n><c-w>h")
-				term.save.wrap("t", "<c-j>", "<c-\\><c-n><c-w>j")
-				term.save.wrap("t", "<c-k>", "<c-\\><c-n><c-w>k")
-				term.save.wrap("t", "<c-l>", "<c-\\><c-n><c-w>l")
-
-				vim.keymap.set("i", "<c-h>", "<esc><c-w>h")
-				vim.keymap.set("i", "<c-j>", function()
-					if vim.fn.pumvisible() == 1 then
-						return "<c-n>"
-					end
-					if cmp.visible() then
-						return cmp.select_next_item()
-					end
-					return "<esc><c-w>j"
-				end, { expr = true })
-
-				vim.keymap.set("i", "<c-k>", function()
-					if vim.fn.pumvisible() == 1 then
-						return "<c-p>"
-					end
-					if cmp.visible() then
-						return cmp.select_prev_item()
-					end
-					return "<esc><c-w>k"
-				end, { expr = true })
-
-				vim.keymap.set("i", "<c-l>", "<esc><c-w>l")
 			end,
 		})
 

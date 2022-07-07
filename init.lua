@@ -699,6 +699,42 @@ vim.keymap.set("i", "<c-w>", "<c-g>u<c-w>") -- ctrl-w: Delete previous word, cre
 vim.keymap.set("t", "<c-y>", "<c-\\><c-n><c-y>") -- scroll up one line
 vim.keymap.set("t", "<c-u>", "<c-\\><c-n><c-u>") -- scroll up half a screen
 
+-- tmux style navigation
+for _, dir in ipairs({ "h", "j", "k", "l" }) do
+	-- normal, visual, terminal modes
+	vim.keymap.set({ "n", "v", "t" }, "<c-" .. dir .. ">", function()
+		vim.cmd("wincmd " .. dir)
+	end)
+
+	-- insert mode
+	vim.keymap.set("i", "<c-" .. dir .. ">", function()
+		if vim.fn.pumvisible() == 1 then
+			if dir == "j" then
+				vim.fn.feedkeys(t("<c-n>" .. dir))
+				return
+			elseif dir == "k" then
+				vim.fn.feedkeys(t("<c-p>" .. dir))
+				return
+			end
+		end
+
+		local ok, cmp = pcall(require, "cmp")
+		if ok then
+			if cmp.visible() then
+				if dir == "j" then
+					cmp.select_next_item()
+					return
+				elseif dir == "k" then
+					cmp.select_prev_item()
+					return
+				end
+			end
+		end
+
+		vim.fn.feedkeys(t("<esc><c-w>" .. dir))
+	end)
+end
+
 -- abbreviations
 vim.cmd([[iabbrev TODO TODO(jawa)]])
 vim.cmd([[iabbrev meml me@jawa.dev]])
