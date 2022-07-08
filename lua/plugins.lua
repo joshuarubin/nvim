@@ -642,6 +642,14 @@ return require("packer").startup({
 		use({
 			"joshuarubin/rubix.vim",
 			config = function()
+				local ok, rubix = pcall(require, "rubix")
+				if not ok then
+					vim.notify("rubix not found", vim.log.levels.WARN)
+					return
+				end
+
+				rubix.setup()
+
 				vim.keymap.set("n", "<leader>m", ":call rubix#maximize_toggle()<cr>", { silent = true }) -- maximize current window
 				vim.keymap.set("n", "<leader>fa", ":call rubix#preserve('normal gg=G')<cr>", { silent = true })
 				vim.keymap.set("n", "<leader>f$", ":call rubix#trim()<cr>", { silent = true })
