@@ -1193,7 +1193,8 @@ return require("packer").startup({
 		use("junegunn/limelight.vim")
 
 		use({
-			"ghillb/cybu.nvim",
+			"joshuarubin/cybu.nvim",
+			branch = "buf-history-order",
 			requires = { "kyazdani42/nvim-web-devicons", opt = true },
 			config = function()
 				local ok, cybu = pcall(require, "cybu")
