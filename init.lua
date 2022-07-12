@@ -89,6 +89,9 @@ local function t(keys)
 end
 
 vim.g.neovide_input_use_logo = 1
+vim.g.neovide_scroll_animation_length = 0
+vim.g.neovide_cursor_animation_length = 0
+vim.g.neovide_cursor_trail_length = 0
 
 -- colorscheme
 vim.o.termguicolors = true
@@ -154,45 +157,96 @@ local function switch_source_header(bufnr, wait_ms)
 	end
 end
 
-local function lsp_supports_method(method, bufnr)
-	bufnr = bufnr or 0
-	for _, client in pairs(vim.lsp.buf_get_clients(bufnr)) do
-		if client.supports_method(method) then
+local function lsp_supports_method(ctx)
+	for _, client in pairs(vim.lsp.buf_get_clients(ctx.bufnr or 0)) do
+		if client.supports_method(ctx.method) then
 			return true
 		end
 	end
 	return false
 end
 
+local function apply_action(action, client, ctx)
+	if action.edit then
+		vim.lsp.util.apply_workspace_edit(action.edit, client.offset_encoding)
+	end
+	if action.command then
+		local command = type(action.command) == "table" and action.command or action
+		local fn = client.commands[command.command] or vim.lsp.commands[command.command]
+		if fn then
+			local enriched_ctx = vim.deepcopy(ctx)
+			enriched_ctx.client_id = client.id
+			fn(command, enriched_ctx)
+		else
+			-- Not using command directly to exclude extra properties,
+			-- see https://github.com/python-lsp/python-lsp-server/issues/146
+			local params = {
+				command = command.command,
+				arguments = command.arguments,
+				workDoneToken = command.workDoneToken,
+			}
+			if ctx.sync then
+				client.request_sync("workspace/executeCommand", params, nil, ctx.bufnr)
+			else
+				client.request("workspace/executeCommand", params, nil, ctx.bufnr)
+			end
+		end
+	end
+end
+
+local function resolve_and_apply_action(client_id, action, wait_ms, ctx)
+	local client = vim.lsp.get_client_by_id(client_id)
+	if
+		not action.edit
+		and client
+		and type(client.resolved_capabilities.code_action) == "table"
+		and client.resolved_capabilities.code_action.resolveProvider
+	then
+		local function handle_resolved_action(err, resolved_action)
+			if err then
+				vim.notify(err.code .. ": " .. err.message, vim.log.levels.ERROR)
+				return
+			end
+			apply_action(resolved_action, client, ctx)
+		end
+
+		if ctx.sync then
+			local resolved_action, err = client.request_sync("codeAction/resolve", action, wait_ms, ctx.bufnr)
+			handle_resolved_action(err, resolved_action)
+		else
+			client.request("codeAction/resolve", action, handle_resolved_action)
+		end
+	else
+		apply_action(action, client, ctx)
+	end
+end
+
 -- if there's only one code action available, just execute it, otherwise, show
 -- the menu
-local function code_action(context)
-	context = context or {}
-	local bufnr = vim.api.nvim_get_current_buf()
-	local params = vim.lsp.util.make_range_params()
-	params.context = {
-		diagnostics = vim.lsp.diagnostic.get_line_diagnostics(bufnr),
+local function code_action()
+	local ctx = {
+		method = "textDocument/codeAction",
+		bufnr = vim.api.nvim_get_current_buf(),
+		params = vim.lsp.util.make_range_params(),
 	}
 
-	local method = "textDocument/codeAction"
+	ctx.params.context = {
+		diagnostics = vim.lsp.diagnostic.get_line_diagnostics(ctx.bufnr),
+	}
 
-	if not lsp_supports_method(method, bufnr) then
+	if not lsp_supports_method(ctx) then
 		return
 	end
 
 	local num = {}
-	vim.lsp.buf_request_all(bufnr, method, params, function(results)
-		for _, res in pairs(results or {}) do
-			for _, r in pairs(res.result or {}) do
-				table.insert(num, r)
+	vim.lsp.buf_request_all(ctx.bufnr, ctx.method, ctx.params, function(results)
+		for client_id, result in pairs(results or {}) do
+			for _, action in pairs(result.result or {}) do
+				table.insert(num, { client_id = client_id, action = action })
 			end
 		end
 		if #num == 1 then
-			if num[1].edit then
-				vim.lsp.util.apply_workspace_edit(num[1].edit, "utf-8")
-			else
-				vim.lsp.buf.execute_command(num[1].command)
-			end
+			resolve_and_apply_action(num[1].client_id, num[1].action, 0, ctx)
 		else
 			vim.lsp.buf.code_action()
 		end
@@ -200,26 +254,28 @@ local function code_action(context)
 end
 
 local function organize_imports(bufnr, wait_ms)
-	local method = "textDocument/codeAction"
+	local ctx = {
+		method = "textDocument/codeAction",
+		bufnr = bufnr,
+		params = vim.lsp.util.make_range_params(),
+	}
 
-	if not lsp_supports_method(method, bufnr) then
+	ctx.params.context = {
+		only = { "source.organizeImports" },
+		diagnostics = vim.lsp.diagnostic.get_line_diagnostics(ctx.bufnr),
+	}
+
+	if not lsp_supports_method(ctx) then
 		return
 	end
 
-	local params = vim.lsp.util.make_range_params()
-	params.context = {
-		only = { "source.organizeImports" },
-		diagnostics = vim.lsp.diagnostic.get_line_diagnostics(bufnr),
-	}
-	local result = vim.lsp.buf_request_sync(bufnr, method, params, wait_ms)
-	for _, res in pairs(result or {}) do
-		for _, r in pairs(res.result or {}) do
-			if r.kind == "source.organizeImports" then
-				if r.edit then
-					vim.lsp.util.apply_workspace_edit(r.edit, "utf-8")
-				else
-					vim.lsp.buf.execute_command(r.command)
-				end
+	ctx.sync = true
+
+	local results = vim.lsp.buf_request_sync(ctx.bufnr, ctx.method, ctx.params, wait_ms)
+	for client_id, result in pairs(results or {}) do
+		for _, action in pairs(result.result or {}) do
+			if action.kind == "source.organizeImports" then
+				resolve_and_apply_action(client_id, action, wait_ms, ctx)
 			end
 		end
 	end
