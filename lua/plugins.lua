@@ -628,13 +628,11 @@ return require("packer").startup({
 
 				local Terminal = require("toggleterm.terminal").Terminal
 				vim.keymap.set("n", "<leader>gg", function()
-					Terminal
-						:new({
-							cmd = "lazygit",
-							dir = vim.fn.expand("%:p:h"),
-							direction = "float",
-						})
-						:toggle()
+					Terminal:new({
+						cmd = "lazygit",
+						dir = vim.fn.expand("%:p:h"),
+						direction = "float",
+					}):toggle()
 				end)
 			end,
 		})
@@ -1094,6 +1092,21 @@ return require("packer").startup({
 				end
 
 				go_return.setup()
+			end,
+		})
+
+		use({
+			"smjonas/inc-rename.nvim",
+			config = function()
+				local ok, inc_rename = pcall(require, "inc_rename")
+				if not ok then
+					vim.notify("inc_rename not found", vim.log.levels.WARN)
+					return
+				end
+
+				inc_rename.setup({
+					input_buffer_type = "dressing",
+				})
 			end,
 		})
 

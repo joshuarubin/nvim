@@ -50,7 +50,7 @@ vim.o.sidescrolloff = 15
 vim.o.scrolljump = 3
 vim.o.numberwidth = 1
 vim.o.cursorline = true
-vim.o.signcolumn = "number"
+vim.o.signcolumn = "yes"
 vim.o.expandtab = true
 vim.o.shiftround = true
 vim.o.clipboard = "unnamedplus,unnamed" -- use clipboard register
@@ -221,38 +221,6 @@ local function resolve_and_apply_action(client_id, action, wait_ms, ctx)
 	end
 end
 
--- if there's only one code action available, just execute it, otherwise, show
--- the menu
-local function code_action()
-	local ctx = {
-		method = "textDocument/codeAction",
-		bufnr = vim.api.nvim_get_current_buf(),
-		params = vim.lsp.util.make_range_params(),
-	}
-
-	ctx.params.context = {
-		diagnostics = vim.lsp.diagnostic.get_line_diagnostics(ctx.bufnr),
-	}
-
-	if not lsp_supports_method(ctx) then
-		return
-	end
-
-	local num = {}
-	vim.lsp.buf_request_all(ctx.bufnr, ctx.method, ctx.params, function(results)
-		for client_id, result in pairs(results or {}) do
-			for _, action in pairs(result.result or {}) do
-				table.insert(num, { client_id = client_id, action = action })
-			end
-		end
-		if #num == 1 then
-			resolve_and_apply_action(num[1].client_id, num[1].action, 0, ctx)
-		else
-			vim.lsp.buf.code_action()
-		end
-	end)
-end
-
 local function organize_imports(bufnr, wait_ms)
 	local ctx = {
 		method = "textDocument/codeAction",
@@ -290,7 +258,10 @@ local function lsp_format(opts)
 
 	organize_imports(opts.buf, 5000)
 
-	vim.lsp.buf.formatting_sync(nil, 5000)
+	vim.lsp.buf.format({
+		timeout = 5000,
+		bufnr = opts.buf,
+	})
 end
 
 local lsp_formatting_group = vim.api.nvim_create_augroup("LspFormatting", {})
@@ -347,8 +318,10 @@ local function on_attach(client, bufnr)
 	vim.keymap.set("n", "<leader>wl", function()
 		print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
 	end, { buffer = bufnr })
-	vim.keymap.set("n", "<leader>cr", vim.lsp.buf.rename, { buffer = bufnr })
-	vim.keymap.set("n", "<leader>ca", code_action, { buffer = bufnr })
+	vim.keymap.set("n", "<leader>cr", function()
+		return ":IncRename " .. vim.fn.expand("<cword>")
+	end, { expr = true, buffer = bufnr })
+	vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { buffer = bufnr })
 	vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { buffer = bufnr })
 	vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { buffer = bufnr })
 	vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { buffer = bufnr })
@@ -430,8 +403,8 @@ safe_require("lspconfig", function(nvim_lsp)
 			init_options = ts_utils.init_options,
 			on_attach = function(client, bufnr)
 				-- disable tsserver formatting (done by null-ls)
-				client.resolved_capabilities.document_formatting = false
-				client.resolved_capabilities.document_range_formatting = false
+				client.server_capabilities.documentFormattingProvider = false
+				client.server_capabilities.documentRangeFormattingProvider = false
 
 				ts_utils.setup({})
 				ts_utils.setup_client(client)
@@ -449,8 +422,8 @@ safe_require("lspconfig", function(nvim_lsp)
 	nvim_lsp.sumneko_lua.setup({
 		on_attach = function(client, bufnr)
 			-- disable sumneko formatting (done by null-ls.stylua)
-			client.resolved_capabilities.document_formatting = false
-			client.resolved_capabilities.document_range_formatting = false
+			client.server_capabilities.documentFormattingProvider = false
+			client.server_capabilities.documentRangeFormattingProvider = false
 
 			on_attach(client, bufnr)
 		end,
