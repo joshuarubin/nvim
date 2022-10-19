@@ -377,6 +377,8 @@ safe_require("lspconfig", function(nvim_lsp)
 					generate = true,
 					nilness = true,
 					regenerate_cgo = true,
+					run_vulncheck_exp = true,
+					test = true,
 					tidy = true,
 					upgrade_dependency = true,
 					vendor = true,
@@ -477,6 +479,7 @@ safe_require("null-ls", function(null_ls)
 			null_ls.builtins.formatting.shfmt.with({ args = {} }), -- sh
 			null_ls.builtins.formatting.sqlfluff.with({ extra_args = { "--dialect", "postgres" } }), -- javascript, typescript, react and tsx
 			null_ls.builtins.formatting.stylua, -- lua
+			null_ls.builtins.formatting.terraform_fmt,
 			null_ls.builtins.hover.dictionary, -- text, markdown
 		},
 	})
