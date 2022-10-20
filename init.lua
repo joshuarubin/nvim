@@ -91,7 +91,6 @@ end
 local paste, pastestar
 
 if vim.fn.has("mac") ~= 0 then
-	print("MAC")
 	paste = { "pbpaste" }
 	pastestar = paste
 elseif vim.env.WAYLAND_DISPLAY and vim.fn.executable("wl-copy") ~= 0 and vim.fn.executable("wl-paste") ~= 0 then
