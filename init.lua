@@ -84,6 +84,39 @@ vim.g.mapleader = ","
 vim.g.maplocalleader = ","
 vim.g.vim_json_conceal = 0
 
+local function copy(lines, _)
+	vim.fn.OSCYankString(table.concat(lines, "\n"))
+end
+
+local paste, pastestar
+
+if vim.fn.has("mac") then
+	paste = { "pbpaste" }
+	pastestar = paste
+elseif not vim.env.WAYLAND_DISPLAY and vim.fn.executable("wl-copy") and vim.fn.executable("wl-paste") then
+	paste = { "wl-paste", "--no-newline" }
+	pastestar = { "wl-paste", "--no-newline", "--primary" }
+elseif not vim.env.DISPLAY and vim.fn.executable("xclip") then
+	paste = { "xclip", "-o", "-selection", "clipboard" }
+	pastestar = { "xclip", "-o", "-selection", "primary" }
+elseif vim.env.SSH_CONNECTION and vim.fn.executable("lemonade") then
+	paste = { "lemonade", "paste" }
+	pastestar = paste
+end
+
+vim.g.clipboard = {
+	name = "osc52",
+	copy = {
+		["+"] = copy,
+		["*"] = copy,
+	},
+	paste = {
+		["+"] = paste,
+		["*"] = pastestar,
+	},
+	cache_enabled = 0,
+}
+
 local function t(keys)
 	return vim.api.nvim_replace_termcodes(keys, true, true, true)
 end
@@ -340,10 +373,10 @@ local function on_attach(client, bufnr)
 	end
 end
 
-local capabilities = vim.lsp.protocol.make_client_capabilities()
+local capabilities
 
 safe_require("cmp_nvim_lsp", function(cmp_nvim_lsp)
-	capabilities = cmp_nvim_lsp.update_capabilities(capabilities)
+	capabilities = cmp_nvim_lsp.default_capabilities()
 end)
 
 safe_require("lspconfig", function(nvim_lsp)
@@ -358,8 +391,10 @@ safe_require("lspconfig", function(nvim_lsp)
 	local clangd_capabilities = vim.deepcopy(capabilities)
 	-- required to get rid of a warning about multiple different offset encodings
 	clangd_capabilities.offsetEncoding = { "utf-16" }
-	clangd_capabilities.textDocument.publishDiagnostics.categorySupport = true
-	clangd_capabilities.textDocument.publishDiagnostics.codeActionsInline = true
+	if clangd_capabilities.textDocument.publishDiagnostics then
+		clangd_capabilities.textDocument.publishDiagnostics.categorySupport = true
+		clangd_capabilities.textDocument.publishDiagnostics.codeActionsInline = true
+	end
 	nvim_lsp.clangd.setup({
 		on_attach = on_attach,
 		capabilities = clangd_capabilities,

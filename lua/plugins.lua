@@ -628,11 +628,13 @@ return require("packer").startup({
 
 				local Terminal = require("toggleterm.terminal").Terminal
 				vim.keymap.set("n", "<leader>gg", function()
-					Terminal:new({
-						cmd = "lazygit",
-						dir = vim.fn.expand("%:p:h"),
-						direction = "float",
-					}):toggle()
+					Terminal
+						:new({
+							cmd = "lazygit",
+							dir = vim.fn.expand("%:p:h"),
+							direction = "float",
+						})
+						:toggle()
 				end)
 			end,
 		})
@@ -1232,6 +1234,8 @@ return require("packer").startup({
 				end)
 			end,
 		})
+
+		use("ojroques/vim-oscyank")
 
 		if packer_bootstrap then
 			require("packer").sync()
