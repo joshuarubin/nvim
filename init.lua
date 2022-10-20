@@ -90,17 +90,20 @@ end
 
 local paste, pastestar
 
-if vim.fn.has("mac") then
+if vim.fn.has("mac") ~= 0 then
+	print("MAC")
 	paste = { "pbpaste" }
 	pastestar = paste
-elseif not vim.env.WAYLAND_DISPLAY and vim.fn.executable("wl-copy") and vim.fn.executable("wl-paste") then
+elseif vim.env.WAYLAND_DISPLAY and vim.fn.executable("wl-copy") ~= 0 and vim.fn.executable("wl-paste") ~= 0 then
 	paste = { "wl-paste", "--no-newline" }
 	pastestar = { "wl-paste", "--no-newline", "--primary" }
-elseif not vim.env.DISPLAY and vim.fn.executable("xclip") then
+elseif vim.env.DISPLAY and vim.fn.executable("xclip") ~= 0 then
 	paste = { "xclip", "-o", "-selection", "clipboard" }
 	pastestar = { "xclip", "-o", "-selection", "primary" }
-elseif vim.env.SSH_CONNECTION and vim.fn.executable("lemonade") then
-	paste = { "lemonade", "paste" }
+else
+	paste = function()
+		return vim.split(vim.fn.getreg(""), "\n"), vim.fn.getregtype("")
+	end
 	pastestar = paste
 end
 
