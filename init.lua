@@ -723,10 +723,6 @@ vim.keymap.set("n", "dd", "dd") -- dd: I use this often to yank a single line, r
 vim.keymap.set("n", "c", '"_c') -- c: Change into the blackhole register to not clobber the last yank
 vim.keymap.set("n", "<c-a>r", ":redraw!<cr>", { silent = true }) -- ctrl-a r to redraw the screen now
 
--- Remap for dealing with word wrap
-vim.keymap.set("n", "k", "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
-vim.keymap.set("n", "j", "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
-
 for i = 1, 9 do
 	vim.keymap.set("n", "<leader>" .. i, ":" .. i .. "wincmd w<cr>", { silent = true }) -- <leader>[1-9]  move to window [1-9]
 	vim.keymap.set("n", "<leader>b" .. i, ":b" .. i .. "<cr>", { silent = true }) -- <leader>b[1-9] move to buffer [1-9]
