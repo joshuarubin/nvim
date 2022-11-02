@@ -301,10 +301,6 @@ end
 
 local lsp_formatting_group = vim.api.nvim_create_augroup("LspFormatting", {})
 local function on_attach(client, bufnr)
-	safe_require("aerial", function(aerial)
-		aerial.on_attach(client, bufnr)
-	end)
-
 	safe_require("lsp_signature", function(lsp_signature)
 		lsp_signature.on_attach(nil, bufnr)
 	end)
