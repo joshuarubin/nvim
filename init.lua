@@ -529,7 +529,14 @@ safe_require({ "luasnip", "cmp" }, function(luasnip, cmp)
 	cmp.setup({
 		preselect = require("cmp.types").cmp.PreselectMode.None,
 		sources = {
-			{ name = "buffer" },
+			{
+				name = "buffer",
+				option = {
+					get_bufnrs = function()
+						return vim.api.nvim_list_bufs()
+					end,
+				},
+			},
 			{ name = "calc" },
 			{ name = "emoji" },
 			{ name = "luasnip" },
