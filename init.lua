@@ -662,7 +662,8 @@ safe_require({ "luasnip", "cmp" }, function(luasnip, cmp)
 end)
 
 -- paste
-for _, lhs in ipairs({ "<c-v>", "<d-v>" }) do
+-- <d-v> is mapped to <c-a>v in the terminal
+for _, lhs in ipairs({ "<c-v>", "<d-v>", "<c-a>v" }) do
 	vim.keymap.set({ "n", "x" }, lhs, '"+p', { remap = true })
 	vim.keymap.set("i", lhs, "<c-r>+", { remap = true })
 	vim.keymap.set("t", lhs, '<c-\\><c-n>"+pa', { remap = true })
@@ -670,11 +671,13 @@ for _, lhs in ipairs({ "<c-v>", "<d-v>" }) do
 end
 
 -- undo
-vim.keymap.set("n", "<d-z>", "<undo>")
-vim.keymap.set("i", "<d-z>", function()
-	vim.cmd(t("normal <undo>"))
-	vim.api.nvim_feedkeys(t("<right>"), "n", false)
-end)
+for _, lhs in ipairs({ "<d-z>", "<c-z>" }) do
+	vim.keymap.set("n", lhs, "<undo>")
+	vim.keymap.set("i", lhs, function()
+		vim.cmd(t("normal <undo>"))
+		vim.api.nvim_feedkeys(t("<right>"), "n", false)
+	end)
+end
 
 -- resize
 vim.keymap.set({ "n", "v" }, "<c-a>H", "<c-w><")

@@ -512,12 +512,29 @@ return require("packer").startup({
 
 				yanky.setup()
 
-				vim.keymap.set({ "n", "x" }, "p", "<plug>(YankyPutAfter)")
-				vim.keymap.set({ "n", "x" }, "P", "<plug>(YankyPutBefore)")
-				vim.keymap.set({ "n", "x" }, "gp", "<plug>(YankyGPutAfter)")
-				vim.keymap.set({ "n", "x" }, "gP", "<plug>(YankyGPutBefore)")
-				vim.keymap.set({ "n", "x" }, "<c-v>", "<plug>(YankyGPutAfter)")
-				vim.keymap.set({ "n", "x" }, "y", "<plug>(YankyYank)")
+				local noOverwriteReg = function(yanky_action)
+					return function()
+						local select_last_visual = "gv"
+						local yank_to_last_reg = '"' .. vim.v.register .. "y"
+						local restore_cursor_pos = "'>"
+
+						return yanky_action .. select_last_visual .. yank_to_last_reg .. restore_cursor_pos
+					end
+				end
+
+				local mappings = {
+					p = "YankyPutAfter",
+					P = "YankyPutBefore",
+					gp = "YankyGPutAfter",
+					gP = "YankyGPutBefore",
+					y = "YankyYank",
+				}
+
+				for key, yanky_action in pairs(mappings) do
+					vim.keymap.set("x", key, noOverwriteReg("<plug>(" .. yanky_action .. ")"), { expr = true })
+					vim.keymap.set("n", key, "<plug>(" .. yanky_action .. ")")
+				end
+
 				vim.keymap.set("n", "<leader>p", "<plug>(YankyCycleForward)")
 				vim.keymap.set("n", "<leader>o", "<plug>(YankyCycleBackward)")
 
@@ -628,13 +645,11 @@ return require("packer").startup({
 
 				local Terminal = require("toggleterm.terminal").Terminal
 				vim.keymap.set("n", "<leader>gg", function()
-					Terminal
-						:new({
-							cmd = "lazygit",
-							dir = vim.fn.expand("%:p:h"),
-							direction = "float",
-						})
-						:toggle()
+					Terminal:new({
+						cmd = "lazygit",
+						dir = vim.fn.expand("%:p:h"),
+						direction = "float",
+					}):toggle()
 				end)
 			end,
 		})
