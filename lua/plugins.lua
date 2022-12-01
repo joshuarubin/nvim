@@ -390,19 +390,17 @@ return require("packer").startup({
 					return
 				end
 
-				-- not sure why, but this has func has to be available to vim
-				_G.copilot_accept = function()
+				vim.keymap.set("i", "<c-e>", function()
 					if cmp.visible() then
 						cmp.abort()
 						return ""
 					end
 
-					-- do copilot completion if possible
-					return vim.fn["copilot#Accept"](vim.api.nvim_replace_termcodes("<c-e>", true, true, true))
-				end
+					local fallback = vim.api.nvim_replace_termcodes("<c-e>", true, true, true)
 
-				-- not sure why, but the func here has to be called from vim and not lua to work properly
-				vim.keymap.set("i", "<c-e>", "v:lua.copilot_accept()", { silent = true, expr = true })
+					-- do copilot completion if possible
+					return vim.fn["copilot#Accept"](fallback)
+				end, { silent = true, expr = true, replace_keycodes = false })
 			end,
 		})
 
