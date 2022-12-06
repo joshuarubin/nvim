@@ -674,7 +674,7 @@ for _, lhs in ipairs({ "<c-v>", "<d-v>", "<c-a>v" }) do
 end
 
 -- undo
-for _, lhs in ipairs({ "<d-z>", "<c-z>" }) do
+for _, lhs in ipairs({ "<d-z>" }) do
 	vim.keymap.set("n", lhs, "<undo>")
 	vim.keymap.set("i", lhs, function()
 		vim.cmd(t("normal <undo>"))

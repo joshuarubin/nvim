@@ -786,10 +786,22 @@ return require("packer").startup({
 					},
 				})
 
-				local git_dir
+				local git_dir = function(file)
+					file = file or "%"
+					local file_dir = vim.fn.expand(file .. ":p:h")
+					local handle = io.popen("cd " .. file_dir .. " && git rev-parse --git-dir")
+					if handle == nil then
+						return ""
+					end
+					local result = vim.fn.fnamemodify(vim.trim(handle:read("*a")):gsub(".git", ""), ":p")
+					handle:close()
+					return result
+				end
+
+				local git_opts = {}
 				vim.keymap.set("n", "<leader>gs", function()
-					git_dir = vim.fn.expand("%:p:h")
-					neogit.open({ cwd = git_dir })
+					git_opts.dir = git_dir()
+					neogit.open({ cwd = git_opts.dir })
 				end)
 
 				local neogit_bindings = {
@@ -805,7 +817,7 @@ return require("packer").startup({
 
 				for k, v in pairs(neogit_bindings) do
 					vim.keymap.set("n", k, function()
-						git_dir = vim.fn.expand("%:p:h")
+						git_opts.dir = git_dir()
 						neogit.open({ v })
 					end)
 				end
@@ -813,7 +825,7 @@ return require("packer").startup({
 				vim.api.nvim_create_autocmd("FileType", {
 					pattern = "Neogit*",
 					callback = function()
-						vim.cmd("lcd " .. git_dir)
+						vim.cmd("lcd " .. git_opts.dir)
 					end,
 				})
 			end,
