@@ -72,6 +72,13 @@ return require("packer").startup({
 		use({
 			"kevinhwang91/nvim-hlslens",
 			config = function()
+				local ok, hlslens = pcall(require, "hlslens")
+				if not ok then
+					vim.notify("hlslens not found", vim.log.levels.WARN)
+					return
+				end
+				hlslens.setup()
+
 				vim.keymap.set(
 					"n",
 					"n",
@@ -510,28 +517,30 @@ return require("packer").startup({
 
 				yanky.setup()
 
-				local noOverwriteReg = function(yanky_action)
-					return function()
-						local select_last_visual = "gv"
-						local yank_to_last_reg = '"' .. vim.v.register .. "y"
-						local restore_cursor_pos = "'>"
-
-						return yanky_action .. select_last_visual .. yank_to_last_reg .. restore_cursor_pos
-					end
-				end
-
 				local mappings = {
 					p = "YankyPutAfter",
 					P = "YankyPutBefore",
 					gp = "YankyGPutAfter",
 					gP = "YankyGPutBefore",
-					y = "YankyYank",
 				}
 
 				for key, yanky_action in pairs(mappings) do
-					vim.keymap.set("x", key, noOverwriteReg("<plug>(" .. yanky_action .. ")"), { expr = true })
-					vim.keymap.set("n", key, "<plug>(" .. yanky_action .. ")")
+					local action = "<plug>(" .. yanky_action .. ")"
+
+					-- paste in visual mode should not replace the default register with the deleted text
+					if yanky_action == "YankyPutAfter" then
+						vim.keymap.set("x", key, '"_d<plug>(YankyPutBefore)')
+					elseif yanky_action == "YankyGPutBefore" then
+						vim.keymap.set("x", key, '"_d<plug>(YankyGPutAfter)')
+					else
+						vim.keymap.set("x", key, '"_d' .. action)
+					end
+
+					vim.keymap.set("n", key, action)
 				end
+
+				-- preserve cursor position on yank (in normal mode only)
+				vim.keymap.set("n", "y", "<plug>(YankyYank)")
 
 				vim.keymap.set("n", "<leader>p", "<plug>(YankyCycleForward)")
 				vim.keymap.set("n", "<leader>o", "<plug>(YankyCycleBackward)")
@@ -780,7 +789,7 @@ return require("packer").startup({
 				local git_dir
 				vim.keymap.set("n", "<leader>gs", function()
 					git_dir = vim.fn.expand("%:p:h")
-					neogit.open({ cwd = vim.fn.expand("%:p:h") })
+					neogit.open({ cwd = git_dir })
 				end)
 
 				local neogit_bindings = {
@@ -1248,7 +1257,12 @@ return require("packer").startup({
 			end,
 		})
 
-		use("ojroques/vim-oscyank")
+		use({
+			"ojroques/vim-oscyank",
+			config = function()
+				vim.g.oscyank_silent = 1
+			end,
+		})
 
 		if packer_bootstrap then
 			require("packer").sync()

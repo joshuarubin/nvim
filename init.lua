@@ -100,10 +100,13 @@ elseif vim.env.DISPLAY and vim.fn.executable("xclip") ~= 0 then
 	paste = { "xclip", "-o", "-selection", "clipboard" }
 	pastestar = { "xclip", "-o", "-selection", "primary" }
 else
-	paste = function()
-		return vim.split(vim.fn.getreg(""), "\n"), vim.fn.getregtype("")
+	local pastefn = function(reg)
+		return function()
+			return vim.split(vim.fn.getreg(reg), "\n"), vim.fn.getregtype(reg)
+		end
 	end
-	pastestar = paste
+	paste = pastefn("+")
+	pastestar = pastefn("*")
 end
 
 vim.g.clipboard = {
@@ -170,7 +173,7 @@ safe_require("nvim-lsp-installer", function(nvim_lsp_installer)
 	-- NOTE: must be called before any servers are set up
 	nvim_lsp_installer.setup({
 		automatic_installation = {
-			exclude = { "hls" },
+			exclude = { "hls", "zls" },
 		},
 	})
 end)
