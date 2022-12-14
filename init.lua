@@ -529,9 +529,26 @@ vim.cmd([[sign define DiagnosticSignHint  text= texthl=LspDiagnosticsSignHint
 safe_require({ "luasnip", "cmp" }, function(luasnip, cmp)
 	require("luasnip/loaders/from_vscode").lazy_load()
 
+	-- clear luasnip jump points when leaving insert mode
+	vim.api.nvim_create_autocmd("InsertLeave", {
+		-- buffer = bufnr,
+		callback = function()
+			while luasnip.jumpable() do
+				print("jumpable")
+				luasnip.unlink_current()
+			end
+		end,
+	})
+
 	cmp.setup({
 		preselect = require("cmp.types").cmp.PreselectMode.None,
 		sources = {
+			{ name = "luasnip" },
+			{ name = "nvim_lsp" },
+			{ name = "nvim_lua" },
+			{ name = "path" },
+			{ name = "emoji" },
+			{ name = "calc" },
 			{
 				name = "buffer",
 				option = {
@@ -540,12 +557,6 @@ safe_require({ "luasnip", "cmp" }, function(luasnip, cmp)
 					end,
 				},
 			},
-			{ name = "calc" },
-			{ name = "emoji" },
-			{ name = "luasnip" },
-			{ name = "nvim_lsp" },
-			{ name = "nvim_lua" },
-			{ name = "path" },
 		},
 		snippet = {
 			expand = function(args)
