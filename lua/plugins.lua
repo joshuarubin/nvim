@@ -305,28 +305,13 @@ return require("packer").startup({
 					return
 				end
 
-				local function restore_nvim_tree()
-					local nvim_tree = require("nvim-tree")
-					nvim_tree.change_dir(vim.fn.getcwd())
-
-					local reloaders = require("nvim-tree.actions.reloaders")
-					reloaders.reload_explorer()
-				end
-
 				auto_session.setup({
 					auto_session_enable_last_session = false,
 					auto_save_enabled = true,
 					auto_restore_enabled = true,
 					auto_session_suppress_dirs = { "~/" },
-					pre_save_cmds = { "tabdo NvimTreeClose" },
-					post_save_cmds = { "tabdo NvimTreeOpen", "tabdo wincmd p" },
 					pre_restore_cmds = { "let g:terminal_autoinsert = 0" },
-					post_restore_cmds = {
-						restore_nvim_tree,
-						"tabdo NvimTreeOpen",
-						"tabdo wincmd p",
-						"unlet g:terminal_autoinsert",
-					},
+					post_restore_cmds = { "unlet g:terminal_autoinsert" },
 				})
 
 				vim.keymap.set("n", "<leader>s", "<cmd>SearchSession<cr>")
@@ -358,11 +343,11 @@ return require("packer").startup({
 
 		-- lsp
 		use({
-			"williamboman/nvim-lsp-installer",
+			"williamboman/mason.nvim",
+			"williamboman/mason-lspconfig.nvim",
 			"neovim/nvim-lspconfig",
+			"simrat39/rust-tools.nvim",
 		})
-
-		use("simrat39/rust-tools.nvim")
 
 		use({
 			"jose-elias-alvarez/null-ls.nvim",

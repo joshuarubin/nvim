@@ -169,9 +169,10 @@ local function safe_require(modules, callback)
 	callback(unpack(mods))
 end
 
-safe_require("nvim-lsp-installer", function(nvim_lsp_installer)
+safe_require({ "mason", "mason-lspconfig" }, function(mason, mason_lspconfig)
 	-- NOTE: must be called before any servers are set up
-	nvim_lsp_installer.setup({
+	mason.setup({})
+	mason_lspconfig.setup({
 		automatic_installation = {
 			exclude = { "hls", "zls" },
 		},
@@ -399,6 +400,7 @@ safe_require("lspconfig", function(nvim_lsp)
 	nvim_lsp.clangd.setup({
 		on_attach = on_attach,
 		capabilities = clangd_capabilities,
+		filetypes = { "c", "cpp", "objc", "objcpp", "cuda" },
 	})
 
 	nvim_lsp.gopls.setup({
@@ -457,7 +459,7 @@ safe_require("lspconfig", function(nvim_lsp)
 	table.insert(lua_path, "lua/?.lua")
 	table.insert(lua_path, "lua/?/init.lua")
 
-	nvim_lsp.sumneko_lua.setup({
+	nvim_lsp.lua_ls.setup({
 		on_attach = function(client, bufnr)
 			-- disable sumneko formatting (done by null-ls.stylua)
 			client.server_capabilities.documentFormattingProvider = false
@@ -510,7 +512,7 @@ safe_require("null-ls", function(null_ls)
 			null_ls.builtins.diagnostics.teal, -- teal
 			null_ls.builtins.diagnostics.vale, -- markdown, tex, asciidoc
 			null_ls.builtins.formatting.alejandra, -- nix
-			null_ls.builtins.formatting.buf, -- proto
+			null_ls.builtins.formatting.buf.with({ args = { "format", "-w", "--path", "$FILENAME" } }), -- proto
 			null_ls.builtins.formatting.prettier.with({ prefer_local = "node_modules/.bin" }), -- javascript, typescript, react, vue, css, scss, less, html, json, yaml, markdown, graphql, handlebars
 			null_ls.builtins.formatting.shfmt.with({ args = {} }), -- sh
 			null_ls.builtins.formatting.sqlfluff.with({ extra_args = { "--dialect", "postgres" } }), -- javascript, typescript, react and tsx
@@ -534,7 +536,6 @@ safe_require({ "luasnip", "cmp" }, function(luasnip, cmp)
 		-- buffer = bufnr,
 		callback = function()
 			while luasnip.jumpable() do
-				print("jumpable")
 				luasnip.unlink_current()
 			end
 		end,
