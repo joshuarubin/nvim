@@ -533,7 +533,6 @@ safe_require({ "luasnip", "cmp" }, function(luasnip, cmp)
 
 	-- clear luasnip jump points when leaving insert mode
 	vim.api.nvim_create_autocmd("InsertLeave", {
-		-- buffer = bufnr,
 		callback = function()
 			while luasnip.jumpable() do
 				luasnip.unlink_current()
