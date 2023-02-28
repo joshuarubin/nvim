@@ -382,6 +382,9 @@ return require("packer").startup({
 					return
 				end
 
+				vim.keymap.set("i", "<m-]>", "<plug>(copilot-next)")
+				vim.keymap.set("i", "<m-[>", "<plug>(copilot-previous)")
+
 				vim.keymap.set("i", "<c-e>", function()
 					if cmp.visible() then
 						cmp.abort()
@@ -392,7 +395,7 @@ return require("packer").startup({
 
 					-- do copilot completion if possible
 					return vim.fn["copilot#Accept"](fallback)
-				end, { silent = true, expr = true, replace_keycodes = false })
+				end, { silent = true, expr = true, replace_keycodes = false, remap = true })
 			end,
 		})
 

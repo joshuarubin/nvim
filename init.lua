@@ -479,6 +479,7 @@ safe_require("lspconfig", function(nvim_lsp)
 				},
 				workspace = {
 					library = vim.api.nvim_get_runtime_file("", true),
+					checkThirdParty = false,
 				},
 				telemetry = {
 					enable = false,
