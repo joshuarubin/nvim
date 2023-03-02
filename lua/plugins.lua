@@ -347,6 +347,7 @@ return require("packer").startup({
 			"williamboman/mason-lspconfig.nvim",
 			"neovim/nvim-lspconfig",
 			"simrat39/rust-tools.nvim",
+			"onsails/lspkind.nvim",
 		})
 
 		use({
@@ -781,7 +782,14 @@ return require("packer").startup({
 					if handle == nil then
 						return ""
 					end
-					local result = vim.fn.fnamemodify(vim.trim(handle:read("*a")):gsub(".git", ""), ":p")
+
+					local dir = handle:read("*a")
+					if dir:find("/", 1, true) == nil then
+						dir = vim.fn.simplify(file_dir .. "/" .. dir)
+					end
+					dir = dir:gsub(".git", "")
+
+					local result = vim.fn.fnamemodify(dir, ":p")
 					handle:close()
 					return result
 				end
@@ -925,8 +933,6 @@ return require("packer").startup({
 				pcall(vim.cmd, [[colorscheme gruvbox-material]])
 			end,
 		})
-
-		use("folke/lsp-colors.nvim")
 
 		use({
 			"norcalli/nvim-colorizer.lua",
@@ -1262,6 +1268,11 @@ return require("packer").startup({
 			config = function()
 				vim.g.oscyank_silent = 1
 			end,
+		})
+
+		use({
+			"sitiom/nvim-numbertoggle",
+			"lukas-reineke/cmp-rg",
 		})
 
 		if packer_bootstrap then

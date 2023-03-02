@@ -133,9 +133,67 @@ vim.g.neovide_cursor_trail_length = 0
 
 -- colorscheme
 vim.o.termguicolors = true
-vim.api.nvim_create_autocmd("ColorScheme", { pattern = "*", command = "highlight Comment gui=italic cterm=italic" })
-vim.api.nvim_create_autocmd("ColorScheme", { pattern = "*", command = "highlight link HlSearchLens Comment" })
-vim.api.nvim_create_autocmd("ColorScheme", { pattern = "*", command = "highlight link HlSearchLensNear Comment" })
+
+local highlights = {
+	Comment = { gui = "italic", cterm = "italic" },
+	HlSearchLens = { link = true, group = "Comment" },
+	HlSearchLensNear = { link = true, group = "Comment" },
+
+	CmpItemAbbrDeprecated = { guifg = "#7E8294", guibg = "NONE", gui = "strikethrough" },
+	CmpItemAbbrMatch = { guifg = "#82AAFF", guibg = "NONE", gui = "bold" },
+	CmpItemAbbrMatchFuzzy = { guifg = "#82AAFF", guibg = "NONE", gui = "bold" },
+	CmpItemMenu = { guifg = "#C792EA", guibg = "NONE", gui = "italic" },
+
+	CmpItemKindField = { guifg = "#EED8DA", guibg = "#B5585F" },
+	CmpItemKindProperty = { guifg = "#EED8DA", guibg = "#B5585F" },
+	CmpItemKindEvent = { guifg = "#EED8DA", guibg = "#B5585F" },
+
+	CmpItemKindText = { guifg = "#C3E88D", guibg = "#9FBD73" },
+	CmpItemKindEnum = { guifg = "#C3E88D", guibg = "#9FBD73" },
+	CmpItemKindKeyword = { guifg = "#C3E88D", guibg = "#9FBD73" },
+
+	CmpItemKindConstant = { guifg = "#FFE082", guibg = "#D4BB6C" },
+	CmpItemKindConstructor = { guifg = "#FFE082", guibg = "#D4BB6C" },
+	CmpItemKindReference = { guifg = "#FFE082", guibg = "#D4BB6C" },
+
+	CmpItemKindFunction = { guifg = "#EADFF0", guibg = "#A377BF" },
+	CmpItemKindStruct = { guifg = "#EADFF0", guibg = "#A377BF" },
+	CmpItemKindClass = { guifg = "#EADFF0", guibg = "#A377BF" },
+	CmpItemKindModule = { guifg = "#EADFF0", guibg = "#A377BF" },
+	CmpItemKindOperator = { guifg = "#EADFF0", guibg = "#A377BF" },
+
+	CmpItemKindVariable = { guifg = "#C5CDD9", guibg = "#7E8294" },
+	CmpItemKindFile = { guifg = "#C5CDD9", guibg = "#7E8294" },
+
+	CmpItemKindUnit = { guifg = "#F5EBD9", guibg = "#D4A959" },
+	CmpItemKindSnippet = { guifg = "#F5EBD9", guibg = "#D4A959" },
+	CmpItemKindFolder = { guifg = "#F5EBD9", guibg = "#D4A959" },
+
+	CmpItemKindMethod = { guifg = "#DDE5F5", guibg = "#6C8ED4" },
+	CmpItemKindValue = { guifg = "#DDE5F5", guibg = "#6C8ED4" },
+	CmpItemKindEnumMember = { guifg = "#DDE5F5", guibg = "#6C8ED4" },
+
+	CmpItemKindInterface = { guifg = "#D8EEEB", guibg = "#58B5A8" },
+	CmpItemKindColor = { guifg = "#D8EEEB", guibg = "#58B5A8" },
+	CmpItemKindTypeParameter = { guifg = "#D8EEEB", guibg = "#58B5A8" },
+}
+
+vim.api.nvim_create_autocmd("ColorScheme", {
+	callback = function()
+		for group, args in pairs(highlights) do
+			local cmd = ""
+
+			if vim.tbl_get(args, "link") == true then
+				vim.cmd.highlight("link " .. group .. " " .. args.group)
+			else
+				for arg, val in pairs(args) do
+					cmd = cmd .. arg .. "=" .. val .. " "
+				end
+				vim.cmd.highlight(group .. " " .. cmd)
+			end
+		end
+	end,
+})
 
 vim.env.GIT_SSH_COMMAND = "ssh -o ControlPersist=no"
 
@@ -362,6 +420,15 @@ local function on_attach(client, bufnr)
 	vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { buffer = bufnr })
 	vim.keymap.set("n", "<leader>cl", vim.lsp.codelens.run, { buffer = bufnr })
 
+	vim.keymap.set("n", "<leader>d", function()
+		local cmd = "disable"
+		if vim.b.diagnostics_disabled == true then
+			cmd = "enable"
+		end
+		vim.b.diagnostics_disabled = not vim.b.diagnostics_disabled
+		vim.diagnostic[cmd](0)
+	end, { buffer = bufnr })
+
 	safe_require("telescope.builtin", function(telescope_builtin)
 		vim.keymap.set("n", "gd", telescope_builtin.lsp_definitions, { buffer = bufnr })
 		vim.keymap.set("n", "gi", telescope_builtin.lsp_implementations, { buffer = bufnr })
@@ -381,10 +448,10 @@ safe_require("cmp_nvim_lsp", function(cmp_nvim_lsp)
 	capabilities = cmp_nvim_lsp.default_capabilities()
 end)
 
-safe_require("lspconfig", function(nvim_lsp)
+safe_require("lspconfig", function(lspconfig)
 	local servers = { "bashls", "cmake", "dockerls", "hls", "pyright", "vimls", "zls" }
 	for _, lsp in ipairs(servers) do
-		nvim_lsp[lsp].setup({
+		lspconfig[lsp].setup({
 			on_attach = on_attach,
 			capabilities = capabilities,
 		})
@@ -397,13 +464,13 @@ safe_require("lspconfig", function(nvim_lsp)
 		clangd_capabilities.textDocument.publishDiagnostics.categorySupport = true
 		clangd_capabilities.textDocument.publishDiagnostics.codeActionsInline = true
 	end
-	nvim_lsp.clangd.setup({
+	lspconfig.clangd.setup({
 		on_attach = on_attach,
 		capabilities = clangd_capabilities,
 		filetypes = { "c", "cpp", "objc", "objcpp", "cuda" },
 	})
 
-	nvim_lsp.gopls.setup({
+	lspconfig.gopls.setup({
 		on_attach = on_attach,
 		capabilities = capabilities,
 		settings = {
@@ -428,6 +495,7 @@ safe_require("lspconfig", function(nvim_lsp)
 					unusedwrite = true,
 				},
 				gofumpt = true,
+				["local"] = "github.com/groq-psw,git.groq.io",
 				staticcheck = true,
 				expandWorkspaceToModule = true,
 			},
@@ -439,7 +507,7 @@ safe_require("lspconfig", function(nvim_lsp)
 
 	-- javascript, typescript, react and tsx
 	safe_require("nvim-lsp-ts-utils", function(ts_utils)
-		nvim_lsp.tsserver.setup({
+		lspconfig.tsserver.setup({
 			init_options = ts_utils.init_options,
 			on_attach = function(client, bufnr)
 				-- disable tsserver formatting (done by null-ls)
@@ -459,7 +527,7 @@ safe_require("lspconfig", function(nvim_lsp)
 	table.insert(lua_path, "lua/?.lua")
 	table.insert(lua_path, "lua/?/init.lua")
 
-	nvim_lsp.lua_ls.setup({
+	lspconfig.lua_ls.setup({
 		on_attach = function(client, bufnr)
 			-- disable sumneko formatting (done by null-ls.stylua)
 			client.server_capabilities.documentFormattingProvider = false
@@ -505,7 +573,7 @@ safe_require("null-ls", function(null_ls)
 			null_ls.builtins.code_actions.eslint.with({ prefer_local = "node_modules/.bin" }), -- javascript, typescript, react and tsx
 			null_ls.builtins.code_actions.shellcheck, -- sh
 			null_ls.builtins.code_actions.statix, -- nix
-			null_ls.builtins.diagnostics.buf.with({ args = { "lint", "--path", "$DIRNAME" } }), -- proto
+			null_ls.builtins.diagnostics.buf,
 			null_ls.builtins.diagnostics.deadnix, -- nix
 			null_ls.builtins.diagnostics.eslint.with({ prefer_local = "node_modules/.bin" }), -- javascript, typescript, react and tsx,
 			null_ls.builtins.diagnostics.sqlfluff.with({ extra_args = { "--dialect", "postgres" } }), -- sql
@@ -529,7 +597,7 @@ vim.cmd([[sign define DiagnosticSignWarn  text= texthl=LspDiagnosticsSignWarn
 vim.cmd([[sign define DiagnosticSignInfo  text= texthl=LspDiagnosticsSignInformation linehl= numhl=]])
 vim.cmd([[sign define DiagnosticSignHint  text= texthl=LspDiagnosticsSignHint        linehl= numhl=]])
 
-safe_require({ "luasnip", "cmp" }, function(luasnip, cmp)
+safe_require({ "luasnip", "cmp", "lspkind", "nvim-web-devicons" }, function(luasnip, cmp, lspkind, icons)
 	require("luasnip/loaders/from_vscode").lazy_load()
 
 	-- clear luasnip jump points when leaving insert mode
@@ -542,14 +610,26 @@ safe_require({ "luasnip", "cmp" }, function(luasnip, cmp)
 	})
 
 	cmp.setup({
+		enabled = function()
+			local disabled = false
+			disabled = disabled or (vim.api.nvim_buf_get_option(0, "buftype") == "prompt")
+			disabled = disabled or (vim.fn.reg_recording() ~= "")
+			disabled = disabled or (vim.fn.reg_executing() ~= "")
+			disabled = disabled or (require("cmp.config.context").in_treesitter_capture("comment"))
+			return not disabled
+		end,
+		window = {
+			completion = {
+				winhighlight = "Normal:Pmenu,FloatBorder:Pmenu,Search:None",
+				col_offset = -3,
+				side_padding = 0,
+			},
+		},
 		preselect = require("cmp.types").cmp.PreselectMode.None,
 		sources = {
 			{ name = "luasnip" },
 			{ name = "nvim_lsp" },
 			{ name = "nvim_lua" },
-			{ name = "path" },
-			{ name = "emoji" },
-			{ name = "calc" },
 			{
 				name = "buffer",
 				option = {
@@ -558,6 +638,43 @@ safe_require({ "luasnip", "cmp" }, function(luasnip, cmp)
 					end,
 				},
 			},
+			{ name = "rg" },
+			{ name = "path" },
+			{ name = "emoji" },
+			{ name = "calc" },
+		},
+		formatting = {
+			fields = { "kind", "abbr", "menu" },
+			format = function(entry, vim_item)
+				vim_item = lspkind.cmp_format({
+					mode = "symbol",
+					maxwidth = 50,
+					ellipsis_char = "…",
+				})(entry, vim_item)
+
+				vim_item.menu = ({
+					luasnip = "",
+					nvim_lsp = "",
+					nvim_lua = "",
+					buffer = "",
+					rg = "",
+					path = "",
+					emoji = "ﲃ",
+					calc = "",
+				})[entry.source.name]
+
+				if entry.source.name == "path" then
+					local icon = icons.get_icon(entry:get_completion_item().label)
+					if icon then
+						vim_item.kind = icon
+					end
+				else
+				end
+
+				vim_item.kind = " " .. (vim_item.kind or "") .. " "
+
+				return vim_item
+			end,
 		},
 		snippet = {
 			expand = function(args)
@@ -637,41 +754,6 @@ safe_require({ "luasnip", "cmp" }, function(luasnip, cmp)
 				"i",
 				"s",
 			}),
-		},
-		formatting = {
-			format = function(_, vim_item)
-				local icons = {
-					Class = "",
-					Color = "",
-					Constant = "",
-					Constructor = "",
-					Enum = "",
-					EnumMember = "",
-					Event = "",
-					Field = "ﰠ",
-					File = "",
-					Folder = "",
-					Function = "",
-					Interface = "ﰮ",
-					Keyword = "",
-					Method = "",
-					Module = "",
-					Operator = "",
-					Property = "ﰠ",
-					Reference = "",
-					Snippet = "﬌",
-					Struct = "",
-					Text = "",
-					TypeParameter = "",
-					Unit = "塞",
-					Value = "",
-					Variable = "",
-				}
-				if icons[vim_item.kind] ~= nil then
-					vim_item.kind = icons[vim_item.kind] .. " " .. vim_item.kind
-				end
-				return vim_item
-			end,
 		},
 	})
 end)
