@@ -1275,6 +1275,43 @@ return require("packer").startup({
 			"lukas-reineke/cmp-rg",
 		})
 
+		use({
+			"SmiteshP/nvim-navic",
+			requires = "neovim/nvim-lspconfig",
+		})
+
+		use({
+			"utilyre/barbecue.nvim",
+			branch = "fix/E36", -- TODO(jawa) remove
+			requires = {
+				"SmiteshP/nvim-navic",
+				"nvim-tree/nvim-web-devicons", -- optional dependency
+			},
+			config = function()
+				local ok, barbecue = pcall(require, "barbecue")
+				if not ok then
+					vim.notify("barbecue not found", vim.log.levels.WARN)
+					return
+				end
+				barbecue.setup()
+			end,
+		})
+
+		use({
+			"jinh0/eyeliner.nvim",
+			config = function()
+				local ok, eyeliner = pcall(require, "eyeliner")
+				if not ok then
+					vim.notify("eyeliner not found", vim.log.levels.WARN)
+					return
+				end
+				eyeliner.setup({
+					highlight_on_key = true,
+					dim = true,
+				})
+			end,
+		})
+
 		if packer_bootstrap then
 			require("packer").sync()
 		end
