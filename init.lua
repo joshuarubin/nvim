@@ -756,13 +756,6 @@ safe_require({ "luasnip", "cmp", "lspkind", "nvim-web-devicons" }, function(luas
 			}),
 		},
 	})
-
-	cmp.setup.cmdline({ "/", "?" }, {
-		mapping = cmp.mapping.preset.cmdline(),
-		sources = {
-			{ name = "buffer" },
-		},
-	})
 end)
 
 -- paste
