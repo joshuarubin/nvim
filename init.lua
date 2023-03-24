@@ -85,7 +85,7 @@ vim.g.maplocalleader = ","
 vim.g.vim_json_conceal = 0
 
 local function copy(lines, _)
-	vim.fn.OSCYankString(table.concat(lines, "\n"))
+	vim.fn.OSCYank(table.concat(lines, "\n"))
 end
 
 local paste, pastestar
