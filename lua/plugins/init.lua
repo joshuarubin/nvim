@@ -7,15 +7,14 @@ return {
 		"tpope/vim-endwise",
 		config = function()
 			vim.g.endwise_no_mappings = 1
-		end,
-		keys = {
-			{
+
+			vim.keymap.set(
+				"i",
 				"<plug>Endwise",
 				vim.api.nvim_replace_termcodes("<c-r>=EndwiseDiscretionary()<cr>", true, true, true),
-				"i",
-				{ silent = true },
-			},
-		},
+				{ silent = true }
+			)
+		end,
 	},
 
 	"tpope/vim-abolish", -- easily search for, substitute, and abbreviate multiple variants of a word
