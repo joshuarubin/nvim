@@ -16,7 +16,9 @@ end
 
 vim.opt.rtp:prepend(lazypath)
 
-require("lazy").setup("plugins")
+require("lazy").setup("plugins", {
+	concurrency = 8,
+})
 
 if vim.env.GROQ_CONFIG then
 	vim.cmd("source " .. vim.env.GROQ_CONFIG .. "/vim/groq.vim")
