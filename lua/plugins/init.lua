@@ -32,8 +32,6 @@ return {
 		end,
 	},
 
-	-- "JoosepAlviste/nvim-ts-context-commentstring",
-
 	{
 		"editorconfig/editorconfig-vim",
 		config = function()
@@ -699,6 +697,27 @@ return {
 			vim.keymap.set("n", "<leader>fa", ":call rubix#preserve('normal gg=G')<cr>", { silent = true })
 			vim.keymap.set("n", "<leader>f$", ":call rubix#trim()<cr>", { silent = true })
 			vim.keymap.set("n", "<c-w><c-w>", ":confirm :Kwbd<cr>", { silent = true }) -- ctrl-w, ctrl-w to delete the current buffer without closing the window
+		end,
+	},
+
+	{
+		"joshuarubin/rubix-telescope.nvim",
+		dependencies = {
+			"nvim-telescope/telescope.nvim",
+		},
+		config = function()
+			local ok, telescope = pcall(require, "telescope")
+			if not ok then
+				vim.notify("telescope not found", vim.log.levels.WARN)
+				return
+			end
+
+			telescope.load_extension("rubix")
+
+			vim.keymap.set({ "n", "t" }, "<c-p>", telescope.extensions.rubix.find_files)
+			vim.keymap.set("n", "<c-f>", telescope.extensions.rubix.history)
+			vim.keymap.set("n", "<c-s><c-s>", telescope.extensions.rubix.grep_string)
+			vim.keymap.set("n", "<c-s><c-d>", telescope.extensions.rubix.live_grep)
 		end,
 	},
 
