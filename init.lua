@@ -1,4 +1,22 @@
-require("plugins")
+vim.o.termguicolors = true
+vim.g.mapleader = ","
+vim.g.maplocalleader = ","
+
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+	vim.fn.system({
+		"git",
+		"clone",
+		"--filter=blob:none",
+		"https://github.com/folke/lazy.nvim.git",
+		"--branch=stable",
+		lazypath,
+	})
+end
+
+vim.opt.rtp:prepend(lazypath)
+
+require("lazy").setup("plugins")
 
 if vim.env.GROQ_CONFIG then
 	vim.cmd("source " .. vim.env.GROQ_CONFIG .. "/vim/groq.vim")
@@ -80,8 +98,6 @@ vim.o.guifont = "JetBrainsMono Nerd Font Rubix:h12"
 
 vim.opt.isfname:remove({ "=" })
 
-vim.g.mapleader = ","
-vim.g.maplocalleader = ","
 vim.g.vim_json_conceal = 0
 
 local function copy(lines, _)
@@ -91,8 +107,7 @@ end
 local paste, pastestar
 
 if vim.fn.has("mac") ~= 0 then
-	paste = { "pbpaste" }
-	pastestar = paste
+	-- noop
 elseif vim.env.WAYLAND_DISPLAY and vim.fn.executable("wl-copy") ~= 0 and vim.fn.executable("wl-paste") ~= 0 then
 	paste = { "wl-paste", "--no-newline" }
 	pastestar = { "wl-paste", "--no-newline", "--primary" }
@@ -109,18 +124,20 @@ else
 	pastestar = pastefn("*")
 end
 
-vim.g.clipboard = {
-	name = "osc52",
-	copy = {
-		["+"] = copy,
-		["*"] = copy,
-	},
-	paste = {
-		["+"] = paste,
-		["*"] = pastestar,
-	},
-	cache_enabled = 0,
-}
+if paste then
+	vim.g.clipboard = {
+		name = "osc52",
+		copy = {
+			["+"] = copy,
+			["*"] = copy,
+		},
+		paste = {
+			["+"] = paste,
+			["*"] = pastestar,
+		},
+		cache_enabled = 0,
+	}
+end
 
 local function t(keys)
 	return vim.api.nvim_replace_termcodes(keys, true, true, true)
@@ -130,9 +147,6 @@ vim.g.neovide_input_use_logo = 1
 vim.g.neovide_scroll_animation_length = 0
 vim.g.neovide_cursor_animation_length = 0
 vim.g.neovide_cursor_trail_length = 0
-
--- colorscheme
-vim.o.termguicolors = true
 
 local highlights = {
 	Comment = { gui = "italic", cterm = "italic" },
@@ -442,13 +456,9 @@ local function on_attach(client, bufnr)
 	end
 end
 
-local capabilities
+safe_require({ "lspconfig", "cmp_nvim_lsp" }, function(lspconfig, cmp_nvim_lsp)
+	local capabilities = cmp_nvim_lsp.default_capabilities()
 
-safe_require("cmp_nvim_lsp", function(cmp_nvim_lsp)
-	capabilities = cmp_nvim_lsp.default_capabilities()
-end)
-
-safe_require("lspconfig", function(lspconfig)
 	local servers = { "bashls", "cmake", "dockerls", "hls", "pyright", "vimls", "zls" }
 	for _, lsp in ipairs(servers) do
 		lspconfig[lsp].setup({
@@ -557,7 +567,8 @@ safe_require("lspconfig", function(lspconfig)
 	})
 end)
 
-safe_require("rust-tools", function(rust_tools)
+safe_require({ "rust-tools", "cmp_nvim_lsp" }, function(rust_tools, cmp_nvim_lsp)
+	local capabilities = cmp_nvim_lsp.default_capabilities()
 	rust_tools.setup({
 		server = {
 			on_attach = on_attach,
@@ -615,7 +626,14 @@ safe_require({ "luasnip", "cmp", "lspkind", "nvim-web-devicons" }, function(luas
 			disabled = disabled or (vim.api.nvim_buf_get_option(0, "buftype") == "prompt")
 			disabled = disabled or (vim.fn.reg_recording() ~= "")
 			disabled = disabled or (vim.fn.reg_executing() ~= "")
-			disabled = disabled or (require("cmp.config.context").in_treesitter_capture("comment"))
+
+			if not disabled then
+				local ok, d = pcall(require("cmp.config.context").in_treesitter_capture, "comment")
+				if ok then
+					disabled = d
+				end
+			end
+
 			return not disabled
 		end,
 		window = {
