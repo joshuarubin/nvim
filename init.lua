@@ -887,11 +887,22 @@ vim.keymap.set("i", "<c-w>", "<c-g>u<c-w>") -- ctrl-w: Delete previous word, cre
 vim.keymap.set("t", "<c-y>", "<c-\\><c-n><c-y>") -- scroll up one line
 vim.keymap.set("t", "<c-u>", "<c-\\><c-n><c-u>") -- scroll up half a screen
 
+local navigator_ok = pcall(require, "Navigator")
+
 -- tmux style navigation
-for _, dir in ipairs({ "h", "j", "k", "l" }) do
+for dir, cmd in pairs({
+	h = "NavigatorLeft",
+	j = "NavigatorDown",
+	k = "NavigatorUp",
+	l = "NavigatorRight",
+}) do
 	-- normal, visual, terminal modes
 	vim.keymap.set({ "n", "v", "t" }, "<c-" .. dir .. ">", function()
-		vim.cmd("wincmd " .. dir)
+		if navigator_ok then
+			vim.cmd(cmd)
+		else
+			vim.cmd("wincmd " .. dir)
+		end
 	end)
 
 	-- insert mode
@@ -919,7 +930,13 @@ for _, dir in ipairs({ "h", "j", "k", "l" }) do
 			end
 		end
 
-		vim.fn.feedkeys(t("<esc><c-w>" .. dir))
+		vim.fn.feedkeys(t("<c-\\><c-n>"))
+
+		if navigator_ok then
+			vim.cmd(cmd)
+		else
+			vim.fn.feedkeys(t("<c-w>" .. dir))
+		end
 	end)
 end
 

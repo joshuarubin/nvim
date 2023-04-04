@@ -1361,4 +1361,16 @@ return {
 			})
 		end,
 	},
+
+	{
+		"numToStr/Navigator.nvim",
+		config = function()
+			local ok, navigator = pcall(require, "Navigator")
+			if not ok then
+				vim.notify("Navigator not found", vim.log.levels.WARN)
+				return
+			end
+			navigator.setup()
+		end,
+	},
 }
