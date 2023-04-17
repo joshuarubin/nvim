@@ -94,7 +94,7 @@ vim.o.ignorecase = true -- case insensitive matching
 vim.o.smartcase = true -- smart case matching
 vim.o.tags = "./tags;/,~/.vimtags"
 vim.o.mouse = "nv"
-vim.o.spell = true
+vim.o.spell = false
 vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal"
 vim.o.guifont = "JetBrainsMono Nerd Font Rubix:h12"
 
@@ -248,7 +248,7 @@ safe_require({ "mason", "mason-lspconfig" }, function(mason, mason_lspconfig)
 	mason.setup({})
 	mason_lspconfig.setup({
 		automatic_installation = {
-			exclude = { "hls", "zls" },
+			exclude = { "hls", "zls", "clangd" },
 		},
 	})
 end)
@@ -1005,13 +1005,6 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 	callback = function()
 		vim.highlight.on_yank()
 	end,
-})
-
-vim.api.nvim_create_autocmd("FileType", {
-	desc = "set nospell for certain file types",
-	group = init_group,
-	pattern = { "aerial", "man" },
-	command = "set nospell",
 })
 
 -- terminal autocommands

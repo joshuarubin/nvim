@@ -703,6 +703,7 @@ return {
 	{
 		"joshuarubin/rubix-telescope.nvim",
 		dependencies = {
+			"joshuarubin/rubix.vim",
 			"nvim-telescope/telescope.nvim",
 		},
 		config = function()
@@ -1205,38 +1206,6 @@ return {
 		end,
 	},
 
-	{
-		"petertriho/nvim-scrollbar",
-		config = function()
-			if vim.g.gonvim_running == 1 then
-				return
-			end
-
-			local ok, scrollbar = pcall(require, "scrollbar")
-			if not ok then
-				vim.notify("scrollbar not found", vim.log.levels.WARN)
-				return
-			end
-
-			scrollbar.setup({
-				handle = {
-					highlight = "Pmenu",
-				},
-				marks = {
-					Search = {
-						highlight = "Green",
-					},
-				},
-				handlers = {
-					diagnostic = true,
-					search = true,
-				},
-			})
-
-			require("scrollbar.handlers.search").setup()
-		end,
-	},
-
 	"axieax/urlview.nvim",
 
 	{
@@ -1321,7 +1290,6 @@ return {
 		end,
 	},
 
-	"sitiom/nvim-numbertoggle",
 	"lukas-reineke/cmp-rg",
 
 	{
