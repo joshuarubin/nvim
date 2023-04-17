@@ -673,6 +673,10 @@ return {
 
 			local Terminal = require("toggleterm.terminal").Terminal
 			vim.keymap.set("n", "<leader>gg", function()
+				if vim.fn.executable("lazygit") == 0 then
+					vim.notify("lazygit not found", vim.log.levels.WARN)
+					return
+				end
 				Terminal:new({
 					cmd = "lazygit",
 					dir = vim.fn.expand("%:p:h"),
@@ -743,6 +747,10 @@ return {
 					changedelete = { hl = "GitGutterChange", text = "█▟" },
 				},
 				trouble = true,
+				current_line_blame = true,
+				current_line_blame_opts = {
+					delay = 0,
+				},
 				on_attach = function(bufnr)
 					local gs = package.loaded.gitsigns
 
