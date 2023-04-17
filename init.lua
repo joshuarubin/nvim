@@ -476,6 +476,7 @@ safe_require({ "lspconfig", "cmp_nvim_lsp" }, function(lspconfig, cmp_nvim_lsp)
 		clangd_capabilities.textDocument.publishDiagnostics.categorySupport = true
 		clangd_capabilities.textDocument.publishDiagnostics.codeActionsInline = true
 	end
+
 	lspconfig.clangd.setup({
 		on_attach = on_attach,
 		capabilities = clangd_capabilities,

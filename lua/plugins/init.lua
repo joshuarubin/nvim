@@ -1149,9 +1149,9 @@ return {
 	{
 		"joshuarubin/terminal.nvim",
 		config = function()
-			local ok, term = pcall(require, "terminal")
+			local ok, term = pcall(require, "rubix-terminal")
 			if not ok then
-				vim.notify("terminal not found", vim.log.levels.WARN)
+				vim.notify("rubix-terminal not found", vim.log.levels.WARN)
 				return
 			end
 			term.setup()
@@ -1338,7 +1338,7 @@ return {
 				vim.notify("Navigator not found", vim.log.levels.WARN)
 				return
 			end
-			navigator.setup()
+			navigator.setup({})
 		end,
 	},
 }
