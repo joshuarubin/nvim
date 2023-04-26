@@ -270,154 +270,27 @@ local function switch_source_header(bufnr, wait_ms)
 	end
 end
 
-local function lsp_supports_method(ctx)
-	for _, client in pairs(vim.lsp.buf_get_clients(ctx.bufnr or 0)) do
-		if client.supports_method(ctx.method) then
-			return true
-		end
-	end
-	return false
-end
-
-local function apply_action(action, client, ctx)
-	if action.edit then
-		vim.lsp.util.apply_workspace_edit(action.edit, client.offset_encoding)
-	end
-	if action.command then
-		local command = type(action.command) == "table" and action.command or action
-		local fn = client.commands[command.command] or vim.lsp.commands[command.command]
-		if fn then
-			local enriched_ctx = vim.deepcopy(ctx)
-			enriched_ctx.client_id = client.id
-			fn(command, enriched_ctx)
-		else
-			-- Not using command directly to exclude extra properties,
-			-- see https://github.com/python-lsp/python-lsp-server/issues/146
-			local params = {
-				command = command.command,
-				arguments = command.arguments,
-				workDoneToken = command.workDoneToken,
-			}
-			if ctx.sync then
-				client.request_sync("workspace/executeCommand", params, nil, ctx.bufnr)
-			else
-				client.request("workspace/executeCommand", params, nil, ctx.bufnr)
-			end
-		end
-	end
-end
-
-local function resolve_and_apply_action(client_id, action, wait_ms, ctx)
-	local client = vim.lsp.get_client_by_id(client_id)
-	if
-		not action.edit
-		and client
-		and type(client.resolved_capabilities.code_action) == "table"
-		and client.resolved_capabilities.code_action.resolveProvider
-	then
-		local function handle_resolved_action(err, resolved_action)
-			if err then
-				vim.notify(err.code .. ": " .. err.message, vim.log.levels.ERROR)
-				return
-			end
-			apply_action(resolved_action, client, ctx)
-		end
-
-		if ctx.sync then
-			local resolved_action, err = client.request_sync("codeAction/resolve", action, wait_ms, ctx.bufnr)
-			handle_resolved_action(err, resolved_action)
-		else
-			client.request("codeAction/resolve", action, handle_resolved_action)
-		end
-	else
-		apply_action(action, client, ctx)
-	end
-end
-
-local function organize_imports(bufnr, wait_ms)
-	local ctx = {
-		method = "textDocument/codeAction",
-		bufnr = bufnr,
-		params = vim.lsp.util.make_range_params(),
-	}
-
-	ctx.params.context = {
-		only = { "source.organizeImports" },
-		diagnostics = vim.lsp.diagnostic.get_line_diagnostics(ctx.bufnr),
-	}
-
-	if not lsp_supports_method(ctx) then
-		return
-	end
-
-	ctx.sync = true
-
-	local results = vim.lsp.buf_request_sync(ctx.bufnr, ctx.method, ctx.params, wait_ms)
-	for client_id, result in pairs(results or {}) do
-		for _, action in pairs(result.result or {}) do
-			if action.kind == "source.organizeImports" then
-				resolve_and_apply_action(client_id, action, wait_ms, ctx)
-			end
-		end
-	end
-end
-
-local function lsp_format(opts)
-	opts = opts or { buf = 0 }
-
-	if vim.b.autoformat ~= 1 then
-		return
-	end
-
-	organize_imports(opts.buf, 5000)
-
-	vim.lsp.buf.format({
-		timeout = 5000,
-		bufnr = opts.buf,
-	})
-end
-
-local lsp_formatting_group = vim.api.nvim_create_augroup("LspFormatting", {})
 local function on_attach(client, bufnr)
 	safe_require("lsp_signature", function(lsp_signature)
 		lsp_signature.on_attach(nil, bufnr)
 	end)
 
-	if vim.b.autoformat == nil then
-		vim.b.autoformat = 1
-	end
+	safe_require("rubix/format", function(format)
+		format.on_attach(client, bufnr)
+	end)
 
-	if client.supports_method("textDocument/formatting") then
-		vim.api.nvim_clear_autocmds({
-			group = lsp_formatting_group,
+	if client.server_capabilities.codeLensProvider ~= nil then
+		vim.api.nvim_create_autocmd({
+			"CursorHold",
+			"CursorHoldI",
+			"InsertLeave",
+		}, {
 			buffer = bufnr,
-		})
-
-		vim.api.nvim_create_autocmd("BufWritePre", {
-			group = lsp_formatting_group,
-			buffer = bufnr,
-			callback = lsp_format,
-		})
-	end
-
-	vim.api.nvim_create_autocmd({
-		"CursorHold",
-		"CursorHoldI",
-		"InsertLeave",
-	}, {
-		buffer = bufnr,
-		callback = function()
-			if client.server_capabilities.codeLensProvider ~= nil then
+			callback = function()
 				vim.lsp.codelens.refresh()
-			end
-		end,
-	})
-
-	vim.keymap.set("n", "<leader>a", "<cmd>AerialToggle!<cr>", { buffer = bufnr, silent = true })
-	vim.keymap.set("n", "[[", "<cmd>AerialPrev<CR>", { buffer = bufnr, silent = true })
-	vim.keymap.set("n", "]]", "<cmd>AerialNext<CR>", { buffer = bufnr, silent = true })
-	vim.keymap.set("n", "{", "<cmd>AerialPrevUp<CR>", { buffer = bufnr, silent = true })
-	vim.keymap.set("n", "}", "<cmd>AerialNextUp<CR>", { buffer = bufnr, silent = true })
+			end,
+		})
+	end
 
 	vim.keymap.set("n", "gD", vim.lsp.buf.declaration, { buffer = bufnr })
 	vim.keymap.set("n", "K", vim.lsp.buf.hover, { buffer = bufnr })
@@ -461,7 +334,17 @@ end
 safe_require({ "lspconfig", "cmp_nvim_lsp" }, function(lspconfig, cmp_nvim_lsp)
 	local capabilities = cmp_nvim_lsp.default_capabilities()
 
-	local servers = { "bashls", "cmake", "dockerls", "hls", "pyright", "vimls", "zls" }
+	local servers = {
+		"bashls",
+		"cmake",
+		"dockerls",
+		"hls",
+		"pyright",
+		"terraformls",
+		"tflint",
+		"vimls",
+		"zls",
+	}
 	for _, lsp in ipairs(servers) do
 		lspconfig[lsp].setup({
 			on_attach = on_attach,
@@ -1026,14 +909,6 @@ vim.api.nvim_create_autocmd("TermOpen", {
 	pattern = "*",
 	command = "nnoremap <buffer> q <nop>",
 })
-
-vim.api.nvim_create_user_command("ToggleAutoFormat", function()
-	if vim.b.autoformat ~= 1 then
-		vim.b.autoformat = 1
-	else
-		vim.b.autoformat = 0
-	end
-end, {})
 
 -- these two lines must be last
 vim.o.exrc = true -- enable per-directory .vimrc files

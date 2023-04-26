@@ -269,6 +269,7 @@ return {
 		dependencies = {
 			"nvim-tree/nvim-web-devicons",
 		},
+		priority = 100,
 		config = function()
 			local ok, alpha = pcall(require, "alpha")
 			if not ok then
@@ -277,29 +278,6 @@ return {
 			end
 
 			alpha.setup(require("alpha.themes.startify").opts)
-		end,
-	},
-
-	{
-		"rmagatti/auto-session",
-		dependencies = {
-			"nvim-lua/plenary.nvim",
-		},
-		config = function()
-			local ok, auto_session = pcall(require, "auto-session")
-			if not ok then
-				vim.notify("auto-session not found", vim.log.levels.WARN)
-				return
-			end
-
-			auto_session.setup({
-				auto_session_enable_last_session = false,
-				auto_save_enabled = true,
-				auto_restore_enabled = true,
-				auto_session_suppress_dirs = { "~/" },
-				pre_restore_cmds = { "let g:terminal_autoinsert = 0" },
-				post_restore_cmds = { "unlet g:terminal_autoinsert" },
-			})
 		end,
 	},
 
@@ -364,33 +342,6 @@ return {
 		end,
 	},
 
-	{
-		"rmagatti/session-lens",
-		dependencies = {
-			"nvim-lua/plenary.nvim",
-			"rmagatti/auto-session",
-			"nvim-telescope/telescope.nvim",
-		},
-		config = function()
-			local ok, session_lens = pcall(require, "session-lens")
-			if not ok then
-				vim.notify("session-lens not found", vim.log.levels.WARN)
-				return
-			end
-
-			session_lens.setup({})
-
-			local telescope
-			ok, telescope = pcall(require, "telescope")
-			if not ok then
-				vim.notify("telescope not found", vim.log.levels.WARN)
-				return
-			end
-
-			telescope.load_extension("session-lens")
-		end,
-	},
-
 	-- lsp
 	"williamboman/mason.nvim",
 	"williamboman/mason-lspconfig.nvim",
@@ -406,7 +357,6 @@ return {
 	},
 
 	"jose-elias-alvarez/nvim-lsp-ts-utils",
-	"mfussenegger/nvim-dap",
 
 	-- completion
 	"hrsh7th/nvim-cmp",
@@ -455,9 +405,7 @@ return {
 
 	{
 		"github/copilot.vim",
-		cond = function()
-			return vim.env.COPILOT_DISABLED ~= "1"
-		end,
+		cond = vim.env.COPILOT_DISABLED ~= "1",
 		config = function()
 			vim.g.copilot_no_tab_map = 1
 			vim.g.copilot_assume_mapped = 1
@@ -697,7 +645,6 @@ return {
 
 			rubix.setup()
 
-			vim.keymap.set("n", "<leader>m", ":call rubix#maximize_toggle()<cr>", { silent = true }) -- maximize current window
 			vim.keymap.set("n", "<leader>fa", ":call rubix#preserve('normal gg=G')<cr>", { silent = true })
 			vim.keymap.set("n", "<leader>f$", ":call rubix#trim()<cr>", { silent = true })
 			vim.keymap.set("n", "<c-w><c-w>", ":confirm :Kwbd<cr>", { silent = true }) -- ctrl-w, ctrl-w to delete the current buffer without closing the window
@@ -893,12 +840,7 @@ return {
 				return
 			end
 
-			local auto_session_lib
-			ok, auto_session_lib = pcall(require, "auto-session-library")
-			if not ok then
-				vim.notify("auto-session-library not found", vim.log.levels.WARN)
-				return
-			end
+			vim.o.ruler = false
 
 			lualine.setup({
 				options = {
@@ -909,7 +851,6 @@ return {
 				sections = {
 					lualine_a = {
 						"mode",
-						auto_session_lib.current_session_name,
 					},
 					lualine_b = {
 						"branch",
@@ -1047,6 +988,12 @@ return {
 			end
 
 			aerial.setup({})
+
+			vim.keymap.set("n", "<leader>a", "<cmd>AerialToggle!<cr>", { buffer = bufnr, silent = true })
+			vim.keymap.set("n", "[[", "<cmd>AerialPrev<CR>", { buffer = bufnr, silent = true })
+			vim.keymap.set("n", "]]", "<cmd>AerialNext<CR>", { buffer = bufnr, silent = true })
+			vim.keymap.set("n", "{", "<cmd>AerialPrevUp<CR>", { buffer = bufnr, silent = true })
+			vim.keymap.set("n", "}", "<cmd>AerialNextUp<CR>", { buffer = bufnr, silent = true })
 		end,
 	},
 
@@ -1067,19 +1014,6 @@ return {
 		"simnalamburt/vim-mundo",
 		config = function()
 			vim.keymap.set("n", "<leader>u", ":MundoToggle<cr>")
-		end,
-	},
-
-	{
-		"lewis6991/spellsitter.nvim",
-		config = function()
-			local ok, spellsitter = pcall(require, "spellsitter")
-			if not ok then
-				vim.notify("spellsitter not found", vim.log.levels.WARN)
-				return
-			end
-
-			spellsitter.setup()
 		end,
 	},
 
@@ -1227,39 +1161,41 @@ return {
 	},
 
 	{
-		"junegunn/goyo.vim",
+		"folke/zen-mode.nvim",
 		config = function()
-			vim.api.nvim_create_autocmd("User", {
-				desc = "When starting goyo...",
-				pattern = "GoyoEnter",
-				nested = true,
-				callback = function()
-					vim.w.goyospell = vim.wo.spell
-					vim.wo.spell = false
-					vim.cmd("ScrollbarHide")
-					vim.diagnostic.disable()
-					vim.cmd("Gitsigns toggle_signs")
-				end,
+			local ok, zen = pcall(require, "zen-mode")
+			if not ok then
+				vim.notify("zen-mode not found", vim.log.levels.WARN)
+				return
+			end
+			zen.setup({
+				window = {
+					width = 0.618,
+				},
+				plugins = {
+					wezterm = {
+						enabled = true,
+						font = "+1", -- (10% increase per step)
+					},
+				},
 			})
 
-			vim.api.nvim_create_autocmd("User", {
-				desc = "When leaving goyo...",
-				pattern = "GoyoLeave",
-				nested = true,
-				callback = function()
-					if vim.w.goyospell then
-						vim.wo.spell = true
-					end
-					vim.w.gotospell = nil
-					vim.cmd("ScrollbarShow")
-					vim.diagnostic.enable()
-					vim.cmd("Gitsigns toggle_signs")
-				end,
-			})
+			vim.keymap.set("n", "<leader>m", ":ZenMode<cr>", { silent = true })
 		end,
 	},
 
-	"junegunn/limelight.vim",
+	{
+		"folke/twilight.nvim",
+		config = function()
+			local ok, twilight = pcall(require, "twilight")
+			if not ok then
+				vim.notify("twilight not found", vim.log.levels.WARN)
+				return
+			end
+
+			twilight.setup()
+		end,
+	},
 
 	{
 		"joshuarubin/cybu.nvim",
@@ -1324,21 +1260,6 @@ return {
 	},
 
 	{
-		"jinh0/eyeliner.nvim",
-		config = function()
-			local ok, eyeliner = pcall(require, "eyeliner")
-			if not ok then
-				vim.notify("eyeliner not found", vim.log.levels.WARN)
-				return
-			end
-			eyeliner.setup({
-				highlight_on_key = true,
-				dim = true,
-			})
-		end,
-	},
-
-	{
 		"numToStr/Navigator.nvim",
 		config = function()
 			local ok, navigator = pcall(require, "Navigator")
@@ -1349,4 +1270,6 @@ return {
 			navigator.setup({})
 		end,
 	},
+
+	"hashivim/vim-terraform",
 }
