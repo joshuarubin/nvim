@@ -542,7 +542,6 @@ safe_require({ "luasnip", "cmp", "lspkind", "nvim-web-devicons" }, function(luas
 					end,
 				},
 			},
-			{ name = "rg" },
 			{ name = "path" },
 			{ name = "emoji" },
 			{ name = "calc" },
@@ -561,7 +560,6 @@ safe_require({ "luasnip", "cmp", "lspkind", "nvim-web-devicons" }, function(luas
 					nvim_lsp = "",
 					nvim_lua = "",
 					buffer = "",
-					rg = "",
 					path = "",
 					emoji = "ﲃ",
 					calc = "",
@@ -590,6 +588,8 @@ safe_require({ "luasnip", "cmp", "lspkind", "nvim-web-devicons" }, function(luas
 			["<c-n>"] = cmp.mapping.select_next_item(),
 			["<c-d>"] = cmp.mapping.scroll_docs(-4),
 			["<c-f>"] = cmp.mapping.scroll_docs(4),
+			["<down>"] = cmp.mapping.select_next_item(),
+			["<up>"] = cmp.mapping.select_prev_item(),
 			["<c-space>"] = cmp.mapping.complete({}),
 			["<c-e>"] = cmp.mapping(function(fallback)
 				fallback()

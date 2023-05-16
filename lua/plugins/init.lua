@@ -695,9 +695,7 @@ return {
 				},
 				trouble = true,
 				current_line_blame = true,
-				current_line_blame_opts = {
-					delay = 0,
-				},
+				current_line_blame_opts = { delay = 0 },
 				on_attach = function(bufnr)
 					local gs = package.loaded.gitsigns
 
@@ -745,6 +743,8 @@ return {
 
 					-- Text object
 					vim.keymap.set({ "o", "x" }, "ih", ":<C-U>Gitsigns select_hunk<CR>", { buffer = bufnr })
+
+					vim.cmd.highlight("GitSignsCurrentLineBlame gui=italic guifg=#564d43")
 				end,
 			})
 		end,
@@ -1233,8 +1233,6 @@ return {
 			vim.g.oscyank_silent = 1
 		end,
 	},
-
-	"lukas-reineke/cmp-rg",
 
 	{
 		"SmiteshP/nvim-navic",
