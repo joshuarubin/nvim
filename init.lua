@@ -248,7 +248,11 @@ safe_require({ "mason", "mason-lspconfig" }, function(mason, mason_lspconfig)
 	mason.setup({})
 	mason_lspconfig.setup({
 		automatic_installation = {
-			exclude = { "hls", "zls", "clangd" },
+			exclude = {
+				"clangd",
+				"hls",
+				"zls",
+			},
 		},
 	})
 end)
@@ -339,6 +343,7 @@ safe_require({ "lspconfig", "cmp_nvim_lsp" }, function(lspconfig, cmp_nvim_lsp)
 		"cmake",
 		"dockerls",
 		"hls",
+		"jsonnet_ls",
 		"pyright",
 		"terraformls",
 		"tflint",
@@ -388,12 +393,15 @@ safe_require({ "lspconfig", "cmp_nvim_lsp" }, function(lspconfig, cmp_nvim_lsp)
 					nilness = true,
 					shadow = true,
 					unusedparams = true,
+					unusedvariable = true,
 					unusedwrite = true,
+					useany = true,
 				},
 				gofumpt = true,
 				["local"] = "github.com/groq-psw,git.groq.io",
 				staticcheck = true,
 				expandWorkspaceToModule = true,
+				vulncheck = "Imports",
 			},
 		},
 		flags = {
@@ -467,21 +475,60 @@ safe_require("null-ls", function(null_ls)
 	null_ls.setup({
 		on_attach = on_attach,
 		sources = {
-			null_ls.builtins.code_actions.eslint.with({ prefer_local = "node_modules/.bin" }), -- javascript, typescript, react and tsx
+			null_ls.builtins.code_actions.eslint.with({
+				prefer_local = "node_modules/.bin",
+				filetypes = {
+					"javascript",
+					"javascriptreact",
+					"typescript",
+					"typescriptreact",
+					"vue",
+				},
+			}),
 			null_ls.builtins.code_actions.shellcheck, -- sh
 			null_ls.builtins.code_actions.statix, -- nix
 			null_ls.builtins.diagnostics.buf,
 			null_ls.builtins.diagnostics.deadnix, -- nix
-			null_ls.builtins.diagnostics.eslint.with({ prefer_local = "node_modules/.bin" }), -- javascript, typescript, react and tsx,
+			null_ls.builtins.diagnostics.eslint.with({
+				prefer_local = "node_modules/.bin",
+				filetypes = {
+					"javascript",
+					"javascriptreact",
+					"typescript",
+					"typescriptreact",
+					"vue",
+				},
+			}),
 			null_ls.builtins.diagnostics.sqlfluff.with({ extra_args = { "--dialect", "postgres" } }), -- sql
 			null_ls.builtins.diagnostics.statix, -- nix
 			null_ls.builtins.diagnostics.teal, -- teal
 			null_ls.builtins.diagnostics.vale, -- markdown, tex, asciidoc
 			null_ls.builtins.formatting.alejandra, -- nix
 			null_ls.builtins.formatting.buf.with({ args = { "format", "-w", "--path", "$FILENAME" } }), -- proto
-			null_ls.builtins.formatting.prettier.with({ prefer_local = "node_modules/.bin" }), -- javascript, typescript, react, vue, css, scss, less, html, json, yaml, markdown, graphql, handlebars
+			null_ls.builtins.formatting.prettier.with({
+				prefer_local = "node_modules/.bin",
+				filetypes = {
+					"javascript",
+					"javascriptreact",
+					"typescript",
+					"typescriptreact",
+					"vue",
+					"css",
+					"scss",
+					"less",
+					"html",
+					"json",
+					"jsonc",
+					"yaml",
+					"markdown",
+					"markdown.mdx",
+					"graphql",
+					"handlebars",
+				},
+				extra_filetypes = {},
+			}), -- javascript, typescript, react, vue, css, scss, less, html, json, yaml, markdown, graphql, handlebars
 			null_ls.builtins.formatting.shfmt.with({ args = {} }), -- sh
-			null_ls.builtins.formatting.sqlfluff.with({ extra_args = { "--dialect", "postgres" } }), -- javascript, typescript, react and tsx
+			null_ls.builtins.formatting.sqlfluff.with({ extra_args = { "--dialect", "postgres" } }), -- sql
 			null_ls.builtins.formatting.stylua, -- lua
 			null_ls.builtins.formatting.terraform_fmt,
 			null_ls.builtins.hover.dictionary, -- text, markdown

@@ -136,6 +136,7 @@ return {
 					"jsdoc",
 					"json5",
 					"jsonc",
+					"jsonnet",
 					"julia",
 					"kotlin",
 					"lalrpop",
@@ -345,9 +346,12 @@ return {
 	-- lsp
 	"williamboman/mason.nvim",
 	"williamboman/mason-lspconfig.nvim",
-	"neovim/nvim-lspconfig",
 	"simrat39/rust-tools.nvim",
 	"onsails/lspkind.nvim",
+
+	{
+		"neovim/nvim-lspconfig",
+	},
 
 	{
 		"jose-elias-alvarez/null-ls.nvim",
