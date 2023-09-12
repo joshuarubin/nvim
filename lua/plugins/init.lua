@@ -29,6 +29,15 @@ return {
 			end
 
 			comment.setup({})
+
+			local ok, ft = pcall(require, "Comment.ft")
+			if not ok then
+				vim.notify("Comment.nvim not found", vim.log.levels.WARN)
+				return
+			end
+
+			ft.gomod = "//%s"
+			ft.jsonnet = ft.get("go")
 		end,
 	},
 
