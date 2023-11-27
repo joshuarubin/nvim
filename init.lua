@@ -243,7 +243,7 @@ local function safe_require(modules, callback)
 	callback(unpack(mods))
 end
 
-safe_require({ "mason", "mason-lspconfig" }, function(mason, mason_lspconfig)
+safe_require({ "mason", "mason-registry", "mason-lspconfig" }, function(mason, mason_registry, mason_lspconfig)
 	-- NOTE: must be called before any servers are set up
 	mason.setup({})
 	mason_lspconfig.setup({
@@ -255,6 +255,16 @@ safe_require({ "mason", "mason-lspconfig" }, function(mason, mason_lspconfig)
 			},
 		},
 	})
+
+	local ensure_installed = {
+		"yamllint",
+	}
+
+	for _, pkg in ipairs(ensure_installed) do
+		if not mason_registry.is_installed(pkg) then
+			mason_registry.get_package(pkg):install()
+		end
+	end
 end)
 
 local function switch_source_header(bufnr, wait_ms)
@@ -400,7 +410,6 @@ safe_require({ "lspconfig", "cmp_nvim_lsp" }, function(lspconfig, cmp_nvim_lsp)
 				gofumpt = true,
 				["local"] = "github.com/groq-psw,git.groq.io",
 				staticcheck = true,
-				expandWorkspaceToModule = true,
 				vulncheck = "Imports",
 			},
 		},
@@ -447,7 +456,7 @@ safe_require({ "lspconfig", "cmp_nvim_lsp" }, function(lspconfig, cmp_nvim_lsp)
 					path = lua_path,
 				},
 				diagnostics = {
-					globals = { "vim", "hs" },
+					globals = { "vim", "hs", "redis", "ARGV", "KEYS" },
 				},
 				workspace = {
 					library = vim.api.nvim_get_runtime_file("", true),
@@ -503,6 +512,7 @@ safe_require("null-ls", function(null_ls)
 			null_ls.builtins.diagnostics.statix, -- nix
 			null_ls.builtins.diagnostics.teal, -- teal
 			null_ls.builtins.diagnostics.vale, -- markdown, tex, asciidoc
+			null_ls.builtins.diagnostics.yamllint, -- yaml
 			null_ls.builtins.formatting.alejandra, -- nix
 			null_ls.builtins.formatting.buf.with({ args = { "format", "-w", "--path", "$FILENAME" } }), -- proto
 			null_ls.builtins.formatting.prettier.with({

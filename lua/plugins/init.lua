@@ -828,7 +828,9 @@ return {
 			vim.api.nvim_create_autocmd("FileType", {
 				pattern = "Neogit*",
 				callback = function()
-					vim.cmd("lcd " .. git_opts.dir)
+					if git_opts.dir then
+						vim.cmd("lcd " .. git_opts.dir)
+					end
 				end,
 			})
 		end,
@@ -1148,28 +1150,15 @@ return {
 
 	{
 		"lukas-reineke/indent-blankline.nvim",
+		main = "ibl",
 		config = function()
-			local ok, indent_blankline = pcall(require, "indent_blankline")
+			local ok, ibl = pcall(require, "ibl")
 			if not ok then
-				vim.notify("indent_blankline not found", vim.log.levels.WARN)
+				vim.notify("ibl not found", vim.log.levels.WARN)
 				return
 			end
 
-			indent_blankline.setup({
-				show_trailing_blankline_indent = false,
-			})
-		end,
-	},
-
-	"axieax/urlview.nvim",
-
-	{
-		"iamcco/markdown-preview.nvim",
-		build = function()
-			vim.fn["mkdp#util#install"]()
-		end,
-		config = function()
-			vim.g.mkdp_auto_close = 0
+			ibl.setup()
 		end,
 	},
 
@@ -1283,4 +1272,5 @@ return {
 	},
 
 	"hashivim/vim-terraform",
+	"direnv/direnv.vim",
 }
