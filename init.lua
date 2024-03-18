@@ -293,7 +293,7 @@ local function on_attach(client, bufnr)
 		format.on_attach(client, bufnr)
 	end)
 
-	if client.server_capabilities.codeLensProvider ~= nil then
+	if client.server_capabilities.codeLensProvider ~= nil and client.server_capabilities.codeLensProvider ~= false then
 		vim.api.nvim_create_autocmd({
 			"CursorHold",
 			"CursorHoldI",
@@ -408,7 +408,7 @@ safe_require({ "lspconfig", "cmp_nvim_lsp" }, function(lspconfig, cmp_nvim_lsp)
 					useany = true,
 				},
 				gofumpt = true,
-				["local"] = "github.com/groq-psw,git.groq.io",
+				["local"] = "github.com/groq,github.com/groq-psw,git.groq.io",
 				staticcheck = true,
 				vulncheck = "Imports",
 			},
@@ -419,20 +419,29 @@ safe_require({ "lspconfig", "cmp_nvim_lsp" }, function(lspconfig, cmp_nvim_lsp)
 	})
 
 	-- javascript, typescript, react and tsx
-	safe_require("nvim-lsp-ts-utils", function(ts_utils)
-		lspconfig.tsserver.setup({
-			init_options = ts_utils.init_options,
+	safe_require({ "typescript-tools", "typescript-tools.api" }, function(ts_tools, ts_api)
+		ts_tools.setup({
 			on_attach = function(client, bufnr)
 				-- disable tsserver formatting (done by null-ls)
 				client.server_capabilities.documentFormattingProvider = false
 				client.server_capabilities.documentRangeFormattingProvider = false
 
-				ts_utils.setup({})
-				ts_utils.setup_client(client)
-
 				on_attach(client, bufnr)
 			end,
 			capabilities = capabilities,
+			handlers = {
+				["textDocument/publishDiagnostics"] = ts_api.filter_diagnostics({
+					6133,
+					6196,
+				}),
+			},
+			settings = {
+				publish_diagnostic_on = "insert_leave",
+				expose_as_code_action = {},
+				tsserver_file_preferences = {},
+				complete_function_calls = false,
+				include_completions_with_insert_text = true,
+			},
 		})
 	end)
 
@@ -484,30 +493,10 @@ safe_require("null-ls", function(null_ls)
 	null_ls.setup({
 		on_attach = on_attach,
 		sources = {
-			null_ls.builtins.code_actions.eslint.with({
-				prefer_local = "node_modules/.bin",
-				filetypes = {
-					"javascript",
-					"javascriptreact",
-					"typescript",
-					"typescriptreact",
-					"vue",
-				},
-			}),
 			null_ls.builtins.code_actions.shellcheck, -- sh
 			null_ls.builtins.code_actions.statix, -- nix
 			null_ls.builtins.diagnostics.buf,
 			null_ls.builtins.diagnostics.deadnix, -- nix
-			null_ls.builtins.diagnostics.eslint.with({
-				prefer_local = "node_modules/.bin",
-				filetypes = {
-					"javascript",
-					"javascriptreact",
-					"typescript",
-					"typescriptreact",
-					"vue",
-				},
-			}),
 			null_ls.builtins.diagnostics.sqlfluff.with({ extra_args = { "--dialect", "postgres" } }), -- sql
 			null_ls.builtins.diagnostics.statix, -- nix
 			null_ls.builtins.diagnostics.teal, -- teal

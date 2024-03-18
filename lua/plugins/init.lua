@@ -369,7 +369,13 @@ return {
 		},
 	},
 
-	"jose-elias-alvarez/nvim-lsp-ts-utils",
+	{
+		"pmizio/typescript-tools.nvim",
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			"neovim/nvim-lspconfig",
+		},
+	},
 
 	-- completion
 	"hrsh7th/nvim-cmp",
@@ -798,7 +804,7 @@ return {
 
 				local result = vim.fn.fnamemodify(dir, ":p")
 				handle:close()
-				return result
+				return vim.trim(result)
 			end
 
 			local git_opts = {}
