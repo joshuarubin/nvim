@@ -107,93 +107,14 @@ return {
 			end
 
 			nvim_treesitter_configs.setup({
+				auto_install = true,
+				sync_install = true,
 				ensure_installed = {
-					"bash",
-					"beancount",
-					"bibtex",
 					"c",
-					"c_sharp",
-					"clojure",
-					"cmake",
-					"comment",
-					"commonlisp",
-					"cooklang",
-					"cpp",
-					"css",
-					"cuda",
-					"erlang",
-					"fennel",
-					"fish",
-					"fusion",
-					"gdscript",
-					"gleam",
-					"glimmer",
-					"glsl",
-					"go",
-					"godot_resource",
-					"gomod",
-					"gowork",
-					"graphql",
-					"hcl",
-					"heex",
-					"hjson",
-					"hocon",
-					"html",
-					"http",
-					"java",
-					"javascript",
-					"jsdoc",
-					"json5",
-					"jsonc",
-					"jsonnet",
-					"julia",
-					"kotlin",
-					"lalrpop",
-					"latex",
-					"ledger",
-					"llvm",
 					"lua",
-					"make",
-					"ninja",
-					"nix",
-					"norg",
-					"ocaml",
-					"ocaml_interface",
-					"ocamllex",
-					"pascal",
-					"perl",
-					"php",
-					"pioasm",
-					"prisma",
-					"pug",
-					"python",
-					"ql",
 					"query",
-					"r",
-					"rasi",
-					"regex",
-					"rst",
-					"ruby",
-					"rust",
-					"scala",
-					"scss",
-					"solidity",
-					"sparql",
-					"supercollider",
-					"surface",
-					"svelte",
-					"teal",
-					"tlaplus",
-					"toml",
-					"tsx",
-					"turtle",
-					"typescript",
-					"vala",
 					"vim",
-					"vue",
-					"yaml",
-					"yang",
-					"zig",
+					"vimdoc",
 				},
 				highlight = { enable = true },
 				-- indent = { enable = true }, -- TODO(jawa) this is too experimental right now, enable when possible
@@ -488,63 +409,6 @@ return {
 			telescope.load_extension("zoxide")
 
 			vim.keymap.set("n", "<leader>z", telescope.extensions.zoxide.list)
-		end,
-	},
-
-	{
-		"gbprod/yanky.nvim",
-		dependencies = {
-			"nvim-telescope/telescope.nvim",
-		},
-		config = function()
-			local ok, yanky = pcall(require, "yanky")
-			if not ok then
-				vim.notify("yanky not found", vim.log.levels.WARN)
-				return
-			end
-
-			yanky.setup()
-
-			local mappings = {
-				p = "YankyPutAfter",
-				P = "YankyPutBefore",
-				gp = "YankyGPutAfter",
-				gP = "YankyGPutBefore",
-			}
-
-			for key, yanky_action in pairs(mappings) do
-				local action = "<plug>(" .. yanky_action .. ")"
-
-				-- paste in visual mode should not replace the default register with the deleted text
-				if yanky_action == "YankyPutAfter" then
-					vim.keymap.set("x", key, '"_d<plug>(YankyPutBefore)')
-				elseif yanky_action == "YankyGPutBefore" then
-					vim.keymap.set("x", key, '"_d<plug>(YankyGPutAfter)')
-				else
-					vim.keymap.set("x", key, '"_d' .. action)
-				end
-
-				vim.keymap.set("n", key, action)
-			end
-
-			-- preserve cursor position on yank (in normal mode only)
-			vim.keymap.set("n", "y", "<plug>(YankyYank)")
-
-			vim.keymap.set("n", "<leader>p", "<plug>(YankyCycleForward)")
-			vim.keymap.set("n", "<leader>o", "<plug>(YankyCycleBackward)")
-
-			if vim.g.neovide then
-				vim.keymap.set({ "n", "x" }, "<d-c>", "<plug>(YankyYank)")
-			end
-
-			local telescope
-			ok, telescope = pcall(require, "telescope")
-			if not ok then
-				vim.notify("telescope not found", vim.log.levels.WARN)
-				return
-			end
-
-			telescope.load_extension("yank_history")
 		end,
 	},
 
@@ -1236,13 +1100,6 @@ return {
 	},
 
 	{
-		"ojroques/vim-oscyank",
-		config = function()
-			vim.g.oscyank_silent = 1
-		end,
-	},
-
-	{
 		"SmiteshP/nvim-navic",
 		dependencies = {
 			"neovim/nvim-lspconfig",
@@ -1277,6 +1134,5 @@ return {
 		end,
 	},
 
-	"hashivim/vim-terraform",
 	"direnv/direnv.vim",
 }
