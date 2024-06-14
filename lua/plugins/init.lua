@@ -350,26 +350,8 @@ return {
 			vim.g.copilot_no_tab_map = 1
 			vim.g.copilot_assume_mapped = 1
 
-			local ok, cmp = pcall(require, "cmp")
-			if not ok then
-				vim.notify("cmp not found", vim.log.levels.WARN)
-				return
-			end
-
 			vim.keymap.set("i", "<m-]>", "<plug>(copilot-next)")
 			vim.keymap.set("i", "<m-[>", "<plug>(copilot-previous)")
-
-			vim.keymap.set("i", "<c-e>", function()
-				if cmp.visible() then
-					cmp.abort()
-					return ""
-				end
-
-				local fallback = vim.api.nvim_replace_termcodes("<c-e>", true, true, true)
-
-				-- do copilot completion if possible
-				return vim.fn["copilot#Accept"](fallback)
-			end, { silent = true, expr = true, replace_keycodes = false, remap = true })
 		end,
 	},
 
@@ -414,64 +396,40 @@ return {
 
 	{
 		"folke/trouble.nvim",
-		config = function()
-			local ok, trouble = pcall(require, "trouble")
-			if not ok then
-				vim.notify("trouble not found", vim.log.levels.WARN)
-				return
-			end
-
-			trouble.setup({
-				position = "bottom", -- position of the list can be: bottom, top, left, right
-				height = 10, -- height of the trouble list when position is top or bottom
-				width = 50, -- width of the list when position is left or right
-				icons = true, -- use devicons for filenames
-				mode = "workspace_diagnostics", -- "workspace_diagnostics", "document_diagnostics", "quickfix", "lsp_references", "loclist"
-				fold_open = "", -- icon used for open folds
-				fold_closed = "", -- icon used for closed folds
-				action_keys = { -- key mappings for actions in the trouble list
-					-- map to {} to remove a mapping, for example:
-					-- close = {},
-					close = "q", -- close the list
-					cancel = "<esc>", -- cancel the preview and get back to your last window / buffer / cursor
-					refresh = "r", -- manually refresh
-					jump = { "<cr>", "<tab>" }, -- jump to the diagnostic or open / close folds
-					open_split = { "<c-x>" }, -- open buffer in new split
-					open_vsplit = { "<c-v>" }, -- open buffer in new vsplit
-					open_tab = { "<c-t>" }, -- open buffer in new tab
-					jump_close = { "o" }, -- jump to the diagnostic and close the list
-					toggle_mode = "m", -- toggle between "workspace" and "document" diagnostics mode
-					toggle_preview = "P", -- toggle auto_preview
-					hover = "K", -- opens a small poup with the full multiline message
-					preview = "p", -- preview the diagnostic location
-					close_folds = { "zM", "zm" }, -- close all folds
-					open_folds = { "zR", "zr" }, -- open all folds
-					toggle_fold = { "zA", "za" }, -- toggle fold of current file
-					previous = "k", -- preview item
-					next = "j", -- next item
-				},
-				indent_lines = true, -- add an indent guide below the fold icons
-				auto_open = false, -- automatically open the list when you have diagnostics
-				auto_close = false, -- automatically close the list when you have no diagnostics
-				auto_preview = true, -- automatyically preview the location of the diagnostic. <esc> to close preview and go back to last window
-				auto_fold = false, -- automatically fold a file trouble list at creation
-				signs = {
-					-- icons / text used for a diagnostic
-					error = "",
-					warning = "",
-					hint = "",
-					information = "",
-					other = "﫠",
-				},
-				use_lsp_diagnostic_signs = false, -- enabling this will use the signs defined in your lsp client
-			})
-
-			vim.keymap.set("n", "<leader>xx", "<cmd>Trouble<cr>", { silent = true })
-			vim.keymap.set("n", "<leader>xw", "<cmd>Trouble workspace_diagnostics<cr>", { silent = true })
-			vim.keymap.set("n", "<leader>xd", "<cmd>Trouble document_diagnostics<cr>", { silent = true })
-			vim.keymap.set("n", "<leader>xl", "<cmd>Trouble loclist<cr>", { silent = true })
-			vim.keymap.set("n", "<leader>xq", "<cmd>Trouble quickfix<cr>", { silent = true })
-		end,
+		cmd = "Trouble",
+		opts = {},
+		keys = {
+			{
+				"<leader>xx",
+				"<cmd>Trouble diagnostics toggle<cr>",
+				desc = "Diagnostics (Trouble)",
+			},
+			{
+				"<leader>xX",
+				"<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
+				desc = "Buffer Diagnostics (Trouble)",
+			},
+			{
+				"<leader>a",
+				"<cmd>Trouble symbols toggle focus=false<cr>",
+				desc = "Symbols (Trouble)",
+			},
+			{
+				"<leader>xd",
+				"<cmd>Trouble lsp toggle focus=false win.position=right<cr>",
+				desc = "LSP Definitions / references / ... (Trouble)",
+			},
+			{
+				"<leader>xl",
+				"<cmd>Trouble loclist toggle<cr>",
+				desc = "Location List (Trouble)",
+			},
+			{
+				"<leader>xq",
+				"<cmd>Trouble qflist toggle<cr>",
+				desc = "Quickfix List (Trouble)",
+			},
+		},
 	},
 
 	{
@@ -628,6 +586,14 @@ return {
 					vim.keymap.set({ "o", "x" }, "ih", ":<C-U>Gitsigns select_hunk<CR>", { buffer = bufnr })
 
 					vim.cmd.highlight("GitSignsCurrentLineBlame gui=italic guifg=#564d43")
+
+					vim.api.nvim_create_autocmd("BufWinEnter", {
+						desc = "fix trailing newlines being staged in git",
+						pattern = "gitsigns://*",
+						callback = function(ev)
+							vim.api.nvim_set_option_value("eol", false, { buf = ev.buf })
+						end,
+					})
 				end,
 			})
 		end,
@@ -860,25 +826,6 @@ return {
 			vim.keymap.set("n", "<c-n>", function()
 				vim.api.nvim_command("NvimTreeFindFileToggle")
 			end)
-		end,
-	},
-
-	{
-		"stevearc/aerial.nvim",
-		config = function()
-			local ok, aerial = pcall(require, "aerial")
-			if not ok then
-				vim.notify("aerial not found", vim.log.levels.WARN)
-				return
-			end
-
-			aerial.setup({})
-
-			vim.keymap.set("n", "<leader>a", "<cmd>AerialToggle!<cr>", { buffer = bufnr, silent = true })
-			vim.keymap.set("n", "[[", "<cmd>AerialPrev<CR>", { buffer = bufnr, silent = true })
-			vim.keymap.set("n", "]]", "<cmd>AerialNext<CR>", { buffer = bufnr, silent = true })
-			vim.keymap.set("n", "{", "<cmd>AerialPrevUp<CR>", { buffer = bufnr, silent = true })
-			vim.keymap.set("n", "}", "<cmd>AerialNextUp<CR>", { buffer = bufnr, silent = true })
 		end,
 	},
 

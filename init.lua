@@ -3,13 +3,13 @@ vim.g.mapleader = ","
 vim.g.maplocalleader = ","
 
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
+if not (vim.uv or vim.loop).fs_stat(lazypath) then
 	vim.fn.system({
 		"git",
 		"clone",
 		"--filter=blob:none",
 		"https://github.com/folke/lazy.nvim.git",
-		"--branch=stable",
+		"--branch=stable", -- latest stable release
 		lazypath,
 	})
 end
@@ -219,7 +219,8 @@ end)
 local paste, pastestar
 
 if vim.fn.has("mac") ~= 0 then
-	-- noop
+	paste = { "pbpaste" }
+	pastestar = { "pbpaste" }
 elseif vim.env.WAYLAND_DISPLAY and vim.fn.executable("wl-copy") ~= 0 and vim.fn.executable("wl-paste") ~= 0 then
 	paste = { "wl-paste", "--no-newline" }
 	pastestar = { "wl-paste", "--no-newline", "--primary" }
@@ -303,7 +304,7 @@ local function on_attach(client, bufnr)
 		}, {
 			buffer = bufnr,
 			callback = function()
-				vim.lsp.codelens.refresh()
+				vim.lsp.codelens.refresh({ bufnr = bufnr })
 			end,
 		})
 	end
@@ -557,7 +558,7 @@ safe_require({ "luasnip", "cmp", "lspkind", "nvim-web-devicons" }, function(luas
 	cmp.setup({
 		enabled = function()
 			local disabled = false
-			disabled = disabled or (vim.api.nvim_buf_get_option(0, "buftype") == "prompt")
+			disabled = disabled or (vim.api.nvim_get_option_value("buftype", { buf = 0 }) == "prompt")
 			disabled = disabled or (vim.fn.reg_recording() ~= "")
 			disabled = disabled or (vim.fn.reg_executing() ~= "")
 
@@ -631,6 +632,9 @@ safe_require({ "luasnip", "cmp", "lspkind", "nvim-web-devicons" }, function(luas
 				luasnip.lsp_expand(args.body)
 			end,
 		},
+		experimental = {
+			ghost_text = false, -- this feature conflicts with copilot.vim's preview
+		},
 		mapping = {
 			["<c-p>"] = cmp.mapping.select_prev_item(),
 			["<c-n>"] = cmp.mapping.select_next_item(),
@@ -639,8 +643,13 @@ safe_require({ "luasnip", "cmp", "lspkind", "nvim-web-devicons" }, function(luas
 			["<down>"] = cmp.mapping.select_next_item(),
 			["<up>"] = cmp.mapping.select_prev_item(),
 			["<c-space>"] = cmp.mapping.complete({}),
-			["<c-e>"] = cmp.mapping(function(fallback)
-				fallback()
+			["<c-e>"] = cmp.mapping(function()
+				if cmp.visible() then
+					cmp.close()
+				end
+
+				local result = vim.fn["copilot#Accept"](t("<c-e>"))
+				vim.api.nvim_feedkeys(result, "n", true)
 			end),
 			["<cr>"] = cmp.mapping(function(fallback)
 				local expandable = luasnip.expandable()
@@ -670,7 +679,7 @@ safe_require({ "luasnip", "cmp", "lspkind", "nvim-web-devicons" }, function(luas
 					vim.fn.feedkeys(t("<cr>"), "n") -- using fallback() breaks abbreviations
 
 					-- telescope breaks when opening a new file in the same buffer unless we do this
-					local filetype = vim.api.nvim_buf_get_option(0, "filetype")
+					local filetype = vim.api.nvim_get_option_value("filetype", { buf = 0 })
 					if filetype ~= "TelescopePrompt" then
 						vim.fn.feedkeys(t("<plug>Endwise"))
 					end
@@ -709,15 +718,6 @@ safe_require({ "luasnip", "cmp", "lspkind", "nvim-web-devicons" }, function(luas
 		},
 	})
 end)
-
--- paste
--- <d-v> is mapped to <c-a>v in the terminal
-for _, lhs in ipairs({ "<c-v>", "<d-v>", "<c-a>v" }) do
-	vim.keymap.set({ "n", "x" }, lhs, '"+p', { remap = true })
-	vim.keymap.set("i", lhs, "<c-r>+", { remap = true })
-	vim.keymap.set("t", lhs, '<c-\\><c-n>"+pa', { remap = true })
-	vim.keymap.set("c", lhs, "<c-r>+")
-end
 
 -- undo
 for _, lhs in ipairs({ "<d-z>" }) do
