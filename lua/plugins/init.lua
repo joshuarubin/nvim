@@ -284,7 +284,7 @@ return {
 	},
 
 	{
-		"jose-elias-alvarez/null-ls.nvim",
+		"nvimtools/none-ls.nvim",
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 		},
@@ -477,6 +477,9 @@ return {
 
 	{
 		"joshuarubin/rubix.vim",
+		dependencies = {
+			"hrsh7th/nvim-cmp",
+		},
 		config = function()
 			local ok, rubix = pcall(require, "rubix")
 			if not ok then
@@ -526,13 +529,19 @@ return {
 				return
 			end
 
+			vim.api.nvim_set_hl(0, "GitSignsAdd", { link = "GitGutterAdd" })
+			vim.api.nvim_set_hl(0, "GitSignsChange", { link = "GitGutterChange" })
+			vim.api.nvim_set_hl(0, "GitSignsChangedelete", { link = "GitGutterChange" })
+			vim.api.nvim_set_hl(0, "GitSignsDelete", { link = "GitGutterDelete" })
+			vim.api.nvim_set_hl(0, "GitSignsTopdelete", { link = "GitGutterDelete" })
+
 			gitsigns.setup({
 				signs = {
-					add = { hl = "GitGutterAdd", text = "█│" },
-					change = { hl = "GitGutterChange", text = "█┆" },
-					delete = { hl = "GitGutterDelete", text = "█▁" },
-					topdelete = { hl = "GitGutterDelete", text = "█▔" },
-					changedelete = { hl = "GitGutterChange", text = "█▟" },
+					add = { text = "█│" },
+					change = { text = "█┆" },
+					delete = { text = "█▁" },
+					topdelete = { text = "█▔" },
+					changedelete = { text = "█▟" },
 				},
 				trouble = true,
 				current_line_blame = true,
