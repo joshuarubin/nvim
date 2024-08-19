@@ -246,6 +246,10 @@ end
 
 vim.g.clipboard = clipboard
 
+vim.diagnostic.config({
+	update_in_insert = true,
+})
+
 safe_require({ "mason", "mason-registry", "mason-lspconfig" }, function(mason, mason_registry, mason_lspconfig)
 	-- NOTE: must be called before any servers are set up
 	mason.setup({})
@@ -498,7 +502,7 @@ safe_require("null-ls", function(null_ls)
 		sources = {
 			null_ls.builtins.code_actions.shellcheck, -- sh
 			null_ls.builtins.code_actions.statix, -- nix
-			null_ls.builtins.diagnostics.buf,
+			null_ls.builtins.diagnostics.buf.with({ args = { "lint" } }),
 			null_ls.builtins.diagnostics.deadnix, -- nix
 			null_ls.builtins.diagnostics.sqlfluff.with({ extra_args = { "--dialect", "postgres" } }), -- sql
 			null_ls.builtins.diagnostics.statix, -- nix
@@ -623,7 +627,8 @@ safe_require(
 					else
 					end
 
-					vim_item.kind = " " .. (vim_item.kind or "") .. " "
+					vim_item.kind = vim_item.kind or ""
+					vim_item.kind = string.format(" %s ", vim_item.kind)
 
 					return vim_item
 				end,
@@ -643,7 +648,7 @@ safe_require(
 					cmp.config.compare.score, -- entries with higher score will be ranked higher
 					cmp.config.compare.recently_used, -- entries that are used recently will be ranked higher
 					cmp.config.compare.locality, -- entries with higher locality (i.e., words that are closer to the cursor) will be ranked higher
-					rubixcmp.compare.kind, -- entires with smaller ordinal value of 'kind' will be ranked higher
+					cmp.config.compare.kind, -- entires with smaller ordinal value of 'kind' will be ranked higher
 					cmp.config.compare.length, -- entires with shorter label length will be ranked higher
 					cmp.config.compare.order, -- entries with smaller id will be ranked higher
 				},
@@ -887,8 +892,7 @@ for dir, cmd in pairs({
 end
 
 -- abbreviations
-vim.cmd([[iabbrev TODO TODO(jawa)]])
-vim.cmd([[iabbrev meml me@jawa.dev]])
+vim.cmd([[iabbrev TODO TODO(jrubin)]])
 
 -- autocommands
 local init_group = vim.api.nvim_create_augroup("InitAutoCmd", {})

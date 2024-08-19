@@ -543,6 +543,7 @@ return {
 					topdelete = { text = "█▔" },
 					changedelete = { text = "█▟" },
 				},
+				signs_staged_enable = false,
 				trouble = true,
 				current_line_blame = true,
 				current_line_blame_opts = { delay = 0 },
@@ -760,7 +761,6 @@ return {
 					left_mouse_command = "buffer %d", -- can be a string | function, see "Mouse actions"
 					middle_mouse_command = nil, -- can be a string | function, see "Mouse actions"
 					diagnostics = "nvim_lsp",
-					diagnostics_update_in_insert = true,
 					show_buffer_close_icons = false,
 					show_close_icon = false,
 					separator_style = "slant",
@@ -859,19 +859,11 @@ return {
 	},
 
 	{
-		"ellisonleao/glow.nvim",
-		branch = "main",
-		config = function()
-			vim.g.glow_use_pager = true
-			vim.g.glow_border = "rounded"
-
-			vim.api.nvim_create_autocmd("FileType", {
-				desc = "set glow preview mapping for markdown files",
-				pattern = "markdown",
-				callback = function()
-					vim.keymap.set("n", "<leader>p", ":Glow<cr>", { silent = true, buffer = true })
-				end,
-			})
+		"iamcco/markdown-preview.nvim",
+		cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+		ft = { "markdown" },
+		build = function()
+			vim.fn["mkdp#util#install"]()
 		end,
 	},
 
