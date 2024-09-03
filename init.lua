@@ -20,10 +20,6 @@ require("lazy").setup("plugins", {
 	concurrency = 8,
 })
 
-if vim.env.GROQ_CONFIG then
-	vim.cmd("source " .. vim.env.GROQ_CONFIG .. "/vim/groq.vim")
-end
-
 local function backupdir()
 	local ret = vim.fn.stdpath("data") .. "/backup"
 	if vim.fn.isdirectory(ret) ~= 1 then
@@ -415,7 +411,7 @@ safe_require({ "lspconfig", "cmp_nvim_lsp" }, function(lspconfig, cmp_nvim_lsp)
 					useany = true,
 				},
 				gofumpt = true,
-				["local"] = "github.com/groq,github.com/groq-psw,git.groq.io",
+				["local"] = "github.com/joshuarubin",
 				staticcheck = true,
 				vulncheck = "Imports",
 			},
