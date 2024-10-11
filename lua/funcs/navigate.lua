@@ -52,6 +52,5 @@ return function(dir, opts)
 		else
 			vim.fn.feedkeys(t("<c-w>" .. dir))
 		end
-		vim.fn.feedkeys(t("<c-w>" .. dir))
 	end
 end

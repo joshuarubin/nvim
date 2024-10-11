@@ -1,7 +1,6 @@
 return {
 	{
 		"nvim-treesitter/nvim-treesitter",
-		cond = not vim.g.vscode,
 		dependencies = {
 			"nvim-treesitter/nvim-treesitter-textobjects",
 		},
@@ -67,9 +66,13 @@ return {
 			},
 		},
 	},
+	"nvim-treesitter/nvim-treesitter-textobjects",
 	{
-		"nvim-treesitter/nvim-treesitter-textobjects",
-		cond = not vim.g.vscode,
+		"JoosepAlviste/nvim-ts-context-commentstring",
+		lazy = true,
+		opts = {
+			enable_autocmd = false,
+		},
 	},
 	{
 		"joshuarubin/go-return.nvim",

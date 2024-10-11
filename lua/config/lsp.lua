@@ -1,3 +1,7 @@
+if vim.g.vscode then
+	return
+end
+
 vim.diagnostic.config({
 	update_in_insert = true,
 })

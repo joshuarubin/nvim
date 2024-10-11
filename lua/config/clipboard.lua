@@ -1,3 +1,8 @@
+if vim.g.vscode then
+	vim.g.clipboard = vim.g.vscode_clipboard
+	return
+end
+
 local safe_require = require("funcs.safe_require")
 
 local clipboard = {

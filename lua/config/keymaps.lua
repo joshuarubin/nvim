@@ -1,3 +1,50 @@
+-- normal mode
+vim.keymap.set("n", "<leader>n", "<cmd>nohlsearch<cr>", { desc = "nohlsearch" })
+vim.keymap.set("n", "<leader>fc", "/\\v^[<|=>]{7}( .*|$)<cr>", { desc = "find merge conflict markers" })
+vim.keymap.set("n", "+", "<c-a>", { desc = "increment number" })
+vim.keymap.set("n", "=", "<c-a>", { desc = "increment number" })
+vim.keymap.set("n", "-", "<c-x>", { desc = "decrement number" })
+vim.keymap.set("n", "d", '"_d', { desc = "delete into blackhole register to not clobber the last yank" })
+vim.keymap.set("n", "dd", "dd", { desc = "delete and yank the current line" })
+vim.keymap.set("n", "c", '"_c', { desc = "change into the blackhole register to not clobber the last yank" })
+vim.keymap.set("n", "W", "<cmd>w<cr>", { desc = "write the buffer to the current file" })
+
+-- allow remap on these to get them working with vscode
+vim.keymap.set("n", "_", "<c-w>s", { desc = "horizontal split current window", remap = true })
+vim.keymap.set("n", "<bar>", "<c-w>v", { desc = "vertical split current window", remap = true })
+
+-- visual mode
+vim.keymap.set("x", "y", "y`]", { desc = "yank and go to end of selection" })
+vim.keymap.set(
+	"x",
+	"p",
+	'"_dP',
+	{ desc = "paste in visual mode should not replace the default register with the deleted text" }
+)
+vim.keymap.set(
+	"x",
+	"d",
+	'"_d',
+	{ desc = "delete into the blackhole register to not clobber the last yank. To 'cut', use 'x' instead" }
+)
+vim.keymap.set("x", "<cr>", 'y<cmd>let @/ = @"<cr><cmd>set hlsearch<cr>', { desc = "highlight visual selections" })
+vim.keymap.set("x", "<", "<gv", { desc = "retain visual selection after indent" })
+vim.keymap.set("x", ">", ">gv", { desc = "retain visual selection after indent" })
+vim.keymap.set("x", ".", ":normal.<cr>", { silent = true, desc = "repeats the last command on every line" })
+vim.keymap.set("x", "@", ":normal@@<cr>", { silent = true, desc = "repeats the last macro on every line" })
+vim.keymap.set("x", "<tab>", ">", { remap = true, desc = "indent" })
+vim.keymap.set("x", "<s-tab>", "<", { remap = true, desc = "unindent" })
+
+-- visual and select mode
+vim.keymap.set("v", "<leader>s", ":sort<cr>", { desc = "sort" })
+
+-- insert mode
+vim.keymap.set("i", "<c-w>", "<c-g>u<c-w>", { desc = "delete previous word, create undo point" })
+
+if vim.g.vscode then
+	return
+end
+
 local function t(keys)
 	return vim.api.nvim_replace_termcodes(keys, true, true, true)
 end
@@ -93,58 +140,17 @@ vim.keymap.set("t", "<d-k>", "<c-\\><c-n><c-w>-i", { desc = "decrease current wi
 vim.keymap.set("t", "<d-l>", "<c-\\><c-n><c-w>>i", { desc = "increase current window width" })
 
 -- normal mode
-vim.keymap.set("n", "<leader>n", ":nohlsearch<cr>", { silent = true, desc = "nohlsearch" })
-vim.keymap.set("n", "<leader>fc", "/\\v^[<|=>]{7}( .*|$)<cr>", { desc = "find merge conflict markers" })
-vim.keymap.set("n", "<leader>q", ":qa<cr>", { silent = true, desc = "exit vim" })
-vim.keymap.set("n", "<leader>Q", ":qa!<cr>", { silent = true, desc = "exit vim losing changes" })
-vim.keymap.set("n", "<leader>cd", ":lcd %:p:h<cr>:pwd<cr>", { desc = "switch to the directory of the open buffer" })
+vim.keymap.set("n", "<leader>cd", "<cmd>lcd %:p:h<cr>:pwd<cr>", { desc = "switch to the directory of the open buffer" })
 vim.keymap.set("n", "<leader>=", "<c-w>=", { desc = "adjust viewports to the same size" })
-vim.keymap.set("n", "Q", ":q<cr>", { silent = true, desc = "quit the current window" })
-vim.keymap.set("n", "W", ":w<cr>", { silent = true, desc = "write the buffer to the current file" })
-vim.keymap.set("n", "_", ":sp<cr>", { silent = true, desc = "horizontal split current window" })
-vim.keymap.set("n", "<bar>", ":vsp<cr>", { silent = true, desc = "vertical split current window" })
-vim.keymap.set("n", "+", "<c-a>", { desc = "increment number" })
-vim.keymap.set("n", "=", "<c-a>", { desc = "increment number" })
-vim.keymap.set("n", "-", "<c-x>", { desc = "decrement number" })
-vim.keymap.set("n", "d", '"_d', { desc = "delete into blackhole register to not clobber the last yank" })
-vim.keymap.set("n", "dd", "dd", { desc = "delete and yank the current line" })
-vim.keymap.set("n", "c", '"_c', { desc = "change into the blackhole register to not clobber the last yank" })
-vim.keymap.set("n", "<c-a>r", ":redraw!<cr>", { silent = true, desc = "redraw the screen" })
+vim.keymap.set("n", "Q", "<cmd>q<cr>", { desc = "quit the current window" })
+vim.keymap.set("n", "<leader>q", "<cmd>qa<cr>", { desc = "exit vim" })
+vim.keymap.set("n", "<leader>Q", "<cmd>qa!<cr>", { desc = "exit vim losing changes" })
+vim.keymap.set("n", "<c-a>r", "<cmd>redraw!<cr>", { desc = "redraw the screen" })
 
 for i = 1, 9 do
-	vim.keymap.set("n", "<leader>w" .. i, ":" .. i .. "wincmd w<cr>", { silent = true, desc = "move to window " .. i })
-	vim.keymap.set("n", "<leader>" .. i, ":b" .. i .. "<cr>", { silent = true, desc = "move to buffer " .. i })
+	vim.keymap.set("n", "<leader>" .. i, "<cmd>" .. i .. "wincmd w<cr>", { desc = "move to window " .. i })
+	vim.keymap.set("n", "<leader>b" .. i, "<cmd>b" .. i .. "<cr>", { desc = "move to buffer " .. i })
 end
-
--- visual mode
-vim.keymap.set("x", "y", "y`]", { desc = "yank and go to end of selection" })
-vim.keymap.set(
-	"x",
-	"p",
-	'"_dP',
-	{ desc = "paste in visual mode should not replace the default register with the deleted text" }
-)
-vim.keymap.set(
-	"x",
-	"d",
-	'"_d',
-	{ desc = "delete into the blackhole register to not clobber the last yank. To 'cut', use 'x' instead" }
-)
-vim.keymap.set(
-	"x",
-	"<cr>",
-	'y:let @/ = @"<cr>:set hlsearch<cr>',
-	{ silent = true, desc = "highlight visual selections" }
-)
-vim.keymap.set("x", "<", "<gv", { desc = "retain visual selection after indent" })
-vim.keymap.set("x", ">", ">gv", { desc = "retain visual selection after indent" })
-vim.keymap.set("x", ".", ":normal.<cr>", { silent = true, desc = "repeats the last command on every line" })
-vim.keymap.set("x", "@", ":normal@@<cr>", { silent = true, desc = "repeats the last macro on every line" })
-vim.keymap.set("x", "<tab>", ">", { remap = true, desc = "indent" })
-vim.keymap.set("x", "<s-tab>", "<", { remap = true, desc = "unindent" })
-
--- visual and select mode
-vim.keymap.set("v", "<leader>s", ":sort<cr>", { desc = "sort" })
 
 -- command line mode
 vim.keymap.set("c", "<c-j>", "<down>", { desc = "down" })
@@ -159,9 +165,6 @@ vim.keymap.set("c", "<cr>", function()
 	end
 	return "<cr>"
 end, { expr = true })
-
--- insert mode
-vim.keymap.set("i", "<c-w>", "<c-g>u<c-w>", { desc = "delete previous word, create undo point" })
 
 -- terminal mode
 vim.keymap.set("t", "<c-y>", "<c-\\><c-n><c-y>", { desc = "scroll up one line" })

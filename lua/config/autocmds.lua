@@ -16,6 +16,10 @@ vim.api.nvim_create_autocmd("InsertLeave", {
 	command = "setlocal hlsearch",
 })
 
+if vim.g.vscode then
+	return
+end
+
 vim.api.nvim_create_autocmd("TextYankPost", {
 	desc = "highlight on yank",
 	group = init_group,
@@ -24,10 +28,6 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 		vim.highlight.on_yank()
 	end,
 })
-
-if vim.g.vscode then
-	return
-end
 
 vim.api.nvim_create_autocmd("WinEnter", {
 	desc = "check timestamp more for 'autoread'",

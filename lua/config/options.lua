@@ -38,13 +38,11 @@ vim.o.concealcursor = ""
 vim.o.showmode = false
 vim.o.showtabline = 2 -- prevent flicker, lualine shows info anyway
 vim.o.showcmd = false
-vim.o.number = true -- line numbers are good
 vim.o.scrolloff = 8 -- start scrolling when we're 8 lines away from margins
 vim.o.sidescrolloff = 15
 vim.o.scrolljump = 3
 vim.o.numberwidth = 1
 vim.o.cursorline = true
-vim.o.signcolumn = "yes"
 vim.o.expandtab = true
 vim.o.shiftround = true
 vim.o.clipboard = "unnamedplus,unnamed" -- use clipboard register
@@ -73,3 +71,8 @@ vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,
 vim.o.guifont = "JetBrainsMono Nerd Font Rubix:h12"
 
 vim.opt.isfname:remove({ "=" })
+
+if not vim.g.vscode then
+	vim.o.signcolumn = "yes"
+	vim.o.number = true -- line numbers are good
+end

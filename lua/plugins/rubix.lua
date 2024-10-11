@@ -7,6 +7,8 @@ local keys = {
 	},
 }
 
+local dependencies = {}
+
 if not vim.g.vscode then
 	table.insert(keys, {
 		"<leader>fa",
@@ -20,14 +22,13 @@ if not vim.g.vscode then
 		silent = true,
 		desc = "delete the current buffer without closing the window",
 	})
+	table.insert(dependencies, "hrsh7th/nvim-cmp")
 end
 
 return {
 	{
 		"joshuarubin/rubix.vim",
-		dependencies = {
-			"hrsh7th/nvim-cmp",
-		},
+		dependencies = dependencies,
 		opts = {},
 		keys = keys,
 	},
