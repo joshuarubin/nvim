@@ -63,8 +63,9 @@ return {
 		},
 	},
 	{
-		"TimUntersberger/neogit",
+		"NeogitOrg/neogit",
 		cond = not vim.g.vscode,
+		lazy = false,
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 			"sindrets/diffview.nvim",
@@ -87,6 +88,25 @@ return {
 				callback = function()
 					if git_opts.dir then
 						vim.cmd("lcd " .. git_opts.dir)
+					end
+				end,
+			})
+			vim.api.nvim_create_autocmd("BufWinEnter", {
+				pattern = "diffview://*",
+				callback = function(ev)
+					if vim.wo.diff then
+						return
+					end
+					pcall(vim.api.nvim_buf_del_keymap, ev.buf, "n", "<esc>")
+				end,
+			})
+			vim.api.nvim_create_autocmd("OptionSet", {
+				callback = function(ev)
+					if not vim.wo.diff then
+						return
+					end
+					if pcall(vim.api.nvim_buf_del_keymap, ev.buf, "n", "<esc>") then
+						return
 					end
 				end,
 			})
@@ -165,6 +185,7 @@ return {
 				)
 				vim.keymap.set("n", "<leader>hd", gs.diffthis, { buffer = bufnr, desc = "diff this" })
 				vim.keymap.set("n", "<leader>gd", gs.diffthis, { buffer = bufnr, desc = "diff this" })
+
 				vim.keymap.set("n", "<leader>hD", function()
 					gs.diffthis("~")
 				end, { buffer = bufnr, desc = "diff this ~" })
@@ -177,8 +198,6 @@ return {
 					":<C-U>Gitsigns select_hunk<CR>",
 					{ buffer = bufnr, desc = "select hunk" }
 				)
-
-				vim.api.nvim_set_option_value("eol", false, { buf = bufnr })
 			end,
 		},
 	},

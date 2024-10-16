@@ -2,7 +2,10 @@ if not vim.g.vscode then
 	return
 end
 
-local vscode = require("vscode")
+local vscode, ok = pcall(require, "vscode")
+if not ok then
+	return
+end
 
 for _, dir in ipairs({ "h", "j", "k", "l" }) do
 	local cmd = "<c-w>" .. dir

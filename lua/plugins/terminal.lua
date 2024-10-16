@@ -26,6 +26,11 @@ return {
 				border = "single", -- "single" | "double" | "shadow" | "curved"
 				winblend = 20,
 			},
+			on_open = function()
+				vim.defer_fn(function()
+					require("barbecue.ui").update()
+				end, 0)
+			end,
 		},
 		keys = {
 			{ open_mapping, desc = "open terminal" },
@@ -41,6 +46,9 @@ return {
 							cmd = "lazygit",
 							dir = vim.fn.expand("%:p:h"),
 							direction = "float",
+							float_opts = {
+								winblend = 0,
+							},
 						})
 						:toggle()
 				end,

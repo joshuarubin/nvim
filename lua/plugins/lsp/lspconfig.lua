@@ -42,7 +42,7 @@ servers.gopls = {
 				useany = true,
 			},
 			gofumpt = true,
-			["local"] = "github.com/joshuarubin",
+			["local"] = "github.com/joshuarubin,github.com/poolsideai",
 			staticcheck = true,
 			vulncheck = "Imports",
 		},
