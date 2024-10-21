@@ -2,19 +2,11 @@ return {
 	{
 		"folke/trouble.nvim",
 		cond = not vim.g.vscode,
-		cmd = "Trouble",
-		opts = {},
 		keys = {
-			{
-				"<leader>xx",
-				"<cmd>Trouble diagnostics toggle<cr>",
-				desc = "Diagnostics (Trouble)",
-			},
-			{
-				"<leader>xX",
-				"<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
-				desc = "Buffer Diagnostics (Trouble)",
-			},
+			{ "<leader>cs", false },
+			{ "<leader>cS", false },
+			{ "<leader>xL", false },
+			{ "<leader>xQ", false },
 			{
 				"<leader>xs",
 				"<cmd>Trouble symbols toggle focus=false<cr>",
@@ -22,7 +14,7 @@ return {
 			},
 			{
 				"<leader>xd",
-				"<cmd>Trouble lsp toggle focus=false win.position=right<cr>",
+				"<cmd>Trouble lsp toggle<cr>",
 				desc = "LSP Definitions / references / ... (Trouble)",
 			},
 			{

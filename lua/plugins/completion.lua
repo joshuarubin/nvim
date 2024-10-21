@@ -64,9 +64,10 @@ end
 local cmpSetup = function()
 	local cmp = require("cmp")
 	local lspkind = require("lspkind")
-	local icons = require("nvim-web-devicons")
 	local luasnip = require("luasnip")
 	local copilot_cmp_comparators = require("copilot_cmp.comparators")
+
+	vim.api.nvim_set_hl(0, "CmpGhostText", { link = "Comment", default = true })
 
 	require("luasnip/loaders/from_vscode").lazy_load()
 
@@ -80,21 +81,7 @@ local cmpSetup = function()
 	})
 
 	return {
-		enabled = function()
-			local disabled = false
-			disabled = disabled or (vim.api.nvim_get_option_value("buftype", { buf = 0 }) == "prompt")
-			disabled = disabled or (vim.fn.reg_recording() ~= "")
-			disabled = disabled or (vim.fn.reg_executing() ~= "")
-
-			if not disabled then
-				local ok, d = pcall(require("cmp.config.context").in_treesitter_capture, "comment")
-				if ok then
-					disabled = d
-				end
-			end
-
-			return not disabled
-		end,
+		auto_brackets = {},
 		window = {
 			completion = {
 				winhighlight = "Normal:Pmenu,FloatBorder:Pmenu,Search:None",
@@ -102,24 +89,19 @@ local cmpSetup = function()
 				side_padding = 0,
 			},
 		},
-		preselect = require("cmp.types").cmp.PreselectMode.None,
-		sources = {
+		preselect = cmp.PreselectMode.None,
+		main = "lazyvim.util.cmp",
+		sources = cmp.config.sources({
 			{ name = "luasnip" },
 			{ name = "copilot" },
 			{ name = "nvim_lsp" },
-			{ name = "nvim_lua" },
+			{ name = "lazydev", group_index = 0 },
+			{ name = "path" },
+		}, {
 			{
 				name = "buffer",
-				option = {
-					get_bufnrs = function()
-						return vim.api.nvim_list_bufs()
-					end,
-				},
 			},
-			{ name = "path" },
-			{ name = "emoji" },
-			{ name = "calc" },
-		},
+		}),
 		formatting = {
 			fields = { "kind", "abbr", "menu" },
 			format = function(entry, vim_item)
@@ -140,16 +122,24 @@ local cmpSetup = function()
 					calc = "",
 				})[entry.source.name]
 
-				if entry.source.name == "path" then
-					local icon = icons.get_icon(entry:get_completion_item().label)
-					if icon then
-						vim_item.kind = icon
-					end
-				else
+				local icons = LazyVim.config.icons.kinds
+				if icons[vim_item.kind] then
+					vim_item.kind = icons[vim_item.kind] .. vim_item.kind
 				end
 
 				vim_item.kind = vim_item.kind or ""
 				vim_item.kind = string.format(" %s ", vim_item.kind)
+
+				local widths = {
+					abbr = vim.g.cmp_widths and vim.g.cmp_widths.abbr or 40,
+					menu = vim.g.cmp_widths and vim.g.cmp_widths.menu or 30,
+				}
+
+				for key, width in pairs(widths) do
+					if vim_item[key] and vim.fn.strdisplaywidth(vim_item[key]) > width then
+						vim_item[key] = vim.fn.strcharpart(vim_item[key], 0, width - 1) .. "…"
+					end
+				end
 
 				return vim_item
 			end,
@@ -160,7 +150,9 @@ local cmpSetup = function()
 			end,
 		},
 		experimental = {
-			ghost_text = true,
+			ghost_text = {
+				hl_group = "CmpGhostText",
+			},
 		},
 		sorting = {
 			priority_weight = 2,
@@ -230,7 +222,6 @@ return {
 		cond = not vim.g.vscode,
 		dependencies = {
 			"onsails/lspkind.nvim",
-			"nvim-tree/nvim-web-devicons", -- optional dependency
 			"L3MON4D3/LuaSnip",
 			"zbirenbaum/copilot-cmp",
 		},
@@ -251,28 +242,7 @@ return {
 		},
 	},
 	{
-		"hrsh7th/cmp-calc",
-		cond = not vim.g.vscode,
-		dependencies = {
-			"hrsh7th/nvim-cmp",
-		},
-	},
-	{
-		"hrsh7th/cmp-emoji",
-		cond = not vim.g.vscode,
-		dependencies = {
-			"hrsh7th/nvim-cmp",
-		},
-	},
-	{
 		"hrsh7th/cmp-nvim-lsp",
-		cond = not vim.g.vscode,
-		dependencies = {
-			"hrsh7th/nvim-cmp",
-		},
-	},
-	{
-		"hrsh7th/cmp-nvim-lua",
 		cond = not vim.g.vscode,
 		dependencies = {
 			"hrsh7th/nvim-cmp",

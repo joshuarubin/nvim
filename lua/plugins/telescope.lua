@@ -74,6 +74,7 @@ return {
 				require("telescope.builtin").lsp_references,
 				desc = "lsp references (telescope)",
 			},
+			{ "<leader>gs", false },
 			{
 				"<leader>y",
 				require("telescope.builtin").lsp_document_symbols,

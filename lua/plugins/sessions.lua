@@ -35,7 +35,11 @@ return {
 			vim.api.nvim_create_autocmd({ "User" }, {
 				pattern = "SessionLoadPost",
 				callback = function()
-					require("nvim-tree.api").tree.toggle(false, true)
+					require("neo-tree.command").execute({
+						action = "show",
+						toggle = true,
+						dir = LazyVim.root(),
+					})
 				end,
 			})
 		end,

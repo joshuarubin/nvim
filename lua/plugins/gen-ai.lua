@@ -23,7 +23,6 @@ return {
 			"stevearc/dressing.nvim",
 			"nvim-lua/plenary.nvim",
 			"MunifTanjim/nui.nvim",
-			"nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
 			"zbirenbaum/copilot.lua",
 			"HakonHarnes/img-clip.nvim",
 			"MeanderingProgrammer/render-markdown.nvim",
@@ -78,7 +77,7 @@ return {
 			--- "claude" | "openai" | "azure" | "gemini" | "cohere" | "copilot"
 			provider = "claude", -- Recommend using Claude
 			-- Since auto-suggestions are a high-frequency operation and therefore expensive, it is recommended to specify an inexpensive provider or even a free provider: copilot
-			auto_suggestions_provider = "copilot",
+			auto_suggestions_provider = "claude",
 			claude = {
 				endpoint = "https://api.anthropic.com",
 				model = "claude-3-5-sonnet-20240620",
@@ -146,8 +145,6 @@ return {
 	{
 		"zbirenbaum/copilot.lua",
 		cond = not vim.g.vscode,
-		cmd = "Copilot",
-		event = "InsertEnter",
 		opts = {
 			panel = {
 				enabled = false,
@@ -180,8 +177,8 @@ return {
 			},
 			filetypes = {
 				yaml = false,
-				markdown = false,
-				help = false,
+				markdown = true,
+				help = true,
 				gitcommit = false,
 				gitrebase = false,
 				hgcommit = false,
@@ -190,7 +187,6 @@ return {
 				["."] = false,
 			},
 			copilot_node_command = "node", -- Node.js version must be > 18.x
-			server_opts_overrides = {},
 		},
 	},
 	{
@@ -205,6 +201,14 @@ return {
 		config = function(_, opts)
 			require("CopilotChat").setup(opts)
 			require("CopilotChat.integrations.cmp").setup()
+
+			vim.api.nvim_create_autocmd("BufEnter", {
+				pattern = "copilot-chat",
+				callback = function()
+					vim.opt_local.relativenumber = false
+					vim.opt_local.number = false
+				end,
+			})
 		end,
 		opts = {
 			mappings = {

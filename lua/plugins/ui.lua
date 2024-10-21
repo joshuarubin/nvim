@@ -1,6 +1,6 @@
 return {
 	{
-		"ryanoasis/vim-devicons",
+		"lukas-reineke/indent-blankline.nvim",
 		cond = not vim.g.vscode,
 	},
 	{
@@ -9,17 +9,11 @@ return {
 		opts = {},
 	},
 	{
-		"lukas-reineke/indent-blankline.nvim",
+		"folke/noice.nvim",
 		cond = not vim.g.vscode,
-		main = "ibl",
-		config = function()
-			local ok, ibl = pcall(require, "ibl")
-			if not ok then
-				vim.notify("ibl not found", vim.log.levels.WARN)
-				return
-			end
-
-			ibl.setup()
-		end,
+		keys = {
+			{ "<c-b>", false },
+			{ "<c-f>", false },
+		},
 	},
 }

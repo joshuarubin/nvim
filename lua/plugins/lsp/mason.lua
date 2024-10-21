@@ -6,21 +6,18 @@ return {
 	{
 		"williamboman/mason-lspconfig.nvim",
 		cond = not vim.g.vscode,
-		dependencies = {
-			"williamboman/mason.nvim",
-		},
-		config = function()
+		config = function(_, opts)
 			local mason = require("mason")
 			local mason_registry = require("mason-registry")
 			local mason_lspconfig = require("mason-lspconfig")
 
-			mason.setup({})
+			mason.setup(opts)
 
 			mason_lspconfig.setup({
 				automatic_installation = {
 					exclude = {
 						"clangd",
-						"hls",
+						"rust-analyzer",
 						"zls",
 					},
 				},

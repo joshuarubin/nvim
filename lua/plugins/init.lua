@@ -1,4 +1,19 @@
 return {
+	{
+		"folke/lazy.nvim",
+		version = false,
+	},
+	{
+		"LazyVim/LazyVim",
+		version = false,
+		opts = {
+			colorscheme = "gruvbox",
+			news = {
+				lazyvim = false,
+				neovim = false,
+			},
+		},
+	},
 	"tpope/vim-surround", -- quoting/parenthesizing made simple
 	"tpope/vim-repeat", -- enable repeating supported plugin maps with `.`
 	"tpope/vim-eunuch", -- helpers for unix

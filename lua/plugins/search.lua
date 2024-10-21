@@ -1,15 +1,25 @@
 return {
 	{
+		"folke/flash.nvim",
+		keys = {
+			{ "s", false },
+			{ "S", false },
+			{ "r", false },
+			{ "R", false },
+			{
+				"<c-s>",
+				mode = { "c" },
+				function()
+					require("flash").toggle()
+				end,
+				desc = "Toggle Flash Search",
+			},
+		},
+	},
+	{
 		"kevinhwang91/nvim-hlslens",
 		cond = not vim.g.vscode,
-		config = function()
-			local ok, hlslens = pcall(require, "hlslens")
-			if not ok then
-				vim.notify("hlslens not found", vim.log.levels.WARN)
-				return
-			end
-			hlslens.setup()
-		end,
+		opts = {},
 		keys = {
 			{
 				"n",

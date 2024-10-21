@@ -4,9 +4,6 @@ return {
 		cond = not vim.g.vscode,
 		lazy = false,
 		branch = "buf-history-order",
-		dependencies = {
-			"nvim-tree/nvim-web-devicons",
-		},
 		opts = {
 			display_time = 1500,
 			style = {

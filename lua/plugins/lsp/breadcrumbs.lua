@@ -11,7 +11,6 @@ return {
 		cond = not vim.g.vscode,
 		dependencies = {
 			"SmiteshP/nvim-navic",
-			"nvim-tree/nvim-web-devicons", -- optional dependency
 		},
 		opts = {},
 	},

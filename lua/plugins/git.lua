@@ -126,6 +126,13 @@ return {
 				topdelete = { text = "█▔" },
 				changedelete = { text = "█▟" },
 			},
+			signs_staged = {
+				add = { text = "█│" },
+				change = { text = "█┆" },
+				delete = { text = "█▁" },
+				topdelete = { text = "█▔" },
+				changedelete = { text = "█▟" },
+			},
 			signs_staged_enable = false,
 			trouble = true,
 			current_line_blame = true,
@@ -185,7 +192,6 @@ return {
 				)
 				vim.keymap.set("n", "<leader>hd", gs.diffthis, { buffer = bufnr, desc = "diff this" })
 				vim.keymap.set("n", "<leader>gd", gs.diffthis, { buffer = bufnr, desc = "diff this" })
-
 				vim.keymap.set("n", "<leader>hD", function()
 					gs.diffthis("~")
 				end, { buffer = bufnr, desc = "diff this ~" })

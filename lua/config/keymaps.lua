@@ -169,3 +169,6 @@ end, { expr = true })
 -- terminal mode
 vim.keymap.set("t", "<c-y>", "<c-\\><c-n><c-y>", { desc = "scroll up one line" })
 vim.keymap.set("t", "<c-u>", "<c-\\><c-n><c-u>", { desc = "scroll up half a screen" })
+
+-- delete lazyvim keymaps
+vim.keymap.del("n", "<leader>qq")

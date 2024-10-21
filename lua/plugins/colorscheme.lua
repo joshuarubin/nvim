@@ -1,5 +1,10 @@
 return {
 	{
+		"ellisonleao/gruvbox.nvim",
+		priority = 1000,
+		config = true,
+	},
+	{
 		"rebelot/kanagawa.nvim",
 		cond = not vim.g.vscode,
 		lazy = false,
@@ -12,9 +17,6 @@ return {
 				light = "lotus",
 			},
 		},
-		init = function()
-			vim.cmd([[colorscheme kanagawa]])
-		end,
 	},
 	{
 		"norcalli/nvim-colorizer.lua",

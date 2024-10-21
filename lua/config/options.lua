@@ -6,6 +6,9 @@ local function backupdir()
 	return ret
 end
 
+vim.g.mapleader = ","
+vim.g.maplocalleader = ","
+
 vim.o.shada = "!,'1000,<50,s10,h"
 vim.o.dictionary = "/usr/share/dict/words"
 vim.o.undofile = true -- persistent undo
@@ -32,7 +35,6 @@ vim.o.splitright = true
 vim.o.splitbelow = true
 vim.o.diffopt = "internal,filler,closeoff,vertical,foldcolumn:0"
 vim.o.winheight = 10
-vim.o.lazyredraw = true
 vim.o.conceallevel = 2
 vim.o.concealcursor = ""
 vim.o.showmode = false
@@ -69,6 +71,7 @@ vim.o.mouse = "nv"
 vim.o.spell = false
 vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal"
 vim.o.guifont = "JetBrainsMono Nerd Font Rubix:h12"
+vim.o.foldlevel = 99
 
 vim.opt.isfname:remove({ "=" })
 
