@@ -17,5 +17,4 @@ repos:
       - id: check-yaml
       - id: detect-private-key
       - id: end-of-file-fixer
-        exclude: ^go\.mod$
       - id: trailing-whitespace
