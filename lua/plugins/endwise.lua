@@ -4,7 +4,6 @@ return {
 		init = function()
 			vim.g.endwise_no_mappings = 1
 		end,
-		cond = not vim.g.vscode,
 		lazy = false,
 		keys = {
 			{

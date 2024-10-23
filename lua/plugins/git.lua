@@ -57,14 +57,12 @@ vim.cmd.highlight("GitSignsCurrentLineBlame gui=italic guifg=#564d43")
 return {
 	{
 		"sindrets/diffview.nvim",
-		cond = not vim.g.vscode,
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 		},
 	},
 	{
 		"NeogitOrg/neogit",
-		cond = not vim.g.vscode,
 		lazy = false,
 		dependencies = {
 			"nvim-lua/plenary.nvim",
@@ -114,10 +112,6 @@ return {
 	},
 	{
 		"lewis6991/gitsigns.nvim",
-		cond = not vim.g.vscode,
-		dependencies = {
-			"nvim-lua/plenary.nvim",
-		},
 		opts = {
 			signs = {
 				add = { text = "█│" },
@@ -140,70 +134,54 @@ return {
 			on_attach = function(bufnr)
 				local gs = package.loaded.gitsigns
 
+				local function map(mode, l, r, desc)
+					vim.keymap.set(mode, l, r, { buffer = bufnr, desc = desc })
+				end
+
 				-- Navigation
-				vim.keymap.set("n", "]c", function()
+				map("n", "]c", function()
 					if vim.wo.diff then
-						return "]c"
+						vim.cmd.normal({ "]c", bang = true })
+					else
+						gs.nav_hunk("next")
 					end
-					vim.schedule(function()
-						gs.next_hunk()
-					end)
-					return "<Ignore>"
-				end, { expr = true, buffer = bufnr, desc = "next hunk" })
+				end, "Next Hunk")
 
-				vim.keymap.set("n", "[c", function()
+				map("n", "[c", function()
 					if vim.wo.diff then
-						return "[c"
+						vim.cmd.normal({ "[c", bang = true })
+					else
+						gs.nav_hunk("prev")
 					end
-					vim.schedule(function()
-						gs.prev_hunk()
-					end)
-					return "<Ignore>"
-				end, { expr = true, buffer = bufnr, desc = "prev hunk" })
+				end, "Prev Hunk")
 
-				-- Actions
-				vim.keymap.set(
-					{ "n", "v" },
-					"<leader>hs",
-					":Gitsigns stage_hunk<CR>",
-					{ buffer = bufnr, desc = "stage hunk" }
-				)
-				vim.keymap.set(
-					{ "n", "v" },
-					"<leader>hr",
-					":Gitsigns reset_hunk<CR>",
-					{ buffer = bufnr, desc = "reset hunk" }
-				)
-				vim.keymap.set("n", "<leader>hS", gs.stage_buffer, { buffer = bufnr, desc = "stage buffer" })
-				vim.keymap.set("n", "<leader>hu", gs.undo_stage_hunk, { buffer = bufnr, desc = "undo stage hunk" })
-				vim.keymap.set("n", "<leader>hR", gs.reset_buffer, { buffer = bufnr, desc = "git reset buffer" })
-				vim.keymap.set("n", "<leader>hp", gs.preview_hunk, { buffer = bufnr, desc = "preview hunk" })
-				vim.keymap.set("n", "<leader>hb", function()
+				map("n", "]C", function()
+					gs.nav_hunk("last")
+				end, "Last Hunk")
+
+				map("n", "[C", function()
+					gs.nav_hunk("first")
+				end, "First Hunk")
+
+				map({ "n", "v" }, "<leader>ghs", ":Gitsigns stage_hunk<CR>", "Stage Hunk")
+				map({ "n", "v" }, "<leader>ghr", ":Gitsigns reset_hunk<CR>", "Reset Hunk")
+				map("n", "<leader>ghS", gs.stage_buffer, "Stage Buffer")
+				map("n", "<leader>ghu", gs.undo_stage_hunk, "Undo Stage Hunk")
+				map("n", "<leader>ghR", gs.reset_buffer, "Reset Buffer")
+				map("n", "<leader>ghp", gs.preview_hunk_inline, "Preview Hunk Inline")
+				map("n", "<leader>ghb", function()
 					gs.blame_line({ full = true })
-				end, { buffer = bufnr, desc = "blame line" })
-				vim.keymap.set("n", "<leader>gw", function()
-					gs.blame_line({ full = true })
-				end, { buffer = bufnr, desc = "blame line" })
-				vim.keymap.set(
-					"n",
-					"<leader>tb",
-					gs.toggle_current_line_blame,
-					{ buffer = bufnr, desc = "toggle current line blame" }
-				)
-				vim.keymap.set("n", "<leader>hd", gs.diffthis, { buffer = bufnr, desc = "diff this" })
-				vim.keymap.set("n", "<leader>gd", gs.diffthis, { buffer = bufnr, desc = "diff this" })
-				vim.keymap.set("n", "<leader>hD", function()
+				end, "Blame Line")
+				map("n", "<leader>ghB", function()
+					gs.blame()
+				end, "Blame Buffer")
+				map("n", "<leader>ghd", gs.diffthis, "Diff This")
+				map("n", "<leader>ghD", function()
 					gs.diffthis("~")
-				end, { buffer = bufnr, desc = "diff this ~" })
-				vim.keymap.set("n", "<leader>td", gs.toggle_deleted, { buffer = bufnr, desc = "git toggle deleted" })
+				end, "Diff This ~")
+				map({ "o", "x" }, "ih", ":<C-U>Gitsigns select_hunk<CR>", "GitSigns Select Hunk")
 
-				-- Text object
-				vim.keymap.set(
-					{ "o", "x" },
-					"ih",
-					":<C-U>Gitsigns select_hunk<CR>",
-					{ buffer = bufnr, desc = "select hunk" }
-				)
+				vim.keymap.set("n", "<leader>gd", "<leader>ghd", { remap = true, buffer = bufnr, desc = "Diff This" })
 			end,
 		},
 	},

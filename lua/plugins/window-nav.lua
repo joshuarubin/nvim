@@ -28,7 +28,6 @@ end
 return {
 	{
 		"numToStr/Navigator.nvim",
-		cond = not vim.g.vscode,
 		keys = keys,
 		opts = {},
 	},

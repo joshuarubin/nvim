@@ -1,9 +1,7 @@
 -- normal mode
 vim.keymap.set("n", "<leader>n", "<cmd>nohlsearch<cr>", { desc = "nohlsearch" })
 vim.keymap.set("n", "<leader>fc", "/\\v^[<|=>]{7}( .*|$)<cr>", { desc = "find merge conflict markers" })
-vim.keymap.set("n", "+", "<c-a>", { desc = "increment number" })
-vim.keymap.set("n", "=", "<c-a>", { desc = "increment number" })
-vim.keymap.set("n", "-", "<c-x>", { desc = "decrement number" })
+
 vim.keymap.set("n", "d", '"_d', { desc = "delete into blackhole register to not clobber the last yank" })
 vim.keymap.set("n", "dd", "dd", { desc = "delete and yank the current line" })
 vim.keymap.set("n", "c", '"_c', { desc = "change into the blackhole register to not clobber the last yank" })
@@ -40,10 +38,6 @@ vim.keymap.set("v", "<leader>s", ":sort<cr>", { desc = "sort" })
 
 -- insert mode
 vim.keymap.set("i", "<c-w>", "<c-g>u<c-w>", { desc = "delete previous word, create undo point" })
-
-if vim.g.vscode then
-	return
-end
 
 local function t(keys)
 	return vim.api.nvim_replace_termcodes(keys, true, true, true)
@@ -101,7 +95,7 @@ vim.keymap.set(
 	"i",
 	"<c-a>L",
 	'<c-r>=execute("normal! \\<lt>c-w>>")<cr>',
-	{ silent = true, desc = "increase current window widt" }
+	{ silent = true, desc = "increase current window width" }
 )
 
 vim.keymap.set(
@@ -120,13 +114,13 @@ vim.keymap.set(
 	"i",
 	"<d-k>",
 	'<c-r>=execute("normal! \\<lt>c-w>-")<cr>',
-	{ silent = true, desc = "decrease current window heigh" }
+	{ silent = true, desc = "decrease current window height" }
 )
 vim.keymap.set(
 	"i",
 	"<d-l>",
 	'<c-r>=execute("normal! \\<lt>c-w>>")<cr>',
-	{ silent = true, desc = "increase current window widt" }
+	{ silent = true, desc = "increase current window width" }
 )
 
 vim.keymap.set("t", "<c-a>H", "<c-\\><c-n><c-w><i", { desc = "decrease current window width" })
@@ -147,11 +141,6 @@ vim.keymap.set("n", "<leader>q", "<cmd>qa<cr>", { desc = "exit vim" })
 vim.keymap.set("n", "<leader>Q", "<cmd>qa!<cr>", { desc = "exit vim losing changes" })
 vim.keymap.set("n", "<c-a>r", "<cmd>redraw!<cr>", { desc = "redraw the screen" })
 
-for i = 1, 9 do
-	vim.keymap.set("n", "<leader>" .. i, "<cmd>" .. i .. "wincmd w<cr>", { desc = "move to window " .. i })
-	vim.keymap.set("n", "<leader>b" .. i, "<cmd>b" .. i .. "<cr>", { desc = "move to buffer " .. i })
-end
-
 -- command line mode
 vim.keymap.set("c", "<c-j>", "<down>", { desc = "down" })
 vim.keymap.set("c", "<c-k>", "<up>", { desc = "up" })
@@ -170,5 +159,8 @@ end, { expr = true })
 vim.keymap.set("t", "<c-y>", "<c-\\><c-n><c-y>", { desc = "scroll up one line" })
 vim.keymap.set("t", "<c-u>", "<c-\\><c-n><c-u>", { desc = "scroll up half a screen" })
 
+vim.keymap.set({ "n", "t" }, "<c-x>", "<c-/>", { remap = true })
+
 -- delete lazyvim keymaps
 vim.keymap.del("n", "<leader>qq")
+vim.keymap.del({ "i", "x", "n", "s" }, "<c-s>")

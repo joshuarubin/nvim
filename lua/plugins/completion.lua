@@ -71,15 +71,6 @@ local cmpSetup = function()
 
 	require("luasnip/loaders/from_vscode").lazy_load()
 
-	-- clear luasnip jump points when leaving insert mode
-	vim.api.nvim_create_autocmd("InsertLeave", {
-		callback = function()
-			while luasnip.jumpable() do
-				luasnip.unlink_current()
-			end
-		end,
-	})
-
 	return {
 		auto_brackets = {},
 		window = {
@@ -217,55 +208,9 @@ local cmpSetup = function()
 end
 
 return {
+	"onsails/lspkind.nvim",
 	{
 		"hrsh7th/nvim-cmp",
-		cond = not vim.g.vscode,
-		dependencies = {
-			"onsails/lspkind.nvim",
-			"L3MON4D3/LuaSnip",
-			"zbirenbaum/copilot-cmp",
-		},
 		opts = cmpSetup,
-	},
-	{
-		"hrsh7th/cmp-path",
-		cond = not vim.g.vscode,
-		dependencies = {
-			"hrsh7th/nvim-cmp",
-		},
-	},
-	{
-		"hrsh7th/cmp-buffer",
-		cond = not vim.g.vscode,
-		dependencies = {
-			"hrsh7th/nvim-cmp",
-		},
-	},
-	{
-		"hrsh7th/cmp-nvim-lsp",
-		cond = not vim.g.vscode,
-		dependencies = {
-			"hrsh7th/nvim-cmp",
-		},
-	},
-	{
-		"saadparwaiz1/cmp_luasnip",
-		cond = not vim.g.vscode,
-		dependencies = {
-			"hrsh7th/nvim-cmp",
-		},
-	},
-	{
-		"zbirenbaum/copilot-cmp",
-		cond = not vim.g.vscode,
-		opts = {},
-	},
-	{
-		"L3MON4D3/LuaSnip",
-		cond = not vim.g.vscode,
-	},
-	{
-		"rafamadriz/friendly-snippets",
-		cond = not vim.g.vscode,
 	},
 }

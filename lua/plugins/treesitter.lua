@@ -1,51 +1,10 @@
 return {
 	{
 		"nvim-treesitter/nvim-treesitter",
-		dependencies = {
-			"nvim-treesitter/nvim-treesitter-textobjects",
-		},
-		build = ":TSUpdate",
-		config = function(_, opts)
-			require("nvim-treesitter.configs").setup(opts)
-		end,
 		opts = {
-			auto_install = true,
-			sync_install = true,
-			ensure_installed = {
-				"c",
-				"lua",
-				"query",
-				"vim",
-				"vimdoc",
-			},
-			highlight = { enable = true },
-			-- indent = { enable = true }, -- TODO(jawa) this is too experimental right now, enable when possible
-			incremental_selection = {
-				enable = true,
-				keymaps = {
-					init_selection = "gnn",
-					node_incremental = "grn",
-					scope_incremental = "grc",
-					node_decremental = "grm",
-				},
-			},
-			context_commentstring = {
-				enable = true,
-			},
 			textobjects = {
-				select = {
-					enable = true,
-					lookahead = true, -- Automatically jump forward to textobj, similar to targets.vim
-					keymaps = {
-						["af"] = "@function.outer",
-						["if"] = "@function.inner",
-						["ac"] = "@class.outer",
-						["ic"] = "@class.inner",
-					},
-				},
 				move = {
 					enable = true,
-					set_jumps = true, -- whether to set jumps in the jumplist
 					goto_next_start = {
 						["]]"] = "@function.outer",
 						["]m"] = "@class.outer",
@@ -65,6 +24,18 @@ return {
 				},
 			},
 		},
+		config = function(_, opts)
+			if type(opts.ensure_installed) == "table" then
+				opts.ensure_installed = LazyVim.dedup(opts.ensure_installed)
+			end
+
+			opts.textobjects.move.goto_next_start["]c"] = nil
+			opts.textobjects.move.goto_next_end["]C"] = nil
+			opts.textobjects.move.goto_previous_start["[c"] = nil
+			opts.textobjects.move.goto_previous_end["[C"] = nil
+
+			require("nvim-treesitter.configs").setup(opts)
+		end,
 	},
 	"nvim-treesitter/nvim-treesitter-textobjects",
 	{
@@ -76,7 +47,6 @@ return {
 	},
 	{
 		"joshuarubin/go-return.nvim",
-		cond = not vim.g.vscode,
 		branch = "main",
 		dependencies = {
 			"nvim-treesitter/nvim-treesitter",

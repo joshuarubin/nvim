@@ -14,10 +14,6 @@ vim.api.nvim_create_autocmd("InsertLeave", {
 	command = "setlocal hlsearch",
 })
 
-if vim.g.vscode then
-	return
-end
-
 vim.api.nvim_create_autocmd("TextYankPost", {
 	desc = "highlight on yank",
 	group = init_group,
@@ -76,7 +72,7 @@ vim.api.nvim_create_autocmd("FileType", {
 vim.api.nvim_create_autocmd("FileType", {
 	desc = "disable showbreak for markdown files",
 	group = init_group,
-	pattern = { "markdown", "Avante" },
+	pattern = { "markdown", "norg", "rmd", "org", "Avante" },
 	callback = function()
 		vim.wo.showbreak = ""
 	end,

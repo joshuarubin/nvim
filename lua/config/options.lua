@@ -72,10 +72,7 @@ vim.o.spell = false
 vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal"
 vim.o.guifont = "JetBrainsMono Nerd Font Rubix:h12"
 vim.o.foldlevel = 99
+vim.o.signcolumn = "yes"
+vim.o.number = true -- line numbers are good
 
 vim.opt.isfname:remove({ "=" })
-
-if not vim.g.vscode then
-	vim.o.signcolumn = "yes"
-	vim.o.number = true -- line numbers are good
-end

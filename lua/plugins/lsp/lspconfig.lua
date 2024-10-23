@@ -9,6 +9,7 @@ local servers = {
 	pyright = {},
 	terraformls = {},
 	tflint = {},
+	ts_ls = { autostart = false },
 	vimls = {},
 	zls = {},
 }
@@ -122,7 +123,6 @@ end)
 return {
 	{
 		"neovim/nvim-lspconfig",
-		cond = not vim.g.vscode,
 		opts = function()
 			local keys = require("lazyvim.plugins.lsp.keymaps").get()
 			keys[#keys + 1] = { "[[", false }

@@ -1,7 +1,6 @@
 return {
 	{
 		"stevearc/conform.nvim",
-		cond = not vim.g.vscode,
 		opts = {
 			default_format_opts = {
 				timeout_ms = 3000,
@@ -10,33 +9,19 @@ return {
 				lsp_format = "fallback", -- not recommended to change
 			},
 			formatters_by_ft = {
-				["markdown.mdx"] = { "prettier" },
+				["markdown"] = { "markdown-toc", "prettier", "markdownlint-cli2" },
+				["markdown.mdx"] = { "markdown-toc", "prettier", "markdownlint-cli2" },
 				["terraform-vars"] = { "tofu_fmt" },
-				css = { "prettier" },
 				fish = { "fish_indent" },
 				go = { "goimports" },
-				graphql = { "prettier" },
-				handlebars = { "prettier" },
-				html = { "prettier" },
-				javascript = { "prettier" },
-				javascriptreact = { "prettier" },
-				json = { "prettier" },
-				jsonc = { "prettier" },
-				less = { "prettier" },
 				lua = { "stylua" },
 				luau = { "stylua" },
-				markdown = { "prettier" },
 				nix = { "alejandra" },
 				proto = { "buf" },
-				scss = { "prettier" },
 				sh = { "shfmt" },
 				sql = { "sqlfluff" },
 				terraform = { "tofu_fmt" },
 				tf = { "tofu_fmt" },
-				typescript = { "prettier" },
-				typescriptreact = { "prettier" },
-				vue = { "prettier" },
-				yaml = { "prettier" },
 			},
 			formatters = {
 				injected = { options = { ignore_errors = true } },

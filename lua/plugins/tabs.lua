@@ -1,7 +1,6 @@
 return {
 	{
 		"akinsho/bufferline.nvim",
-		cond = not vim.g.vscode,
 		opts = {
 			options = {
 				numbers = function(opts)

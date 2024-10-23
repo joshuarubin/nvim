@@ -1,8 +1,9 @@
 return {
 	{
 		"rcarriga/nvim-dap-ui",
-		cond = not vim.g.vscode,
 		config = function(_, opts)
+			-- override LazyVim config to prevent automatic closing of dapui on
+			-- exit and terminated events
 			local dap = require("dap")
 			local dapui = require("dapui")
 			dapui.setup(opts)
@@ -10,35 +11,5 @@ return {
 				dapui.open({})
 			end
 		end,
-	},
-	{
-		"leoluz/nvim-dap-go",
-		cond = not vim.g.vscode,
-		config = true,
-		keys = {
-			{
-				"<leader>td",
-				function()
-					require("dap-go").debug_test()
-				end,
-				desc = "Debug Go test",
-			},
-			{
-				"<leader>tl",
-				function()
-					require("dap-go").debug_last_test()
-				end,
-				desc = "Debug Last Go test",
-			},
-		},
-	},
-	{
-		"jay-babu/mason-nvim-dap.nvim",
-		cond = not vim.g.vscode,
-		opts = {
-			ensure_installed = {
-				"delve",
-			},
-		},
 	},
 }

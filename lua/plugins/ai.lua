@@ -1,7 +1,6 @@
 return {
 	{
 		"HakonHarnes/img-clip.nvim",
-		cond = not vim.g.vscode,
 		event = "VeryLazy",
 		opts = {
 			default = {
@@ -15,7 +14,6 @@ return {
 	},
 	{
 		"yetone/avante.nvim",
-		cond = not vim.g.vscode,
 		event = "VeryLazy",
 		lazy = false,
 		build = "make",
@@ -41,6 +39,12 @@ return {
 			end
 
 			local mappings = {
+				{
+					opts.mappings.group,
+					"",
+					desc = "+ai",
+					mode = { "n", "v" },
+				},
 				{
 					opts.mappings.ask,
 					function()
@@ -93,6 +97,7 @@ return {
 				support_paste_from_clipboard = false,
 			},
 			mappings = {
+				group = "<leader>a",
 				ask = "<leader>aa", -- ask
 				edit = "<leader>ae", -- edit
 				refresh = "<leader>ar", -- refresh
@@ -144,7 +149,6 @@ return {
 	},
 	{
 		"zbirenbaum/copilot.lua",
-		cond = not vim.g.vscode,
 		opts = {
 			panel = {
 				enabled = false,
@@ -187,60 +191,6 @@ return {
 				["."] = false,
 			},
 			copilot_node_command = "node", -- Node.js version must be > 18.x
-		},
-	},
-	{
-		"CopilotC-Nvim/CopilotChat.nvim",
-		cond = not vim.g.vscode,
-		branch = "canary",
-		dependencies = {
-			{ "zbirenbaum/copilot.lua" }, -- or github/copilot.vim
-			{ "nvim-lua/plenary.nvim" }, -- for curl, log wrapper
-		},
-		build = "make tiktoken", -- Only on MacOS or Linux
-		config = function(_, opts)
-			require("CopilotChat").setup(opts)
-			require("CopilotChat.integrations.cmp").setup()
-
-			vim.api.nvim_create_autocmd("BufEnter", {
-				pattern = "copilot-chat",
-				callback = function()
-					vim.opt_local.relativenumber = false
-					vim.opt_local.number = false
-				end,
-			})
-		end,
-		opts = {
-			mappings = {
-				complete = {
-					insert = "",
-				},
-			},
-		},
-		keys = {
-			{
-				"<leader>cct",
-				function()
-					require("CopilotChat").toggle({ selection = require("CopilotChat.select").buffer })
-				end,
-				desc = "CopilotChat",
-			},
-			{
-				"<leader>cch",
-				function()
-					local actions = require("CopilotChat.actions")
-					require("CopilotChat.integrations.telescope").pick(actions.help_actions())
-				end,
-				desc = "CopilotChat - Help actions",
-			},
-			{
-				"<leader>ccp",
-				function()
-					local actions = require("CopilotChat.actions")
-					require("CopilotChat.integrations.telescope").pick(actions.prompt_actions())
-				end,
-				desc = "CopilotChat - Prompt actions",
-			},
 		},
 	},
 }

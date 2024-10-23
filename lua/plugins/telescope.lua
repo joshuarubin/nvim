@@ -1,7 +1,6 @@
 return {
 	{
 		"nvim-telescope/telescope.nvim",
-		cond = not vim.g.vscode,
 		dependencies = {
 			"nvim-lua/popup.nvim",
 			"nvim-lua/plenary.nvim",
@@ -48,43 +47,53 @@ return {
 			},
 		},
 		keys = {
-			{
-				"<c-b>",
-				require("telescope.builtin").buffers,
-				mode = { "n", "t" },
-				desc = "buffers (telescope)",
-			},
-			{
-				"gd",
-				require("telescope.builtin").lsp_definitions,
-				desc = "lsp definitions (telescope)",
-			},
-			{
-				"gi",
-				require("telescope.builtin").lsp_implementations,
-				desc = "lsp implementations (telescope)",
-			},
-			{
-				"gy",
-				require("telescope.builtin").lsp_type_definitions,
-				desc = "lsp type definitions (telescope)",
-			},
-			{
-				"gr",
-				require("telescope.builtin").lsp_references,
-				desc = "lsp references (telescope)",
-			},
 			{ "<leader>gs", false },
 			{
-				"<leader>y",
-				require("telescope.builtin").lsp_document_symbols,
-				desc = "lsp document symbols (telescope)",
+				"<c-b>",
+				"<leader>,",
+				mode = { "n" },
+				remap = true,
+				desc = "Switch Buffer",
+			},
+			{
+				"<c-p>",
+				"<leader><space>",
+				mode = { "n" },
+				remap = true,
+				desc = "Find Files (Root Dir)",
+			},
+			{
+				"<c-f>",
+				"<leader>fr",
+				mode = { "n" },
+				remap = true,
+				desc = "Recent",
+			},
+			{
+				"<c-s><c-s>",
+				"<leader>sw",
+				mode = { "n" },
+				remap = true,
+				desc = "Word (Root Dir)",
+			},
+			{
+				"<c-s><c-s>",
+				"<leader>sw",
+				mode = { "v" },
+				remap = true,
+				desc = "Selection (Root Dir)",
+			},
+			{
+				"<c-s><c-d>",
+				"<leader>sg",
+				mode = { "n" },
+				remap = true,
+				desc = "Grep (Root Dir)",
 			},
 		},
 	},
 	{
 		"nvim-telescope/telescope-fzf-native.nvim",
-		cond = not vim.g.vscode,
 		dependencies = {
 			"nvim-telescope/telescope.nvim",
 		},
@@ -95,7 +104,6 @@ return {
 	},
 	{
 		"jvgrootveld/telescope-zoxide",
-		cond = not vim.g.vscode,
 		dependencies = {
 			"nvim-telescope/telescope.nvim",
 		},
@@ -104,53 +112,11 @@ return {
 		end,
 		keys = {
 			{
-				"<leader>z",
+				"<leader>sz",
 				function()
 					require("telescope").extensions.zoxide.list()
 				end,
-				desc = "zoxide list (telescope)",
-			},
-		},
-	},
-	{
-		"joshuarubin/rubix-telescope.nvim",
-		cond = not vim.g.vscode,
-		dependencies = {
-			"joshuarubin/rubix.vim",
-			"nvim-telescope/telescope.nvim",
-		},
-		config = function()
-			require("telescope").load_extension("rubix")
-		end,
-		keys = {
-			{
-				"<c-p>",
-				function()
-					require("telescope").extensions.rubix.find_files()
-				end,
-				mode = { "n", "t" },
-				desc = "find files (telescope)",
-			},
-			{
-				"<c-f>",
-				function()
-					require("telescope").extensions.rubix.history()
-				end,
-				desc = "file history (telescope)",
-			},
-			{
-				"<c-s><c-s>",
-				function()
-					require("telescope").extensions.rubix.grep_string()
-				end,
-				desc = "grep for string under cursor (telescope)",
-			},
-			{
-				"<c-s><c-d>",
-				function()
-					require("telescope").extensions.rubix.live_grep()
-				end,
-				desc = "live grep (telescope)",
+				desc = "Zoxide",
 			},
 		},
 	},
