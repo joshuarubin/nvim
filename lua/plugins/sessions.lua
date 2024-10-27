@@ -39,6 +39,9 @@ return {
 						toggle = true,
 						dir = LazyVim.root(),
 					})
+					vim.defer_fn(function()
+						vim.cmd.wincmd("=")
+					end, 150)
 				end,
 			})
 		end,

@@ -1,29 +1,12 @@
 return {
 	{
 		"nvim-telescope/telescope.nvim",
-		dependencies = {
-			"nvim-lua/popup.nvim",
-			"nvim-lua/plenary.nvim",
-		},
 		opts = {
 			defaults = {
-				vimgrep_arguments = {
-					"rg",
-					"--with-filename",
-					"--no-heading",
-					"--line-number",
-					"--column",
-					"--hidden",
-					"--smart-case",
-					"--follow",
-					"--color=never",
-				},
 				layout_config = {
 					prompt_position = "top",
 				},
 				sorting_strategy = "ascending",
-				set_env = { ["COLORTERM"] = "truecolor" },
-
 				mappings = {
 					i = {
 						["<esc>"] = require("telescope.actions").close,
@@ -37,17 +20,10 @@ return {
 					},
 				},
 			},
-			extensions = {
-				fzf = {
-					fuzzy = true, -- false will only do exact matching
-					override_generic_sorter = true, -- override the generic sorter
-					override_file_sorter = true, -- override the file sorter
-					case_mode = "smart_case", -- or "ignore_case" or "respect_case" the default case_mode is "smart_case"
-				},
-			},
 		},
 		keys = {
 			{ "<leader>gs", false },
+			{ "<leader>gc", false },
 			{
 				"<c-b>",
 				"<leader>,",
@@ -93,16 +69,6 @@ return {
 		},
 	},
 	{
-		"nvim-telescope/telescope-fzf-native.nvim",
-		dependencies = {
-			"nvim-telescope/telescope.nvim",
-		},
-		build = "make",
-		config = function()
-			require("telescope").load_extension("fzf")
-		end,
-	},
-	{
 		"jvgrootveld/telescope-zoxide",
 		dependencies = {
 			"nvim-telescope/telescope.nvim",
@@ -112,7 +78,7 @@ return {
 		end,
 		keys = {
 			{
-				"<leader>sz",
+				"<leader>fz",
 				function()
 					require("telescope").extensions.zoxide.list()
 				end,

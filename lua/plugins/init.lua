@@ -7,7 +7,7 @@ return {
 		"LazyVim/LazyVim",
 		version = false,
 		opts = {
-			colorscheme = "gruvbox",
+			colorscheme = "gruvbox-material",
 			news = {
 				lazyvim = false,
 				neovim = false,
