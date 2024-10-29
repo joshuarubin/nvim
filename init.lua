@@ -1,5 +1,3 @@
-vim.o.termguicolors = true
-
 require("config")
 
 -- these two lines must be last

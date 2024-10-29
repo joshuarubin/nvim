@@ -12,6 +12,12 @@ return {
 				lazyvim = false,
 				neovim = false,
 			},
+			icons = {
+				kinds = {
+					Copilot = " ",
+					Snippet = " ",
+				},
+			},
 		},
 	},
 	"tpope/vim-surround", -- quoting/parenthesizing made simple

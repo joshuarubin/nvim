@@ -1,5 +1,3 @@
-vim.o.ruler = false
-
 return {
 	{
 		"nvim-lualine/lualine.nvim",

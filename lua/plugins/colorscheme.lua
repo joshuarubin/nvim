@@ -78,14 +78,16 @@ return {
 		lazy = false,
 		priority = 1000,
 		init = function()
-			vim.g.gruvbox_material_enable_italic = true
+			vim.g.gruvbox_material_enable_italic = 1
+			vim.g.gruvbox_material_enable_bold = 1
+			vim.g.gruvbox_material_current_word = "underline"
+			vim.g.gruvbox_material_inlay_hints_background = "dimmed"
 			vim.g.gruvbox_material_background = "hard"
 			vim.g.gruvbox_material_foreground = "original"
-			vim.g.gruvbox_material_enable_bold = 1
 			vim.g.gruvbox_material_ui_contrast = "high"
-			vim.g.gruvbox_material_diagnostic_virtual_text = "colored"
 			vim.g.gruvbox_material_statusline_style = "original"
-			vim.g.gruvbox_material_disable_terminal_colors = 1
+			vim.g.gruvbox_material_diagnostic_text_highlight = 1
+			vim.g.gruvbox_material_diagnostic_virtual_text = "highlighted"
 		end,
 	},
 	{

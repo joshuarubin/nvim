@@ -25,4 +25,5 @@ vim.api.nvim_create_autocmd("SessionLoadPost", {
 	end,
 })
 
+-- run this before lazy is loaded so that FileType autocmds are run
 create_callback(false)
