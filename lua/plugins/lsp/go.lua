@@ -35,6 +35,7 @@ return {
 	{
 		"neovim/nvim-lspconfig",
 		opts = function(_, opts)
+			opts.servers.gopls.settings.gopls.analyses.fieldalignment = false
 			opts.servers.gopls.settings.gopls.analyses.shadow = true
 			opts.servers.gopls.settings.gopls.analyses.unusedvariable = true
 			opts.servers.gopls.settings.gopls.codelenses.gc_details = true
