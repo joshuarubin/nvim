@@ -9,6 +9,7 @@ return {
 
 			-- change the default config a bit
 			opts.codelens.enabled = true
+			opts.inlay_hints.enabled = false
 
 			-- enable a few more servers
 			opts.servers.jsonnet_ls = {}

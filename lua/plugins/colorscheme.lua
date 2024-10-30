@@ -102,6 +102,15 @@ return {
 		opts = {
 			flavour = "mocha",
 			transparent_background = true,
+			highlight_overrides = {
+				mocha = function(colors)
+					return {
+						LineNr = { fg = colors.overlay1 },
+						CursorLineNr = { style = { "bold" } },
+						PmenuSel = { bg = colors.overlay1 },
+					}
+				end,
+			},
 		},
 	},
 }

@@ -42,6 +42,7 @@ return {
 			opts.servers.gopls.settings.gopls.buildFlags = { "-tags=wireinject" }
 			opts.servers.gopls.settings.gopls["local"] = table.concat(local_imports, ",")
 			opts.servers.gopls.settings.gopls.vulncheck = "Imports"
+
 			opts.servers.gopls.keys = {
 				{
 					"<leader>co",
@@ -57,7 +58,7 @@ return {
 
 			LazyVim.format.register(LazyVim.lsp.formatter({
 				name = "goimports: lsp",
-				primary = true,
+				primary = false, -- keep as false so that both standard gopls and this get enabled
 				priority = 2,
 				sources = function(buf)
 					local client = get_client(buf)
