@@ -7,7 +7,7 @@ return {
 		"LazyVim/LazyVim",
 		version = false,
 		opts = {
-			colorscheme = "gruvbox-material",
+			colorscheme = "catppuccin",
 			news = {
 				lazyvim = false,
 				neovim = false,
@@ -23,6 +23,14 @@ return {
 	"tpope/vim-eunuch", -- helpers for unix
 	"tpope/vim-abolish", -- easily search for, substitute, and abbreviate multiple variants of a word
 	"direnv/direnv.vim",
+	{
+		"echasnovski/mini.pairs",
+		opts = {
+			modes = {
+				command = false,
+			},
+		},
+	},
 	{
 		"monaqa/dial.nvim",
 		keys = {

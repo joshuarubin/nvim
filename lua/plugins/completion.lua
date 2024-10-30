@@ -93,6 +93,8 @@ return {
 				end,
 			}
 
+			opts.experimental.ghost_text = false
+
 			local defaults = require("cmp.config.default")()
 			opts.sorting = vim.deepcopy(defaults.sorting)
 			if opts.sorting then
@@ -107,13 +109,13 @@ return {
 				["<down>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Insert }),
 				["<up>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Insert }),
 				["<c-space>"] = cmp.mapping.complete(),
-				["<cr>"] = LazyVim.cmp.confirm({ behavior = cmp.ConfirmBehavior.Replace }),
-				["<s-cr>"] = LazyVim.cmp.confirm({ behavior = cmp.ConfirmBehavior.Replace }),
+				["<cr>"] = LazyVim.cmp.confirm({ select = false, behavior = cmp.ConfirmBehavior.Replace }),
+				["<s-cr>"] = LazyVim.cmp.confirm({ select = false, behavior = cmp.ConfirmBehavior.Replace }),
 				["<c-cr>"] = function(fallback)
 					cmp.abort()
 					fallback()
 				end,
-				["<c-y>"] = LazyVim.cmp.confirm({ select = true, behavior = cmp.ConfirmBehavior.Replace }),
+				["<c-y>"] = LazyVim.cmp.confirm({ behavior = cmp.ConfirmBehavior.Replace }),
 				["<c-e>"] = cmp.mapping.abort(),
 				["<tab>"] = supertab(),
 				["<s-tab>"] = supertab({ behavior = TabBehavior.Prev }),

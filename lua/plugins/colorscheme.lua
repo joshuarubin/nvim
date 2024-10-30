@@ -96,4 +96,12 @@ return {
 		priority = 1000,
 		opts = {},
 	},
+	{
+		"catppuccin/nvim",
+		name = "catppuccin",
+		opts = {
+			flavour = "mocha",
+			transparent_background = true,
+		},
+	},
 }
