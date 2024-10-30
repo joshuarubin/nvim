@@ -62,7 +62,7 @@ return {
 				fields = { "kind", "abbr", "menu" },
 				format = function(entry, item)
 					item.menu = ({
-						copilot = "",
+						copilot = " ",
 						luasnp = "",
 						snippets = "",
 						nvim_lsp = "",
