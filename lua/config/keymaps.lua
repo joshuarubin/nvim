@@ -166,3 +166,4 @@ vim.keymap.set({ "n", "t" }, "<c-x>", "<c-/>", { remap = true })
 -- delete lazyvim keymaps
 vim.keymap.del("n", "<leader>qq")
 vim.keymap.del({ "i", "x", "n", "s" }, "<c-s>")
+vim.keymap.del("t", "<esc><esc>") -- nice idea but makes zsh vim mode almost unusable
