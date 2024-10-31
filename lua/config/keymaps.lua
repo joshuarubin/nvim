@@ -163,7 +163,24 @@ vim.keymap.set("t", "<c-u>", "<c-\\><c-n><c-u>", { desc = "scroll up half a scre
 
 vim.keymap.set({ "n", "t" }, "<c-x>", "<c-/>", { remap = true })
 
+-- pick window and go to it
+vim.keymap.set("n", "<leader>wp", function()
+	local picked_window_id = require("window-picker").pick_window({
+		filter_rules = {
+			bo = {
+				filetype = {},
+				buftype = {},
+			},
+		},
+	})
+	if not picked_window_id then
+		return
+	end
+	vim.api.nvim_set_current_win(picked_window_id)
+end, { desc = "Pick and Switch to Window" })
+
 -- delete lazyvim keymaps
 vim.keymap.del("n", "<leader>qq")
 vim.keymap.del({ "i", "x", "n", "s" }, "<c-s>")
 vim.keymap.del("t", "<esc><esc>") -- nice idea but makes zsh vim mode almost unusable
+vim.keymap.del("n", "<leader>w")

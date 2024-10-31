@@ -42,6 +42,64 @@ local supertab = function(opts)
 	end, { "i", "s" })
 end
 
+local get_prev_word = function()
+	local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+	if col == 0 then
+		return nil
+	end
+
+	-- move the cursor back one char so that the cursor is actually on a word
+	vim.api.nvim_win_set_cursor(0, { row, col - 1 })
+
+	-- this is so much simpler than trying to parse the line
+	local word = vim.fn.expand("<cWORD>")
+
+	-- and return the cursor to where it was
+	vim.api.nvim_win_set_cursor(0, { row, col })
+
+	return word, { row, col }
+end
+
+-- this only works for my own luasnp source
+local expand_snippet = function()
+	local luasnp = require("luasnp")
+	local context = require("cmp.context")
+
+	local label, pos = get_prev_word()
+	if not label or not pos then
+		return false
+	end
+
+	local snip = luasnp.snippets.get_exact(label, context.new())
+	if not snip then
+		return false
+	end
+
+	-- remove the label from the buffer
+	local row, col = unpack(pos)
+	local start_col = math.max(col - #label, 0)
+	vim.api.nvim_buf_set_text(0, row - 1, start_col, row - 1, col, {})
+
+	vim.snippet.expand(snip)
+
+	return true
+end
+
+local expand_snippet_with_fallback = function(fallback)
+	if not expand_snippet() then
+		fallback()
+	end
+end
+
+local confirm = function(opts, fallback)
+	local lazyConfirm = LazyVim.cmp.confirm(opts)
+	return function(f)
+		lazyConfirm(function()
+			fallback(f)
+		end)
+	end
+end
+
 return {
 	{
 		"hrsh7th/nvim-cmp",
@@ -109,8 +167,14 @@ return {
 				["<down>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Insert }),
 				["<up>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Insert }),
 				["<c-space>"] = cmp.mapping.complete(),
-				["<cr>"] = LazyVim.cmp.confirm({ select = false, behavior = cmp.ConfirmBehavior.Replace }),
-				["<s-cr>"] = LazyVim.cmp.confirm({ select = false, behavior = cmp.ConfirmBehavior.Replace }),
+				["<cr>"] = confirm(
+					{ select = false, behavior = cmp.ConfirmBehavior.Replace },
+					expand_snippet_with_fallback
+				),
+				["<s-cr>"] = confirm(
+					{ select = false, behavior = cmp.ConfirmBehavior.Replace },
+					expand_snippet_with_fallback
+				),
 				["<c-cr>"] = function(fallback)
 					cmp.abort()
 					fallback()
