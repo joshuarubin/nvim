@@ -62,7 +62,7 @@ end
 
 -- this only works for my own luasnp source
 local expand_snippet = function()
-	local luasnp = require("luasnp")
+	local snippets = require("luasnp.snippets")
 	local context = require("cmp.context")
 
 	local label, pos = get_prev_word()
@@ -70,7 +70,7 @@ local expand_snippet = function()
 		return false
 	end
 
-	local snip = luasnp.snippets.get_exact(label, context.new())
+	local snip = snippets.get_exact(label, context.new())
 	if not snip then
 		return false
 	end

@@ -62,6 +62,7 @@ vim.o.mouse = "nv"
 vim.o.spell = false
 vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal"
 vim.o.ruler = false
+vim.o.wrap = true
 
 vim.opt.packpath:prepend(vim.fn.stdpath("config"))
 vim.opt.isfname:remove({ "=" })
