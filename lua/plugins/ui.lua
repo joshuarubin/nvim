@@ -1,6 +1,7 @@
 return {
 	{
 		"folke/edgy.nvim",
+		cond = not vim.g.vscode,
 		opts = {
 			animate = {
 				enabled = false,
@@ -13,6 +14,7 @@ return {
 	},
 	{
 		"folke/noice.nvim",
+		cond = not vim.g.vscode,
 		enabled = false,
 		keys = {
 			{ "<c-b>", false },
@@ -21,6 +23,7 @@ return {
 	},
 	{
 		"echasnovski/mini.indentscope",
+		cond = not vim.g.vscode,
 		opts = {
 			draw = {
 				animation = require("mini.indentscope").gen_animation.none(),
@@ -29,6 +32,7 @@ return {
 	},
 	{
 		"echasnovski/mini.icons",
+		cond = not vim.g.vscode,
 		opts = {
 			filetype = {
 				go = {

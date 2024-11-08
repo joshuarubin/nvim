@@ -33,15 +33,12 @@ vim.o.wildmode = "longest,full"
 vim.o.wildignorecase = true
 vim.o.wildignore = "*.o,*.obj,*~,*.so,*.swp,*.DS_Store" -- stuff to ignore when tab completing
 vim.o.showfulltag = true
-vim.o.completeopt = "noinsert,menuone,noselect"
 vim.o.diffopt = "internal,filler,closeoff,vertical,foldcolumn:0"
 vim.o.winheight = 10
 vim.o.concealcursor = ""
 vim.o.showmode = false
 vim.o.showtabline = 2 -- prevent flicker, lualine shows info anyway
 vim.o.showcmd = false
-vim.o.scrolloff = 8 -- start scrolling when we're 8 lines away from margins
-vim.o.sidescrolloff = 15
 vim.o.scrolljump = 3
 vim.o.numberwidth = 1
 vim.o.shiftround = true
@@ -63,6 +60,7 @@ vim.o.spell = false
 vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal"
 vim.o.ruler = false
 vim.o.wrap = true
+vim.o.relativenumber = false
 
 vim.opt.packpath:prepend(vim.fn.stdpath("config"))
 vim.opt.isfname:remove({ "=" })

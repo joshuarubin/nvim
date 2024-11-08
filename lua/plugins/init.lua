@@ -25,6 +25,7 @@ return {
 	"direnv/direnv.vim",
 	{
 		"echasnovski/mini.pairs",
+		cond = not vim.g.vscode,
 		opts = {
 			modes = {
 				command = false,

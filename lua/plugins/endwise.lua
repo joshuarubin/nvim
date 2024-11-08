@@ -1,6 +1,7 @@
 return {
 	{
 		"tpope/vim-endwise",
+		cond = not vim.g.vscode,
 		init = function()
 			vim.g.endwise_no_mappings = 1
 		end,

@@ -1,6 +1,7 @@
 return {
 	{
 		"rcarriga/nvim-dap-ui",
+		cond = not vim.g.vscode,
 		config = function(_, opts)
 			-- override LazyVim config to prevent automatic closing of dapui on
 			-- exit and terminated events

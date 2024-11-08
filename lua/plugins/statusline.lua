@@ -1,6 +1,7 @@
 return {
 	{
 		"nvim-lualine/lualine.nvim",
+		cond = not vim.g.vscode,
 		opts = {
 			options = {
 				theme = "auto",

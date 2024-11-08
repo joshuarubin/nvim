@@ -103,6 +103,7 @@ end
 return {
 	{
 		"hrsh7th/nvim-cmp",
+		cond = not vim.g.vscode,
 		opts = function(_, opts)
 			local cmp = require("cmp")
 			local copilot_cmp_comparators = require("copilot_cmp.comparators")

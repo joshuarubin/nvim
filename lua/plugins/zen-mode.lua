@@ -1,6 +1,7 @@
 return {
 	{
 		"folke/zen-mode.nvim",
+		cond = not vim.g.vscode,
 		opts = {
 			window = {
 				width = 0.618,

@@ -1,6 +1,7 @@
 return {
 	{
 		"kevinhwang91/nvim-hlslens",
+		cond = not vim.g.vscode,
 		opts = {},
 		keys = {
 			{

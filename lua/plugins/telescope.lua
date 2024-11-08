@@ -1,6 +1,7 @@
 return {
 	{
 		"nvim-telescope/telescope.nvim",
+		cond = not vim.g.vscode,
 		opts = {
 			defaults = {
 				layout_config = {
@@ -70,6 +71,7 @@ return {
 	},
 	{
 		"jvgrootveld/telescope-zoxide",
+		cond = not vim.g.vscode,
 		dependencies = {
 			"nvim-telescope/telescope.nvim",
 		},

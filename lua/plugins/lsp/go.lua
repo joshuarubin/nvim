@@ -22,6 +22,7 @@ end
 return {
 	{
 		"stevearc/conform.nvim",
+		cond = not vim.g.vscode,
 		opts = function(_, opts)
 			opts.formatters_by_ft.go = {} -- let everything be done by gopls
 
@@ -34,6 +35,7 @@ return {
 	},
 	{
 		"neovim/nvim-lspconfig",
+		cond = not vim.g.vscode,
 		opts = function(_, opts)
 			opts.servers.gopls.settings.gopls.analyses.fieldalignment = false
 			opts.servers.gopls.settings.gopls.analyses.shadow = true

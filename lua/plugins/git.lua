@@ -57,12 +57,14 @@ vim.cmd.highlight("GitSignsCurrentLineBlame gui=italic guifg=#564d43")
 return {
 	{
 		"sindrets/diffview.nvim",
+		cond = not vim.g.vscode,
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 		},
 	},
 	{
 		"NeogitOrg/neogit",
+		cond = not vim.g.vscode,
 		lazy = false,
 		dependencies = {
 			"nvim-lua/plenary.nvim",
@@ -112,6 +114,7 @@ return {
 	},
 	{
 		"lewis6991/gitsigns.nvim",
+		cond = not vim.g.vscode,
 		opts = {
 			signs = {
 				add = { text = "█│" },

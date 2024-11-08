@@ -1,3 +1,7 @@
+if vim.g.vscode then
+	return
+end
+
 local init_group = vim.api.nvim_create_augroup("InitAutoCmd", {})
 
 vim.api.nvim_create_autocmd("InsertEnter", {

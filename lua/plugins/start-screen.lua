@@ -1,6 +1,7 @@
 return {
 	{
 		"nvimdev/dashboard-nvim",
+		cond = not vim.g.vscode,
 		opts = function(_, opts)
 			local index
 			for i, value in ipairs(opts.config.center) do

@@ -37,7 +37,9 @@ return {
 			require("nvim-treesitter.configs").setup(opts)
 		end,
 	},
-	"nvim-treesitter/nvim-treesitter-textobjects",
+	{
+		"nvim-treesitter/nvim-treesitter-textobjects",
+	},
 	{
 		"JoosepAlviste/nvim-ts-context-commentstring",
 		lazy = true,

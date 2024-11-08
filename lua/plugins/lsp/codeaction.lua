@@ -1,6 +1,7 @@
 return {
 	{
 		"kosayoda/nvim-lightbulb",
+		cond = not vim.g.vscode,
 		opts = {
 			sign = {
 				enabled = false,

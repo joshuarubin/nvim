@@ -1,6 +1,7 @@
 return {
 	{
 		"stevearc/conform.nvim",
+		cond = not vim.g.vscode,
 		opts = function(_, opts)
 			opts.formatters_by_ft.luau = { "stylua" }
 			opts.formatters_by_ft.markdown = { "markdown-toc", "prettier", "markdownlint-cli2" }

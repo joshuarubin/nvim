@@ -1,6 +1,7 @@
 return {
 	{
 		"gbprod/yanky.nvim",
+		cond = not vim.g.vscode,
 		opts = {
 			picker = {
 				telescope = {

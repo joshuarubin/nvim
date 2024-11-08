@@ -1,6 +1,7 @@
 return {
 	{
 		"simnalamburt/vim-mundo",
+		cond = not vim.g.vscode,
 		keys = {
 			{
 				"<leader>uu",

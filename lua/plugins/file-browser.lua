@@ -1,6 +1,7 @@
 return {
 	{
 		"s1n7ax/nvim-window-picker",
+		cond = not vim.g.vscode,
 		name = "window-picker",
 		event = "VeryLazy",
 		version = "2.*",
@@ -11,6 +12,7 @@ return {
 	},
 	{
 		"nvim-neo-tree/neo-tree.nvim",
+		cond = not vim.g.vscode,
 		keys = {
 			{
 				"<c-n>",
