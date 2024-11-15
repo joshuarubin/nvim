@@ -17,4 +17,5 @@ repos:
       - id: check-yaml
       - id: detect-private-key
       - id: end-of-file-fixer
+        exclude: ^lazyvim\.json$
       - id: trailing-whitespace
