@@ -11,4 +11,8 @@ return {
 		"saghen/blink.cmp",
 		enabled = false,
 	},
+	{
+		"nvimdev/dashboard-nvim",
+		enabled = false,
+	},
 }
