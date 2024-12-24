@@ -22,15 +22,6 @@ return {
 		},
 	},
 	{
-		"echasnovski/mini.indentscope",
-		cond = not vim.g.vscode,
-		opts = {
-			draw = {
-				animation = require("mini.indentscope").gen_animation.none(),
-			},
-		},
-	},
-	{
 		"echasnovski/mini.icons",
 		cond = not vim.g.vscode,
 		opts = {

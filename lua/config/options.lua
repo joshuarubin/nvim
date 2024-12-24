@@ -64,6 +64,8 @@ vim.o.relativenumber = false
 
 vim.opt.packpath:prepend(vim.fn.stdpath("config"))
 vim.opt.isfname:remove({ "=" })
+vim.g.lazyvim_cmp = "nvim-cmp"
+vim.g.snacks_animate = false
 
 require("config.env")
 require("config.clipboard")

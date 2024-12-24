@@ -69,7 +69,6 @@ return {
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 			"sindrets/diffview.nvim",
-			"nvim-telescope/telescope.nvim",
 		},
 		opts = {
 			kind = "split",
@@ -77,7 +76,6 @@ return {
 			graph_style = "unicode",
 			auto_close_console = false,
 			integrations = {
-				telescope = true,
 				diffview = true,
 			},
 		},

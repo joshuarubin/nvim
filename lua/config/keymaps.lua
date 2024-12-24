@@ -179,6 +179,13 @@ vim.keymap.set("n", "<leader>wp", function()
 	vim.api.nvim_set_current_win(picked_window_id)
 end, { desc = "Pick and Switch to Window" })
 
+vim.keymap.set("n", "<c-b>", "<leader>,", { remap = true, desc = "Switch Buffer" })
+vim.keymap.set("n", "<c-p>", "<leader><space>", { remap = true, desc = "Find Files (Root Dir)" })
+vim.keymap.set("n", "<c-f>", "<leader>fr", { remap = true, desc = "Recent" })
+vim.keymap.set("n", "<c-s><c-s>", "<leader>sw", { remap = true, desc = "Word (Root Dir)" })
+vim.keymap.set("v", "<c-s><c-s>", "<leader>sw", { remap = true, desc = "Selection (Root Dir)" })
+vim.keymap.set("n", "<c-s><c-d>", "<leader>sg", { remap = true, desc = "Grep (Root Dir)" })
+
 -- delete lazyvim keymaps
 vim.keymap.del("n", "<leader>qq")
 vim.keymap.del({ "i", "x", "n", "s" }, "<c-s>")
