@@ -1,14 +1,14 @@
 return {
 	{
 		"ellisonleao/gruvbox.nvim",
-		cond = not vim.g.vscode,
+		cond = not vim.g.vscode and false,
 		lazy = false,
 		priority = 1000,
 		config = true,
 	},
 	{
 		"rebelot/kanagawa.nvim",
-		cond = not vim.g.vscode,
+		cond = not vim.g.vscode and false,
 		lazy = false,
 		priority = 1000,
 		opts = {
@@ -22,14 +22,14 @@ return {
 	},
 	{
 		"rose-pine/neovim",
-		cond = not vim.g.vscode,
+		cond = not vim.g.vscode and false,
 		name = "rose-pine",
 		lazy = false,
 		priority = 1000,
 	},
 	{
 		"Mofiqul/dracula.nvim",
-		cond = not vim.g.vscode,
+		cond = not vim.g.vscode and false,
 		lazy = false,
 		priority = 1000,
 		opts = {
@@ -38,7 +38,7 @@ return {
 	},
 	{
 		"scottmckendry/cyberdream.nvim",
-		cond = not vim.g.vscode,
+		cond = not vim.g.vscode and false,
 		lazy = false,
 		priority = 1000,
 		opts = {
@@ -48,7 +48,7 @@ return {
 	},
 	{
 		"sainnhe/sonokai",
-		cond = not vim.g.vscode,
+		cond = not vim.g.vscode and false,
 		lazy = false,
 		priority = 1000,
 		init = function()
@@ -57,14 +57,14 @@ return {
 	},
 	{
 		"craftzdog/solarized-osaka.nvim",
-		cond = not vim.g.vscode,
+		cond = not vim.g.vscode and false,
 		lazy = false,
 		priority = 1000,
 		opts = {},
 	},
 	{
 		"AlexvZyl/nordic.nvim",
-		cond = not vim.g.vscode,
+		cond = not vim.g.vscode and false,
 		lazy = false,
 		priority = 1000,
 		opts = {
@@ -77,14 +77,14 @@ return {
 	{
 
 		"ribru17/bamboo.nvim",
-		cond = not vim.g.vscode,
+		cond = not vim.g.vscode and false,
 		lazy = false,
 		priority = 1000,
 		opts = {},
 	},
 	{
 		"sainnhe/gruvbox-material",
-		cond = not vim.g.vscode,
+		cond = not vim.g.vscode and false,
 		lazy = false,
 		priority = 1000,
 		init = function()
@@ -102,7 +102,7 @@ return {
 	},
 	{
 		"loctvl842/monokai-pro.nvim",
-		cond = not vim.g.vscode,
+		cond = not vim.g.vscode and false,
 		lazy = false,
 		priority = 1000,
 		opts = {},
