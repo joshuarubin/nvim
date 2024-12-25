@@ -139,7 +139,6 @@ vim.keymap.set("t", "<d-l>", "<c-\\><c-n><c-w>>i", { desc = "increase current wi
 vim.keymap.set("n", "<leader>cd", "<cmd>lcd %:p:h<cr>:pwd<cr>", { desc = "switch to the directory of the open buffer" })
 vim.keymap.set("n", "<leader>=", "<c-w>=", { desc = "adjust viewports to the same size" })
 vim.keymap.set("n", "Q", "<cmd>q<cr>", { desc = "quit the current window" })
-vim.keymap.set("n", "<leader>q", "<cmd>qa<cr>", { desc = "exit vim" })
 vim.keymap.set("n", "<leader>Q", "<cmd>qa!<cr>", { desc = "exit vim losing changes" })
 vim.keymap.set("n", "<c-a>r", "<cmd>redraw!<cr>", { desc = "redraw the screen" })
 
@@ -186,7 +185,12 @@ vim.keymap.set("n", "<c-s><c-s>", "<leader>sw", { remap = true, desc = "Word (Ro
 vim.keymap.set("v", "<c-s><c-s>", "<leader>sw", { remap = true, desc = "Selection (Root Dir)" })
 vim.keymap.set("n", "<c-s><c-d>", "<leader>sg", { remap = true, desc = "Grep (Root Dir)" })
 
+vim.keymap.set("n", "<leader>N", function()
+	Snacks.notifier.show_history()
+end, { desc = "Notification History" })
+
 -- delete lazyvim keymaps
-vim.keymap.del("n", "<leader>qq")
 vim.keymap.del({ "i", "x", "n", "s" }, "<c-s>")
 vim.keymap.del("n", "<leader>w")
+vim.keymap.del("n", "j")
+vim.keymap.del("n", "k")

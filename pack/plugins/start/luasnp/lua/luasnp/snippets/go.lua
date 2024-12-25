@@ -8,7 +8,7 @@ return {
 			local ret = {
 				"if err != nil {",
 				"\t" .. go.return_values(context),
-				"}",
+				"}$0",
 			}
 			return table.concat(ret, "\n")
 		end,

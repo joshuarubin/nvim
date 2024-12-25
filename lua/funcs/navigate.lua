@@ -31,21 +31,6 @@ return function(dir, opts)
 			end
 		end
 
-		local ok, cmp = pcall(require, "cmp")
-		if ok then
-			if cmp.visible() then
-				if dir == "j" then
-					cmp.select_next_item()
-					return
-				end
-
-				if dir == "k" then
-					cmp.select_prev_item()
-					return
-				end
-			end
-		end
-
 		vim.fn.feedkeys(t("<c-\\><c-n>"))
 		if opts.cmd then
 			vim.cmd(opts.cmd)

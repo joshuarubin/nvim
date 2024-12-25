@@ -37,7 +37,7 @@ vim.api.nvim_create_autocmd("FileType", {
 vim.api.nvim_create_autocmd("FileType", {
 	desc = "disable showbreak for markdown files",
 	group = init_group,
-	pattern = { "markdown", "norg", "rmd", "org", "Avante" },
+	pattern = { "markdown", "norg", "rmd", "org", "Avante", "blink-cmp-documentation" },
 	callback = function()
 		vim.wo.showbreak = ""
 	end,

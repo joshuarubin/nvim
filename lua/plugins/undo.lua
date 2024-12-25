@@ -7,7 +7,7 @@ return {
 				"<leader>uu",
 				":MundoToggle<cr>",
 				silent = true,
-				desc = "undo tree",
+				desc = "Undo Tree",
 			},
 		},
 	},
