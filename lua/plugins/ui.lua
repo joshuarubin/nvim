@@ -15,6 +15,16 @@ return {
 	{
 		"folke/noice.nvim",
 		cond = not vim.g.vscode,
+		opts = {
+			cmdline = {
+				view = "cmdline",
+			},
+			presets = {
+				command_palette = false,
+				lsp_doc_border = true,
+				inc_rename = false,
+			},
+		},
 		keys = {
 			{ "<c-b>", false },
 			{ "<c-f>", false },

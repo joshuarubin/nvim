@@ -22,7 +22,7 @@
   "dracula.nvim": { "branch": "main", "commit": "515acae4fd294fcefa5b15237a333c2606e958d1" },
   "edgy.nvim": { "branch": "main", "commit": "7e8dedc39abebe40c289b8012cc89b11c69aa7a0" },
   "friendly-snippets": { "branch": "main", "commit": "efff286dd74c22f731cdec26a70b46e5b203c619" },
-  "fzf-lua": { "branch": "main", "commit": "af6ecbd7f421e7894127a9e94b40e13172fbfb13" },
+  "fzf-lua": { "branch": "main", "commit": "7e63bc8a61ef9f38b513a19718308e57f4729d14" },
   "gitsigns.nvim": { "branch": "main", "commit": "68114837e81ca16d06514c3a997c9102d1b25c15" },
   "grug-far.nvim": { "branch": "main", "commit": "08f32182335754abf461dfb77b2c4e24bfe4d614" },
   "gruvbox-material": { "branch": "master", "commit": "e41451337d33997aff4c078a83165a9f66e2d38d" },
@@ -33,7 +33,6 @@
   "kulala.nvim": { "branch": "main", "commit": "eb0804ef7c98680bfe1844c8e4bfd62c0ccd34c7" },
   "lazy.nvim": { "branch": "main", "commit": "d8f26efd456190241afd1b0f5235fe6fdba13d4a" },
   "lazydev.nvim": { "branch": "main", "commit": "8620f82ee3f59ff2187647167b6b47387a13a018" },
-  "lsp_signature.nvim": { "branch": "master", "commit": "fc38521ea4d9ec8dbd4c2819ba8126cea743943b" },
   "lualine.nvim": { "branch": "master", "commit": "2a5bae925481f999263d6f5ed8361baef8df4f83" },
   "markdown-preview.nvim": { "branch": "master", "commit": "a923f5fc5ba36a3b17e289dc35dc17f66d0548ee" },
   "mason-lspconfig.nvim": { "branch": "main", "commit": "97d9f1d3ad205dece6bcafd1d71cf1507608f3c7" },
@@ -76,7 +75,7 @@
   "refactoring.nvim": { "branch": "master", "commit": "2db6d378e873de31d18ade549c2edba64ff1c2e3" },
   "render-markdown.nvim": { "branch": "main", "commit": "cfe57468a4ab44b745eddfbe90b63b9777ba7223" },
   "rose-pine": { "branch": "main", "commit": "106f05aeab8277e97eda9649271b33f9f12d8db4" },
-  "rubix.vim": { "branch": "main", "commit": "af0ecb2ff10ad6ed55daf95c06da7396bdaa1f87" },
+  "rubix.vim": { "branch": "main", "commit": "8d0f24d23ee033e1085392710329e3360f7969d0" },
   "rustaceanvim": { "branch": "master", "commit": "10efd4d48fb241b2530062090dd84fd4f9717584" },
   "snacks.nvim": { "branch": "main", "commit": "14e89401da348f5d14509fca164fb7bcec83e597" },
   "solarized-osaka.nvim": { "branch": "main", "commit": "725064069861811398e6d7f4653e6be6d760a07d" },
@@ -94,6 +93,6 @@
   "vim-helm": { "branch": "master", "commit": "ae1ebc160d2b9b90108477ab10df7a4fc501e358" },
   "vim-mundo": { "branch": "master", "commit": "2ceda8c65f7b3f9066820729fc02003a09df91f9" },
   "which-key.nvim": { "branch": "main", "commit": "1f8d414f61e0b05958c342df9b6a4c89ce268766" },
-  "window-picker": { "branch": "main", "commit": "c959032b63f61c1d3cf747e5f67114a05efddee2" },
+  "window-picker": { "branch": "main", "commit": "8c7bd9cede063de5d3d972951636fd0302d18bfb" },
   "yanky.nvim": { "branch": "main", "commit": "f9b905994cccf3c55f41af3a0a1f4c76c844e411" }
 }
