@@ -6,7 +6,6 @@ return {
 			"A",
 			"AS",
 			"AV",
-			"Kwbd",
 			"Only",
 		},
 		keys = {
@@ -15,12 +14,6 @@ return {
 				":call rubix#trim()<cr>",
 				silent = true,
 				desc = "trim trailing whitespace",
-			},
-			{
-				"<c-w><c-w>",
-				":confirm :Kwbd<cr>",
-				silent = true,
-				desc = "delete the current buffer without closing the window",
 			},
 		},
 	},

@@ -7,7 +7,7 @@ return {
 		"LazyVim/LazyVim",
 		version = false,
 		opts = {
-			colorscheme = "catppuccin",
+			colorscheme = "tokyonight",
 			news = {
 				lazyvim = false,
 				neovim = false,
@@ -19,9 +19,39 @@ return {
 			},
 		},
 	},
-	"tpope/vim-repeat", -- enable repeating supported plugin maps with `.`
-	"tpope/vim-eunuch", -- helpers for unix
-	"tpope/vim-abolish", -- easily search for, substitute, and abbreviate multiple variants of a word
+	{
+		"tpope/vim-eunuch", -- helpers for unix
+		cmd = {
+			"Cfind",
+			"Chmod",
+			"Clocate",
+			"Copy",
+			"Delete",
+			"Duplicate",
+			"Lfind",
+			"Llocate",
+			"Mkdir",
+			"Remove",
+			"SudoEdit",
+			"SudoWrite",
+			"Unlink",
+			"W",
+			"Wall",
+		},
+		event = {
+			"BufNewFile",
+			"BufReadPost",
+		},
+		config = function()
+			vim.api.nvim_create_user_command("Move", function()
+				Snacks.rename.rename_file()
+			end, { desc = "Move File" })
+
+			vim.api.nvim_create_user_command("Rename", function()
+				Snacks.rename.rename_file()
+			end, { desc = "Rename File" })
+		end,
+	},
 	"direnv/direnv.vim",
 	{
 		"echasnovski/mini.pairs",

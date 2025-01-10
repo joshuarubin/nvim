@@ -16,12 +16,12 @@ vim.o.backupcopy = "yes"
 vim.o.backupdir = backupdir()
 vim.o.listchars = "tab:│ ,trail:•,precedes:❮,nbsp:.,conceal:Δ"
 vim.opt.fillchars = {
-	foldopen = "", -- mark the beginning of a fold
-	foldclose = "", -- show a closed fold
-	fold = " ", -- filling 'foldtext'
-	foldsep = " ", -- open fold middle marker
 	diff = "╱", -- deleted lines of the 'diff' option
 	eob = " ", -- empty lines at the end of a buffer
+	fold = " ", -- filling 'foldtext'
+	foldclose = "", -- show a closed fold
+	foldopen = "", -- mark the beginning of a fold
+	foldsep = " ", -- open fold middle marker
 }
 vim.o.foldcolumn = "auto:9"
 vim.o.title = true
@@ -71,3 +71,4 @@ require("config.clipboard")
 require("config.editorconfig")
 require("config.abbrev")
 require("config.filetype")
+require("config.debug")

@@ -15,7 +15,6 @@ return {
 	{
 		"folke/noice.nvim",
 		cond = not vim.g.vscode,
-		enabled = false,
 		keys = {
 			{ "<c-b>", false },
 			{ "<c-f>", false },

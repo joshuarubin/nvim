@@ -13,22 +13,16 @@ return {
 
 			table.insert(opts.sources.default, "luasnp")
 
-			opts.sources.cmdline = function()
-				local type = vim.fn.getcmdtype()
-				-- Search forward and backward
-				if type == "/" or type == "?" then
-					return { "buffer" }
-				end
-				-- Commands
-				if type == ":" then
-					return { "cmdline" }
-				end
-				return {}
-			end
+			opts.sources.per_filetype = {
+				codecompanion = { "codecompanion" },
+			}
 
 			opts.completion.accept.auto_brackets.enabled = false
 			opts.completion.list = {
-				selection = "manual",
+				selection = {
+					preselect = false,
+					auto_insert = false,
+				},
 			}
 
 			opts.completion.menu.border = "single"
@@ -87,7 +81,7 @@ return {
 			}
 			opts.keymap["<tab>"] = {
 				"select_next",
-				"snippet_forward",
+				LazyVim.cmp.map({ "snippet_forward", "ai_accept" }),
 				"fallback",
 			}
 			opts.keymap["<s-tab>"] = {

@@ -6,7 +6,7 @@ luasnp.new = function(opts)
 	opts = opts or {}
 	local self = setmetatable({}, { __index = luasnp })
 	self.cache = {}
-	self.registry = require("blink.cmp.sources.snippets.registry").new(opts)
+	self.registry = require("blink.cmp.sources.snippets.default.registry").new(opts)
 	self.get_filetype = opts.get_filetype or function()
 		return vim.bo.filetype
 	end

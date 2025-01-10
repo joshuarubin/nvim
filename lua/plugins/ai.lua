@@ -52,22 +52,36 @@ return {
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 			"nvim-treesitter/nvim-treesitter",
-			"hrsh7th/nvim-cmp", -- Optional: For using slash commands and variables in the chat buffer
-			{ "stevearc/dressing.nvim", opts = {} }, -- Optional: Improves `vim.ui.select`
 		},
 		opts = {
-			display = {
-				chat = {
-					render_headers = false,
-				},
-			},
 			strategies = {
 				chat = {
 					adapter = "anthropic",
+					slash_commands = {
+						["buffer"] = {
+							opts = {
+								provider = "fzf_lua", -- default|telescope|mini_pick|fzf_lua
+							},
+						},
+						["file"] = {
+							opts = {
+								provider = "fzf_lua", -- default|telescope|mini_pick|fzf_lua
+							},
+						},
+						["help"] = {
+							opts = {
+								provider = "fzf_lua", -- telescope|mini_pick|fzf_lua
+							},
+						},
+						["symbols"] = {
+							opts = {
+								provider = "fzf_lua", -- default|telescope|mini_pick|fzf_lua
+							},
+						},
+					},
 				},
 				inline = {
-					-- adapter = "copilot",
-					adapter = "anthropic",
+					adapter = "anthropic", -- anthropic|copilot
 				},
 			},
 			adapters = {
@@ -76,11 +90,6 @@ return {
 						env = {
 							api_key = "ANTHROPIC_API_KEY",
 						},
-						-- schema = {
-						-- 	model = {
-						-- 		default = "claude-3-opus-20240229",
-						-- 	},
-						-- },
 					})
 				end,
 			},
@@ -91,12 +100,6 @@ return {
 			"CodeCompanionChat",
 		},
 		keys = {
-			-- {
-			-- 	"<localleader>a",
-			-- 	"",
-			-- 	desc = "+ai",
-			-- 	mode = { "n", "v" },
-			-- },
 			{
 				"<c-a><c-a>",
 				"<cmd>CodeCompanionActions<cr>",

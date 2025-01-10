@@ -160,7 +160,8 @@ end, { expr = true })
 vim.keymap.set("t", "<c-y>", "<c-\\><c-n><c-y>", { desc = "scroll up one line" })
 vim.keymap.set("t", "<c-u>", "<c-\\><c-n><c-u>", { desc = "scroll up half a screen" })
 
-vim.keymap.set({ "n", "t" }, "<c-x>", "<c-/>", { remap = true })
+vim.keymap.set({ "n", "t" }, "<c-x>", "<c-/>", { remap = true, desc = "Terminal (Root Dir)" })
+Snacks.toggle.zoom():map("<leader>m")
 
 -- pick window and go to it
 vim.keymap.set("n", "<leader>wp", function()
@@ -188,6 +189,10 @@ vim.keymap.set("n", "<c-s><c-d>", "<leader>sg", { remap = true, desc = "Grep (Ro
 vim.keymap.set("n", "<leader>N", function()
 	Snacks.notifier.show_history()
 end, { desc = "Notification History" })
+
+vim.keymap.set("n", "<c-w><c-w>", function()
+	Snacks.bufdelete.delete()
+end, { desc = "Delete the current buffer without closing the window" })
 
 -- delete lazyvim keymaps
 vim.keymap.del({ "i", "x", "n", "s" }, "<c-s>")

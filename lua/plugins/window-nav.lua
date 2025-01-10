@@ -12,6 +12,7 @@ for dir, cmd in pairs({
 		"<c-" .. dir .. ">",
 		navigate(dir, cmd),
 		mode = { "n", "v", "t" },
+		desc = cmd,
 	})
 
 	-- insert mode
@@ -22,6 +23,7 @@ for dir, cmd in pairs({
 			cmd = cmd,
 		}),
 		mode = "i",
+		desc = cmd,
 	})
 end
 

@@ -4,7 +4,7 @@ return {
 		enabled = false,
 	},
 	{
-		"nvimdev/dashboard-nvim",
+		"folke/noice.nvim",
 		enabled = false,
 	},
 }

@@ -1,29 +1,10 @@
-local git_dir = function(file)
-	file = file or "%"
-	local file_dir = vim.fn.expand(file .. ":p:h")
-	local handle = io.popen("cd " .. file_dir .. " && git rev-parse --git-dir")
-	if handle == nil then
-		return ""
-	end
-
-	local dir = handle:read("*a")
-	if dir:find("/", 1, true) == nil then
-		dir = vim.fn.simplify(file_dir .. "/" .. dir)
-	end
-	dir = dir:gsub(".git", "")
-
-	local result = vim.fn.fnamemodify(dir, ":p")
-	handle:close()
-	return vim.trim(result)
-end
-
 local git_opts = {}
 
 local keys = {
 	{
 		"<leader>gs",
 		function()
-			git_opts.dir = git_dir()
+			git_opts.dir = Snacks.git.get_root()
 			require("neogit").open({ cwd = git_opts.dir })
 		end,
 		desc = "git status",
@@ -45,14 +26,12 @@ for k, v in pairs(neogit_bindings) do
 	table.insert(keys, {
 		k,
 		function()
-			git_opts.dir = git_dir()
+			git_opts.dir = Snacks.git.get_root()
 			require("neogit").open({ v[1] })
 		end,
 		desc = v[2],
 	})
 end
-
-vim.cmd.highlight("GitSignsCurrentLineBlame gui=italic guifg=#564d43")
 
 return {
 	{
@@ -65,7 +44,6 @@ return {
 	{
 		"NeogitOrg/neogit",
 		cond = not vim.g.vscode,
-		lazy = false,
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 			"sindrets/diffview.nvim",
