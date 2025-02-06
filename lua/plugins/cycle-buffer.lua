@@ -1,5 +1,14 @@
 return {
 	{
+		"akinsho/bufferline.nvim",
+		keys = {
+			{ "<s-h>", false },
+			{ "<s-l>", false },
+			{ "[b", false },
+			{ "]b", false },
+		},
+	},
+	{
 		"joshuarubin/cybu.nvim",
 		cond = not vim.g.vscode,
 		lazy = false,
@@ -19,14 +28,42 @@ return {
 				function()
 					require("cybu").cycle("prev")
 				end,
-				desc = "cycle to previous buffer in window",
+				desc = "Prev Buffer",
+			},
+			{
+				"H",
+				function()
+					require("cybu").cycle("prev")
+				end,
+				desc = "Prev Buffer",
+			},
+			{
+				"[b",
+				function()
+					require("cybu").cycle("prev")
+				end,
+				desc = "Prev Buffer",
 			},
 			{
 				"X",
 				function()
 					require("cybu").cycle("next")
 				end,
-				desc = "cycle to next buffer in window",
+				desc = "Next Buffer",
+			},
+			{
+				"L",
+				function()
+					require("cybu").cycle("next")
+				end,
+				desc = "Next Buffer",
+			},
+			{
+				"]b",
+				function()
+					require("cybu").cycle("next")
+				end,
+				desc = "Next Buffer",
 			},
 		},
 	},
