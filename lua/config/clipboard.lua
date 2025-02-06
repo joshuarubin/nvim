@@ -3,7 +3,7 @@ if vim.g.vscode then
 	return
 end
 
-local safe_require = require("funcs.safe_require")
+local safe_require = require("util.safe_require")
 
 local clipboard = {
 	cache_enabled = 0,

@@ -196,6 +196,5 @@ end, { desc = "Delete the current buffer without closing the window" })
 
 -- delete lazyvim keymaps
 vim.keymap.del({ "i", "x", "n", "s" }, "<c-s>")
-vim.keymap.del("n", "<leader>w")
 vim.keymap.del("n", "j")
 vim.keymap.del("n", "k")

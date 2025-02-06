@@ -81,15 +81,3 @@ vim.api.nvim_create_autocmd("OptionSet", {
 		end
 	end,
 })
-
-vim.api.nvim_create_autocmd("BufFilePost", {
-	desc = "fix issue where writing to a git diff buffer appends an extra newline",
-	pattern = {
-		"gitsigns://*",
-		"diffview://*",
-	},
-	callback = function()
-		vim.bo.endofline = false
-		vim.bo.fixendofline = false
-	end,
-})

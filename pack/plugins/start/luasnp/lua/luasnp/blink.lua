@@ -110,9 +110,6 @@ end
 
 function luasnp:cache_completions(context)
 	local filetype = self.get_filetype(context)
-	if vim.tbl_contains(self.registry.config.ignored_filetypes, filetype) then
-		return nil
-	end
 
 	if not self.cache[filetype] then
 		local global_snippets = vim.list_slice(global)

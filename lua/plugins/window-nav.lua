@@ -1,4 +1,4 @@
-local navigate = require("funcs.navigate")
+local navigate = require("util.navigate")
 local keys = {}
 
 for dir, cmd in pairs({

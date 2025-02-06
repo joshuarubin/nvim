@@ -4,6 +4,7 @@ return {
 		cond = not vim.g.vscode,
 		opts = {
 			ensure_installed = {
+				"golines",
 				"typescript-language-server",
 				"yamllint",
 			},

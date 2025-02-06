@@ -49,7 +49,6 @@ vim.o.infercase = true -- ignore case on insert completion
 vim.o.grepprg = "rg --vimgrep --hidden --smart-case --follow"
 vim.o.timeoutlen = 2000 -- time in milliseconds to wait for a mapped sequence to complete
 vim.o.ttimeoutlen = 10 -- time in milliseconds to wait for a key code sequence to complete
-vim.o.formatoptions = "jcroqlnt"
 vim.o.textwidth = 80
 vim.o.shiftwidth = 2
 vim.o.softtabstop = 2
