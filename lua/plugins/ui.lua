@@ -10,6 +10,40 @@ return {
 				left = { size = 40 },
 				right = { size = 40 },
 			},
+			keys = {
+				-- increase width
+				["<c-a>L"] = function(win)
+					win:resize("width", 1)
+				end,
+				-- decrease width
+				["<c-a>H"] = function(win)
+					win:resize("width", -1)
+				end,
+				-- increase height
+				["<c-a>K"] = function(win)
+					win:resize("height", 1)
+				end,
+				-- decrease height
+				["<c-a>J"] = function(win)
+					win:resize("height", -1)
+				end,
+				-- increase width
+				["<d-l>"] = function(win)
+					win:resize("width", 1)
+				end,
+				-- decrease width
+				["<d-h>"] = function(win)
+					win:resize("width", -1)
+				end,
+				-- increase height
+				["<d-k>"] = function(win)
+					win:resize("height", 1)
+				end,
+				-- decrease height
+				["<d-j>"] = function(win)
+					win:resize("height", -1)
+				end,
+			},
 		},
 	},
 	{

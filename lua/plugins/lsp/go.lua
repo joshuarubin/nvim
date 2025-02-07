@@ -41,6 +41,17 @@ return {
 		end,
 	},
 	{
+		"nvim-neotest/neotest",
+		opts = {
+			adapters = {
+				["neotest-golang"] = {
+					go_test_args = { "-race" },
+					dap_go_enabled = true,
+				},
+			},
+		},
+	},
+	{
 		"neovim/nvim-lspconfig",
 		cond = not vim.g.vscode,
 		opts = function(_, opts)
