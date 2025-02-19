@@ -91,4 +91,37 @@ return {
 			{ "g<c-x>", false, mode = { "n", "v" } },
 		},
 	},
+	{
+		"julienvincent/hunk.nvim",
+		cmd = { "DiffEditor" },
+		opts = {
+			keys = {
+				global = {
+					quit = { "q" },
+					accept = { "<leader><cr>" },
+					focus_tree = { "<leader>e" },
+				},
+
+				tree = {
+					expand_node = { "l", "<right>" },
+					collapse_node = { "h", "<left>" },
+					open_file = { "<cr>" },
+					toggle_file = { "a" },
+				},
+
+				diff = {
+					toggle_line = { "a" },
+					toggle_hunk = { "A" },
+				},
+			},
+
+			ui = {
+				tree = {
+					mode = "nested",
+					width = 35,
+				},
+				layout = "vertical",
+			},
+		},
+	},
 }
