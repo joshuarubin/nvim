@@ -21,5 +21,8 @@ return {
 				remap = true,
 			},
 		},
+		opts = {
+			sources = { "filesystem" },
+		},
 	},
 }
