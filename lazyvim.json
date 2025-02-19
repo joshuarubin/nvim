@@ -36,9 +36,10 @@
     "lazyvim.plugins.extras.util.project",
     "lazyvim.plugins.extras.util.rest"
   ],
+  "install_version": 7,
   "news": {
     "NEWS.md": "10960",
     "doc/news.txt": "24450"
   },
-  "version": 7
+  "version": 8
 }
