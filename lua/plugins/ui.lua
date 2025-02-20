@@ -247,6 +247,7 @@ return {
 						})
 						return focus.bufnr, winnr
 					end,
+					-- diff = "tab_vsplit", -- TODO(joshua): Enable for diff workflow
 				},
 				hooks = {
 					-- Pre-open hook: Save terminal state before opening file
