@@ -90,7 +90,7 @@ return {
 		opts = {
 			strategies = {
 				chat = {
-					adapter = "claude_code", -- anthropic|claude_code
+					adapter = "poolside", -- anthropic|claude_code|poolside
 					slash_commands = {
 						["buffer"] = {
 							opts = {
@@ -115,7 +115,7 @@ return {
 					},
 				},
 				inline = {
-					adapter = "claude_code", -- anthropic|claude_code|copilot
+					adapter = "poolside", -- anthropic|claude_code|copilot|poolside
 				},
 			},
 			adapters = {
@@ -126,6 +126,49 @@ return {
 						},
 					})
 				end,
+				acp = {
+					poolside = function()
+						-- Use LSP workspace root, fallback to cwd
+						local workspace = vim.lsp.buf.list_workspace_folders()[1] or vim.fn.getcwd()
+						return {
+							name = "poolside",
+							formatted_name = "Poolside",
+							type = "acp",
+							roles = {
+								llm = "assistant",
+								user = "user",
+							},
+							commands = {
+								default = {
+									"pool",
+									"acp",
+									"--agent-name",
+									"agent_1003_cc_v2_rc-fp8-tpr",
+									"--workspace",
+									workspace,
+								},
+							},
+							defaults = {
+								model = "019b7095-3f98-7140-a876-dfbc2e0462c7", -- malibu_xml_1215
+							},
+							parameters = {
+								protocolVersion = 1,
+								clientCapabilities = {
+									fs = { readTextFile = true, writeTextFile = true },
+								},
+							},
+							handlers = {
+								form_messages = function(self, messages, capabilities)
+									return require("codecompanion.adapters.acp.helpers").form_messages(
+										self,
+										messages,
+										capabilities
+									)
+								end,
+							},
+						}
+					end,
+				},
 			},
 		},
 		cmd = {
