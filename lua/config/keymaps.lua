@@ -227,6 +227,8 @@ vim.keymap.set(
 vim.keymap.del({ "i", "x", "n", "s" }, "<c-s>")
 vim.keymap.del({ "n", "x" }, "j")
 vim.keymap.del({ "n", "x" }, "k")
+-- vim.keymap.del("s", "<tab>")
+-- vim.keymap.del({ "i", "s" }, "<s-tab>")
 
 -- fix abbreviations in lazyvim esc keymap in insert mode
 vim.keymap.set("i", "<esc>", function()
