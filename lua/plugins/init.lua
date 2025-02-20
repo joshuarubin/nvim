@@ -40,6 +40,12 @@ return {
 			},
 		},
 	},
+	-- {
+	-- 	"m4xshen/hardtime.nvim",
+	-- 	lazy = false,
+	-- 	dependencies = { "MunifTanjim/nui.nvim" },
+	-- 	opts = {},
+	-- },
 	{
 		"tpope/vim-eunuch", -- helpers for unix
 		cmd = {
@@ -146,6 +152,11 @@ return {
 		},
 	},
 	{
+		-- TODO(joshua)
+		"rafikdraoui/jj-diffconflicts",
+		cmd = { "JJDiffConflicts" },
+	},
+	{
 		"Dzordzu/vim-cedar",
 	},
 	{
@@ -175,6 +186,7 @@ return {
 						})
 						return focus.bufnr, winnr
 					end,
+					-- diff = "tab_vsplit", -- TODO(joshua)
 				},
 				hooks = {
 					pre_open = function(opts)
