@@ -62,4 +62,12 @@ return {
 			},
 		},
 	},
+
+	-- Break bad vim habits by limiting repeated key usage
+	-- {
+	-- 	"m4xshen/hardtime.nvim",
+	-- 	lazy = false,
+	-- 	dependencies = { "MunifTanjim/nui.nvim" },
+	-- 	opts = {},
+	-- },
 }
