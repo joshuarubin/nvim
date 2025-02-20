@@ -5,6 +5,7 @@ return {
 		opts = {
 			ensure_installed = {
 				"golines",
+				"tree-sitter-cli",
 				"typescript-language-server",
 				"yamllint",
 			},

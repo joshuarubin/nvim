@@ -65,7 +65,7 @@ return {
 		end,
 		init = function()
 			local function get_client(buf)
-				return LazyVim.lsp.get_clients({ name = "gopls", bufnr = buf })[1]
+				return vim.lsp.get_clients({ name = "gopls", bufnr = buf })[1]
 			end
 
 			LazyVim.format.register(LazyVim.lsp.formatter({
