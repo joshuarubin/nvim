@@ -29,6 +29,9 @@ return {
 				opts.ensure_installed = LazyVim.dedup(opts.ensure_installed)
 			end
 
+			-- this is still experimental and really sucks atm
+			opts.indent.enable = false
+
 			opts.textobjects.move.goto_next_start["]c"] = nil
 			opts.textobjects.move.goto_next_end["]C"] = nil
 			opts.textobjects.move.goto_previous_start["[c"] = nil

@@ -194,8 +194,21 @@ vim.keymap.set("n", "<c-w><c-w>", function()
 	Snacks.bufdelete.delete()
 end, { desc = "Delete the current buffer without closing the window" })
 
+vim.keymap.set(
+	"v",
+	"p",
+	"P",
+	{ desc = "visual put without putting the previously selected text in the unnamed register" }
+)
+
 -- delete lazyvim keymaps
 vim.keymap.del({ "i", "x", "n", "s" }, "<c-s>")
 vim.keymap.del({ "n", "x" }, "j")
 vim.keymap.del({ "n", "x" }, "k")
-vim.keymap.del({ "n", "i", "s" }, "<esc>")
+
+-- fix abbreviations in lazyvim esc keymap in insert mode
+vim.keymap.set("i", "<esc>", function()
+	vim.cmd("nohlsearch")
+	LazyVim.cmp.actions.snippet_stop()
+	return "<c-]><esc>"
+end, { expr = true, desc = "Escape and Clear hlsearch" })

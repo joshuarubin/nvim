@@ -24,7 +24,10 @@ return {
 		"stevearc/conform.nvim",
 		cond = not vim.g.vscode,
 		opts = function(_, opts)
-			opts.formatters_by_ft.go = { lsp_format = "first", "golines" } -- gopls first, then golines
+			opts.formatters_by_ft.go = {
+				lsp_format = "first",
+				"golines",
+			} -- gopls first, then golines
 
 			opts.formatters.golines = {
 				append_args = {

@@ -9,6 +9,14 @@ return {
 			words = {
 				enabled = false,
 			},
+			styles = {
+				terminal = {
+					keys = {
+						q = "<nop>",
+						term_normal = "<nop>",
+					},
+				},
+			},
 		},
 	},
 }

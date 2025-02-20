@@ -11,6 +11,11 @@ return {
 			end
 		end,
 		opts = {
+			linters = {
+				sqlfluff = {
+					args = { "lint", "--format=json" },
+				},
+			},
 			linters_by_ft = {
 				fish = { "fish" },
 				nix = { "deadnix", "statix" },

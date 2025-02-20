@@ -18,6 +18,8 @@ return {
 			}
 
 			opts.completion.accept.auto_brackets.enabled = false
+			opts.completion.accept.dot_repeat = false
+
 			opts.completion.list = {
 				selection = {
 					preselect = false,
