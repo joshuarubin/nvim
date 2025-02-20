@@ -24,18 +24,6 @@ return {
 		"stevearc/conform.nvim",
 		cond = not vim.g.vscode,
 		opts = function(_, opts)
-			opts.formatters_by_ft.go = {
-				lsp_format = "first",
-				"golines",
-			} -- gopls first, then golines
-
-			opts.formatters.golines = {
-				append_args = {
-					"--shorten-comments",
-					"--max-len=100",
-				},
-			}
-
 			opts.formatters.goimports = {
 				append_args = { "-local=" .. table.concat(local_imports, ",") },
 			}
@@ -62,7 +50,7 @@ return {
 			opts.servers.gopls.settings.gopls.analyses.shadow = true
 			opts.servers.gopls.settings.gopls.analyses.unusedvariable = true
 			opts.servers.gopls.settings.gopls.codelenses.gc_details = true
-			opts.servers.gopls.settings.gopls.buildFlags = { "-tags=wireinject" }
+			opts.servers.gopls.settings.gopls.buildFlags = { "-tags=wireinject,integration" }
 			opts.servers.gopls.settings.gopls["local"] = table.concat(local_imports, ",")
 			opts.servers.gopls.settings.gopls.gofumpt = true
 			opts.servers.gopls.settings.gopls.vulncheck = "Imports"

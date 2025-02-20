@@ -2,6 +2,7 @@ return {
 	{
 		"zbirenbaum/copilot.lua",
 		cond = not vim.g.vscode,
+		enabled = true,
 		opts = {
 			panel = {
 				enabled = false,
@@ -9,9 +10,9 @@ return {
 				keymap = {
 					jump_prev = "[[",
 					jump_next = "]]",
-					accept = "<CR>",
+					accept = "<cr>",
 					refresh = "gr",
-					open = "<M-CR>",
+					open = "<m-cr>",
 				},
 				layout = {
 					position = "bottom", -- | top | left | right
@@ -19,12 +20,12 @@ return {
 				},
 			},
 			suggestion = {
-				enabled = false,
+				enabled = true,
 				auto_trigger = true,
 				hide_during_completion = true,
 				debounce = 75,
 				keymap = {
-					accept = "<M-l>",
+					accept = "<c-e>",
 					accept_word = false,
 					accept_line = false,
 					next = "<M-]>",
@@ -45,6 +46,21 @@ return {
 			},
 			copilot_node_command = "node", -- Node.js version must be > 18.x
 		},
+		init = function()
+			vim.api.nvim_create_autocmd("User", {
+				pattern = "BlinkCmpMenuOpen",
+				callback = function()
+					vim.b.copilot_suggestion_hidden = true
+				end,
+			})
+
+			vim.api.nvim_create_autocmd("User", {
+				pattern = "BlinkCmpMenuClose",
+				callback = function()
+					vim.b.copilot_suggestion_hidden = false
+				end,
+			})
+		end,
 	},
 	{
 		"olimorris/codecompanion.nvim",

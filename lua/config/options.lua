@@ -59,11 +59,11 @@ vim.o.spell = false
 vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal"
 vim.o.ruler = false
 vim.o.wrap = true
-vim.o.relativenumber = false
 
 vim.opt.packpath:prepend(vim.fn.stdpath("config"))
 vim.opt.isfname:remove({ "=" })
 vim.g.snacks_animate = false
+vim.g.root_spec = { { ".git" }, "lsp", "cwd" }
 
 require("config.env")
 require("config.clipboard")

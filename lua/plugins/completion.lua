@@ -32,18 +32,40 @@ return {
 				border = "single",
 			}
 
+			local lsp_name = function(ctx)
+				if ctx.source_id ~= "lsp" then
+					return
+				end
+
+				if ctx.item == nil then
+					return
+				end
+
+				return ctx.item.client_name
+			end
+
 			opts.completion.menu.draw.components = {
 				source_icon = {
 					width = { max = 30 },
 					text = function(ctx)
 						return ({
 							copilot = " ",
-							luasnp = "",
-							snippets = "",
-							lsp = "",
-							buffer = "",
-							path = "",
+							luasnp = " ",
+							snippets = " ",
+							lsp = " ",
+							buffer = " ",
+							path = " ",
 						})[ctx.source_id] or ""
+					end,
+					highlight = "BlinkCmpSource",
+				},
+				client_name = {
+					width = { max = 30 },
+					text = function(ctx)
+						local cn = lsp_name(ctx)
+						if cn ~= nil then
+							return "[" .. cn .. "]"
+						end
 					end,
 					highlight = "BlinkCmpSource",
 				},
@@ -52,7 +74,7 @@ return {
 			opts.completion.menu.draw.columns = {
 				{ "kind_icon" },
 				{ "label", "label_description", gap = 1 },
-				{ "source_icon" },
+				{ "source_icon", "source_name", "client_name", gap = 1 },
 			}
 
 			opts.keymap.preset = "none"
@@ -81,9 +103,11 @@ return {
 				luasnp.expand,
 				"fallback",
 			}
-			opts.keymap["<tab>"] = {
+			-- this has to be `Tab`, not `tab`, to ensure LazyVim doesn't add an
+			-- additional keymap that races with this one
+			opts.keymap["<Tab>"] = {
 				"select_next",
-				"snippet_forward",
+				LazyVim.cmp.map({ "snippet_forward", "ai_accept" }),
 				"fallback",
 			}
 			opts.keymap["<s-tab>"] = {

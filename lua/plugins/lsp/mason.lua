@@ -1,6 +1,6 @@
 return {
 	{
-		"williamboman/mason.nvim",
+		"mason-org/mason.nvim",
 		cond = not vim.g.vscode,
 		opts = {
 			ensure_installed = {
@@ -11,7 +11,7 @@ return {
 		},
 	},
 	{
-		"williamboman/mason-lspconfig.nvim",
+		"mason-org/mason-lspconfig.nvim",
 		cond = not vim.g.vscode,
 		opts = {
 			automatic_installation = {

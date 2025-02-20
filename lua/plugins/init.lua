@@ -20,6 +20,27 @@ return {
 		},
 	},
 	{
+		"gbprod/yanky.nvim",
+		keys = {
+			{ "p", "<Plug>(YankyPutBefore)", mode = { "x" }, desc = "Put Text Before Cursor" },
+		},
+	},
+	{
+		"mistweaverco/kulala.nvim",
+		opts = {
+			contenttypes = {
+				-- this is just copied from the default application/json
+				["application/problem+json"] = {
+					ft = "json",
+					formatter = vim.fn.executable("jq") == 1 and { "jq", "." },
+					pathresolver = function(...)
+						return require("kulala.parser.jsonpath").parse(...)
+					end,
+				},
+			},
+		},
+	},
+	{
 		"tpope/vim-eunuch", -- helpers for unix
 		cmd = {
 			"Cfind",
@@ -54,7 +75,7 @@ return {
 	},
 	"direnv/direnv.vim",
 	{
-		"echasnovski/mini.pairs",
+		"nvim-mini/mini.pairs",
 		cond = not vim.g.vscode,
 		opts = {
 			modes = {
@@ -125,8 +146,12 @@ return {
 		},
 	},
 	{
+		"Dzordzu/vim-cedar",
+	},
+	{
 		"willothy/flatten.nvim",
 		-- Ensure that it runs first to minimize delay when opening file from terminal
+		enabled = false,
 		lazy = false,
 		priority = 1001,
 		opts = function()

@@ -2,6 +2,7 @@ return {
 	{
 		"kevinhwang91/nvim-hlslens",
 		cond = not vim.g.vscode,
+		enabled = false,
 		opts = {},
 		keys = {
 			{

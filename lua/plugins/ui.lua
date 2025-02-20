@@ -49,6 +49,7 @@ return {
 	{
 		"folke/noice.nvim",
 		cond = not vim.g.vscode,
+		enabled = false,
 		opts = {
 			cmdline = {
 				view = "cmdline",
@@ -65,7 +66,7 @@ return {
 		},
 	},
 	{
-		"echasnovski/mini.icons",
+		"nvim-mini/mini.icons",
 		cond = not vim.g.vscode,
 		opts = {
 			filetype = {

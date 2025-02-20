@@ -27,18 +27,3 @@ editorconfig.properties.trim_trailing_whitespace = function(bufnr, val)
 	end
 	trim_trailing_whitespace(bufnr, val)
 end
-
-local insert_final_newline = editorconfig.properties.insert_final_newline
-
-editorconfig.properties.insert_final_newline = function(bufnr, val)
-	if vim.bo[bufnr].filetype == "go" then
-		-- gopls will handle final newline
-		vim.api.nvim_clear_autocmds({
-			event = "BufWritePre",
-			group = "editorconfig",
-			buffer = bufnr,
-		})
-		return
-	end
-	insert_final_newline(bufnr, val)
-end

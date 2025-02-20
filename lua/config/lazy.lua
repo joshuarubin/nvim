@@ -24,6 +24,9 @@ require("lazy").setup({
 	defaults = {
 		version = false,
 	},
+	dev = {
+		path = "~/.config/nvim/dev",
+	},
 	install = { colorscheme = { "habamax" } },
 	checker = { enabled = true },
 	performance = {
