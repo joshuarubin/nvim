@@ -1,3 +1,10 @@
+local hide_false = function(cmp)
+	if cmp.is_visible() then
+		cmp.hide()
+	end
+	return false -- different from 'hide' which won't fallthrough to fallback
+end
+
 return {
 	{
 		"saghen/blink.cmp",
@@ -19,6 +26,7 @@ return {
 
 			opts.completion.accept.auto_brackets.enabled = false
 			opts.completion.accept.dot_repeat = false
+			opts.completion.ghost_text.enabled = false
 
 			opts.completion.list = {
 				selection = {
@@ -92,7 +100,7 @@ return {
 			opts.keymap["<s-cr>"] = { "accept", "fallback" }
 			opts.keymap["<c-cr>"] = { "cancel", "fallback" }
 			opts.keymap["<c-y>"] = { "select_and_accept", "fallback" }
-			opts.keymap["<c-e>"] = { "hide", "fallback" }
+			opts.keymap["<c-e>"] = { hide_false, "fallback" }
 			opts.keymap["<cr>"] = {
 				"accept",
 				luasnp.expand,
@@ -106,8 +114,8 @@ return {
 			-- this has to be `Tab`, not `tab`, to ensure LazyVim doesn't add an
 			-- additional keymap that races with this one
 			opts.keymap["<Tab>"] = {
-				"select_next",
 				LazyVim.cmp.map({ "snippet_forward", "ai_accept" }),
+				"select_next",
 				"fallback",
 			}
 			opts.keymap["<s-tab>"] = {

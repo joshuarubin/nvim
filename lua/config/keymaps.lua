@@ -145,6 +145,9 @@ vim.keymap.set("n", "<c-a>r", "<cmd>redraw!<cr>", { desc = "redraw the screen" }
 -- command line mode
 vim.keymap.set("c", "<c-j>", "<down>", { desc = "down" })
 vim.keymap.set("c", "<c-k>", "<up>", { desc = "up" })
+
+local safe_require = require("util.safe_require")
+
 vim.keymap.set("c", "<cr>", function()
 	if vim.fn.wildmenumode() == 1 then
 		vim.fn.feedkeys(t("<c-y>"))
@@ -153,6 +156,18 @@ vim.keymap.set("c", "<cr>", function()
 		end
 		return ""
 	end
+
+	local accepted
+	safe_require("blink.cmp", function(cmp)
+		if cmp.is_visible() then
+			accepted = cmp.accept()
+		end
+	end)
+
+	if accepted then
+		return ""
+	end
+
 	return "<cr>"
 end, { expr = true })
 
