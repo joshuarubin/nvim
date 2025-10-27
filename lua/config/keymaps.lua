@@ -149,22 +149,29 @@ vim.keymap.set("c", "<c-k>", "<up>", { desc = "up" })
 local safe_require = require("util.safe_require")
 
 vim.keymap.set("c", "<cr>", function()
+	local accepted = false
+
+	-- Handle wildmenu completion
 	if vim.fn.wildmenumode() == 1 then
 		vim.fn.feedkeys(t("<c-y>"))
-		if not vim.fn.getcmdline():match("/$") then
-			vim.fn.feedkeys(t("<cr>"))
-		end
-		return ""
+		accepted = true
 	end
 
-	local accepted
-	safe_require("blink.cmp", function(cmp)
-		if cmp.is_visible() then
-			accepted = cmp.accept()
-		end
-	end)
+	-- Handle blink.cmp completion
+	if not accepted then
+		safe_require("blink.cmp", function(cmp)
+			if cmp.is_visible() then
+				accepted = cmp.accept()
+			end
+		end)
+	end
 
+	-- If something was accepted from a menu, check if we should execute
 	if accepted then
+		-- Only insert if it's a directory (ends with /), otherwise execute
+		if not vim.fn.getcmdline():match("/$") then
+			return "<cr>"
+		end
 		return ""
 	end
 
