@@ -55,13 +55,14 @@ return {
 			opts.servers.gopls.settings.gopls.gofumpt = true
 			opts.servers.gopls.settings.gopls.vulncheck = "Imports"
 
-			opts.servers.gopls.keys = {
+			-- Extend default keys instead of replacing them
+			opts.servers.gopls.keys = vim.list_extend(opts.servers.gopls.keys or {}, {
 				{
 					"<leader>co",
 					LazyVim.lsp.action["source.organizeImports"],
 					desc = "Organize Imports",
 				},
-			}
+			})
 		end,
 		init = function()
 			local function get_client(buf)

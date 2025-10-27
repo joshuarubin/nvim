@@ -3,11 +3,11 @@ return {
 		"neovim/nvim-lspconfig",
 		cond = not vim.g.vscode,
 		opts = function(_, opts)
-			-- disable these mappings
-			opts.servers["*"].keys = {
+			-- disable these mappings by extending the default keys
+			opts.servers["*"].keys = vim.list_extend(opts.servers["*"].keys or {}, {
 				{ "[[", false },
 				{ "]]", false },
-			}
+			})
 
 			-- change the default config a bit
 			opts.codelens.enabled = true
