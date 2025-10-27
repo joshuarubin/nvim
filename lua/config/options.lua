@@ -56,7 +56,7 @@ vim.o.joinspaces = false
 vim.o.tags = "./tags;/,~/.vimtags"
 vim.o.mouse = "nv"
 vim.o.spell = false
-vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal"
+vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos"
 vim.o.ruler = false
 vim.o.wrap = true
 
