@@ -4,9 +4,10 @@ return {
 		cond = not vim.g.vscode,
 		opts = function(_, opts)
 			-- disable these mappings
-			local keys = require("lazyvim.plugins.lsp.keymaps").get()
-			keys[#keys + 1] = { "[[", false }
-			keys[#keys + 1] = { "]]", false }
+			opts.servers["*"].keys = {
+				{ "[[", false },
+				{ "]]", false },
+			}
 
 			-- change the default config a bit
 			opts.codelens.enabled = true
