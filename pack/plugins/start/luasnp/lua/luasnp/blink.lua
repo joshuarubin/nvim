@@ -14,11 +14,12 @@ luasnp.new = function(opts)
 end
 
 function luasnp:snippet_to_completion_item(context, snippet)
+	-- Convert cursor from 1-indexed (LSP/blink format) to 0-indexed (treesitter format)
 	local luasnpCtx = {
 		bufnr = context.bufnr,
 		cursor = {
-			line = context.cursor[1],
-			col = context.cursor[2],
+			line = context.cursor[1] - 1,
+			col = context.cursor[2] - 1,
 		},
 	}
 
@@ -57,7 +58,9 @@ local get_prev_word = function(context)
 	-- and return the cursor to where it was
 	vim.api.nvim_win_set_cursor(window, { row, col })
 
-	context.cursor = { row - 1, col }
+	-- Store in LSP format (1-indexed row, 1-indexed col) to match blink.cmp's format
+	-- vim.api.nvim_win_get_cursor returns (1-indexed row, 0-indexed col)
+	context.cursor = { row, col + 1 }
 
 	return word
 end
@@ -80,7 +83,8 @@ function luasnp.expand(context)
 	end
 
 	-- remove the label from the buffer
-	local row, col = unpack(context.cursor)
+	-- Convert from 1-indexed (LSP format) to 0-indexed (nvim_buf_set_text format)
+	local row, col = context.cursor[1] - 1, context.cursor[2] - 1
 	local start_col = math.max(col - #trigger, 0)
 
 	vim.schedule(function()

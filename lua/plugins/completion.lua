@@ -40,6 +40,13 @@ return {
 				border = "single",
 			}
 
+			opts.signature = {
+				enabled = true,
+				window = {
+					border = "rounded",
+				},
+			}
+
 			local lsp_name = function(ctx)
 				if ctx.source_id ~= "lsp" then
 					return

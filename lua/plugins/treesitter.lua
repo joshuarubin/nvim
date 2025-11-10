@@ -1,5 +1,13 @@
 return {
 	{
+		"nvim-treesitter/nvim-treesitter",
+		opts = {
+			ensure_installed = {
+				"cue",
+			},
+		},
+	},
+	{
 		"nvim-treesitter/nvim-treesitter-textobjects",
 		keys = function()
 			local moves = {

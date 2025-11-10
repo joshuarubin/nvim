@@ -111,6 +111,18 @@ return {
 			current_line_blame = true,
 			current_line_blame_opts = { delay = 0 },
 			on_attach = function(bufnr)
+				-- Don't attach to diff/virtual buffers to avoid git-blame errors
+				local bufname = vim.api.nvim_buf_get_name(bufnr)
+				-- Check for virtual buffer schemes from gitsigns or diffview
+				if bufname:match("^gitsigns://") or bufname:match("^diffview://") then
+					return false
+				end
+				-- Check if buffer is in diff mode
+				local winid = vim.fn.bufwinid(bufnr)
+				if winid ~= -1 and vim.wo[winid].diff then
+					return false
+				end
+
 				local gs = package.loaded.gitsigns
 
 				local function map(mode, l, r, desc)

@@ -1,6 +1,3 @@
-local ts_utils = require("nvim-treesitter.ts_utils")
-local parsers = require("nvim-treesitter.parsers")
-
 local M = {}
 
 M.split_args = function(text)
@@ -72,15 +69,20 @@ end
 ---@param context cmp.Context
 ---@return string
 M.return_values = function(context)
-	local root_lang_tree = parsers.get_parser(context.bufnr)
+	local bufnr = context.bufnr or 0
+	local ok, parser = pcall(vim.treesitter.get_parser, bufnr, "go")
 	local ret = ""
 
-	if not root_lang_tree then
+	if not ok or not parser then
 		return ret
 	end
 
-	local root = ts_utils.get_root_for_position(context.cursor.line, context.cursor.col, root_lang_tree)
+	local tree = parser:parse()[1]
+	if not tree then
+		return ret
+	end
 
+	local root = tree:root()
 	if not root then
 		return ret
 	end
@@ -91,6 +93,10 @@ M.return_values = function(context)
 		context.cursor.line,
 		context.cursor.col
 	)
+
+	if not node then
+		return ret
+	end
 
 	while node ~= nil do
 		if

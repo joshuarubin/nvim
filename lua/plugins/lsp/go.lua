@@ -89,7 +89,7 @@ return {
 						triggerKind = vim.lsp.protocol.CodeActionTriggerKind.Invoked,
 					}
 
-					local params = vim.lsp.util.make_range_params()
+					local params = vim.lsp.util.make_range_params(nil, client.offset_encoding)
 					params.context = context
 
 					local results = client.request_sync(ms.textDocument_codeAction, params, 1000, buf)

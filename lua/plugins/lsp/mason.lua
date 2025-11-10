@@ -4,6 +4,7 @@ return {
 		cond = not vim.g.vscode,
 		opts = {
 			ensure_installed = {
+				"cuelsp",
 				"golines",
 				"tree-sitter-cli",
 				"typescript-language-server",
