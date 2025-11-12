@@ -1,7 +1,7 @@
 return {
 	{
 		trigger = "ie",
-		---@param context cmp.Context
+		---@param context luasnp.Context
 		body = function(context)
 			local ok, go = pcall(require, "luasnp.go")
 			local return_stmt = "return err"

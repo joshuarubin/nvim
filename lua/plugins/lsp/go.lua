@@ -90,8 +90,10 @@ return {
 					}
 
 					local params = vim.lsp.util.make_range_params(nil, client.offset_encoding)
+					---@diagnostic disable-next-line: inject-field
 					params.context = context
 
+					---@diagnostic disable-next-line: param-type-mismatch
 					local results = client.request_sync(ms.textDocument_codeAction, params, 1000, buf)
 					if not results then
 						return

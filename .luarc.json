@@ -1,0 +1,40 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
+  "runtime": {
+    "version": "LuaJIT",
+    "path": [
+      "lua/?.lua",
+      "lua/?/init.lua",
+      "pack/plugins/start/luasnp/lua/?.lua",
+      "pack/plugins/start/luasnp/lua/?/init.lua"
+    ],
+    "special": {
+      "vim": "require"
+    }
+  },
+  "diagnostics": {
+    "globals": [
+      "vim",
+      "LazyVim",
+      "Snacks"
+    ]
+  },
+  "workspace": {
+    "checkThirdParty": false,
+    "library": [
+      "${3rd}/luv/library",
+      "${3rd}/luassert/library",
+      "${3rd}/busted/library",
+      "$VIMRUNTIME/lua",
+      "~/.local/share/nvim/lazy/LazyVim/lua",
+      "~/.local/share/nvim/lazy/lazy.nvim/lua",
+      "~/.local/share/nvim/lazy/blink.cmp/lua"
+    ]
+  },
+  "completion": {
+    "callSnippet": "Replace"
+  },
+  "telemetry": {
+    "enable": false
+  }
+}

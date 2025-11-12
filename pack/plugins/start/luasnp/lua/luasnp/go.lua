@@ -66,7 +66,7 @@ M.zero_value = function(type)
 	return "nil"
 end
 
----@param context cmp.Context
+---@param context luasnp.Context
 ---@return string
 M.return_values = function(context)
 	local bufnr = context.bufnr or 0

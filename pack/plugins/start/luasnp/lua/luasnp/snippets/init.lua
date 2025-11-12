@@ -2,7 +2,7 @@ local M = {}
 
 local global = require("luasnp.snippets.global")
 
----@param context cmp.Context
+---@param context luasnp.Context
 M.get = function(context)
 	local snips = vim.list_slice(global)
 
@@ -26,7 +26,7 @@ M.get = function(context)
 			body = s.body(context)
 		end
 
-		---@type lsp.CompletionItem
+		---@type {label: string, kind: integer, insertText: string, insertTextFormat: integer}
 		return {
 			label = s.trigger,
 			kind = vim.lsp.protocol.CompletionItemKind.Snippet,
@@ -37,7 +37,7 @@ M.get = function(context)
 end
 
 ---@param label string
----@param context cmp.Context
+---@param context luasnp.Context
 M.get_exact = function(label, context)
 	local snips = M.get(context)
 	for _, s in ipairs(snips) do

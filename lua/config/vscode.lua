@@ -2,7 +2,7 @@ if not vim.g.vscode then
 	return
 end
 
-local vscode, ok = pcall(require, "vscode")
+local ok, vscode = pcall(require, "vscode")
 if not ok then
 	return
 end

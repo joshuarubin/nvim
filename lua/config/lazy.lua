@@ -24,6 +24,7 @@ require("lazy").setup({
 	defaults = {
 		version = false,
 	},
+	---@diagnostic disable-next-line: assign-type-mismatch
 	dev = {
 		path = "~/.config/nvim/dev",
 	},
