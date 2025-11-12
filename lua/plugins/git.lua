@@ -132,18 +132,16 @@ return {
 				-- Navigation
 				map("n", "]c", function()
 					if vim.wo.diff then
-						vim.cmd.normal({ "]c", bang = true })
-					else
-						gs.nav_hunk("next")
+						return vim.api.nvim_feedkeys("]c", "n", false)
 					end
+					gs.nav_hunk("next")
 				end, "Next Hunk")
 
 				map("n", "[c", function()
 					if vim.wo.diff then
-						vim.cmd.normal({ "[c", bang = true })
-					else
-						gs.nav_hunk("prev")
+						return vim.api.nvim_feedkeys("[c", "n", false)
 					end
+					gs.nav_hunk("prev")
 				end, "Prev Hunk")
 
 				map("n", "]C", function()
