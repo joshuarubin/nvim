@@ -21,13 +21,18 @@ return {
 			return opts
 		end,
 		init = function()
-			-- Add border to hover window
+			-- Add border to hover window and disable spell checking
 			local orig_util_open_floating_preview = vim.lsp.util.open_floating_preview
 			---@diagnostic disable-next-line: duplicate-set-field
 			function vim.lsp.util.open_floating_preview(contents, syntax, opts, ...)
 				opts = opts or {}
 				opts.border = opts.border or "rounded"
-				return orig_util_open_floating_preview(contents, syntax, opts, ...)
+				local bufnr, winnr = orig_util_open_floating_preview(contents, syntax, opts, ...)
+				-- Disable spell checking in the hover window
+				if winnr then
+					vim.api.nvim_set_option_value("spell", false, { win = winnr })
+				end
+				return bufnr, winnr
 			end
 
 			-- Configure diagnostics

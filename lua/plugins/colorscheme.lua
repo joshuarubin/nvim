@@ -1,5 +1,18 @@
 return {
 	{
+		"folke/tokyonight.nvim",
+		cond = not vim.g.vscode,
+		lazy = false,
+		priority = 1000,
+		opts = {
+			on_highlights = function(hl, c)
+				-- Make window separators more visible
+				hl.WinSeparator = { fg = "#545c7e" }
+				hl.VertSplit = { fg = "#545c7e" }
+			end,
+		},
+	},
+	{
 		"ellisonleao/gruvbox.nvim",
 		cond = not vim.g.vscode,
 		lazy = false,
