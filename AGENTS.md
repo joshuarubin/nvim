@@ -17,6 +17,8 @@
 - After each `main` push, rebase `testing` onto it locally and push the updated `testing` bookmark so GitHub mirrors your experiments.
 - Start the next `latest updates` revision from `testing`, move `main` to it with `jj`, and keep the `latest updates` description for soon-to-ship work.
 - Before the next push, rebase `latest updates` onto plain `main`, move the `main` bookmark to that revision, and only then push; after the push lands, repeat by rebasing/pushing `testing` and respawning `latest updates` from it.
+- After `main` is moved and pushed, immediately rebase any other local branches onto that pushed `main` revision (not the new temporary `latest updates`) so they stay aligned before you resume work on them.
+- When I say “ready to push” (or similar), execute the full flow interactively: ensure the current revision has an accurate single-line `jj desc`, rebase it onto `main`, move and push `main`, rebase/push `testing`, rebase other bookmarks onto the pushed `main`, then spawn the new `latest updates` from `testing`. Halt and ask for guidance if any step hits conflicts.
 
 ## Coding Style & Naming Conventions
 
