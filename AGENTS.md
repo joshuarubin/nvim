@@ -35,5 +35,6 @@
 ## Commit & Push Guidelines
 
 - Keep every `jj desc` to a single-line Conventional Commit scope (e.g., `feat(lint): ...`) that reflects the full change set in the revision; add extra detail in the body only when needed.
-- Create, amend, and reorder commits with `jj` so the repository’s preferred DVCS remains the source of truth before exporting to Git remotes.
+- **Commit descriptions must comprehensively describe ALL changes in the diff** — review every modified file and summarize all changes, not just a subset. Use bullet points in the body to enumerate changes across multiple files or subsystems.
+- Create, amend, and reorder commits with `jj` so the repository's preferred DVCS remains the source of truth before exporting to Git remotes.
 - When `lazy-lock.json` changes intentionally, keep that bump in its own commit so lock diffs stay readable.
