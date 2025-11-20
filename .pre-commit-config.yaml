@@ -19,3 +19,19 @@ repos:
       - id: end-of-file-fixer
         exclude: ^lazyvim\.json$
       - id: trailing-whitespace
+  - repo: local
+    hooks:
+      - id: lua-lint
+        name: make lua-lint
+        entry: bash -c 'set -euo pipefail; make lua-lint-hook FILES="$@"' --
+        language: system
+        files: ^(lua/|pack/plugins/start/luasnp/).+\.lua$
+        stages: [pre-commit, manual]
+  - repo: local
+    hooks:
+      - id: markdownlint
+        name: markdownlint
+        entry: scripts/markdownlint.sh
+        language: system
+        files: \.md$
+        stages: [pre-commit, manual]
