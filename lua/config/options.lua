@@ -23,7 +23,7 @@ vim.opt.fillchars = {
 	foldopen = "", -- mark the beginning of a fold
 	foldsep = " ", -- open fold middle marker
 }
-vim.o.foldcolumn = "auto:9"
+vim.o.foldcolumn = "auto:1"
 vim.o.title = true
 vim.o.showbreak = ""
 vim.o.whichwrap = "b,s,<,>,[,]"

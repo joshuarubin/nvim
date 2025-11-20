@@ -81,3 +81,13 @@ vim.api.nvim_create_autocmd("OptionSet", {
 		end
 	end,
 })
+
+vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter" }, {
+	desc = "check for file changes when switching windows",
+	group = init_group,
+	callback = function()
+		if vim.o.buftype ~= "nofile" then
+			vim.cmd.checktime()
+		end
+	end,
+})

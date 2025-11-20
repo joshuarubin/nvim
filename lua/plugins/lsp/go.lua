@@ -55,6 +55,19 @@ return {
 			opts.servers.gopls.settings.gopls.gofumpt = true
 			opts.servers.gopls.settings.gopls.vulncheck = "Imports"
 
+			-- Filter out shadow diagnostics for "err" variable
+			opts.servers.gopls.handlers = {
+				["textDocument/publishDiagnostics"] = function(err, result, ctx, config)
+					if result and result.diagnostics then
+						result.diagnostics = vim.tbl_filter(function(diag)
+							-- Filter out shadow warnings for "err" variable
+							return not (diag.message and diag.message:match("shadow") and diag.message:match('"err"'))
+						end, result.diagnostics)
+					end
+					vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx, config)
+				end,
+			}
+
 			-- Extend default keys instead of replacing them
 			opts.servers.gopls.keys = vim.list_extend(opts.servers.gopls.keys or {}, {
 				{

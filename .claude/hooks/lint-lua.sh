@@ -13,7 +13,7 @@ if [ ! -f "$FILE_PATH" ]; then
   exit 0
 fi
 
-# Use the Makefile lint-hook target
-cd "$CLAUDE_PROJECT_DIR" && make lint-hook FILE="$FILE_PATH" 2>&1
+# Use the Makefile lua-lint-hook target
+cd "$CLAUDE_PROJECT_DIR" && make lua-lint-hook FILES="$FILE_PATH" 2>&1
 
 exit 0
