@@ -73,7 +73,12 @@ return {
 			end, { desc = "Rename File" })
 		end,
 	},
-	"direnv/direnv.vim",
+	{
+		"direnv/direnv.vim",
+		init = function()
+			vim.g.direnv_silent_load = 1
+		end,
+	},
 	{
 		"nvim-mini/mini.pairs",
 		cond = not vim.g.vscode,
@@ -209,5 +214,84 @@ return {
 				},
 			}
 		end,
+	},
+	{
+		"joshuarubin/terminal.nvim",
+		cond = not vim.g.vscode,
+		opts = {},
+	},
+	{
+		"simnalamburt/vim-mundo",
+		cond = not vim.g.vscode,
+		keys = { {
+			"<leader>uu",
+			":MundoToggle<cr>",
+			silent = true,
+			desc = "Undo Tree",
+		} },
+	},
+	{
+		"nvim-lualine/lualine.nvim",
+		cond = not vim.g.vscode,
+		opts = {
+			options = {
+				theme = "auto",
+				component_separators = { left = "", right = "" },
+				section_separators = { left = "", right = "" },
+			},
+		},
+	},
+	{
+		"folke/snacks.nvim",
+		opts = {
+			terminal = {
+				-- this is needed for terminal.nvim to work
+				interactive = false,
+			},
+			words = {
+				enabled = false,
+			},
+			styles = {
+				terminal = {
+					keys = {
+						q = "<nop>",
+						term_normal = "<nop>",
+					},
+				},
+			},
+		},
+	},
+	{
+		"MeanderingProgrammer/render-markdown.nvim",
+		ft = { "markdown", "norg", "rmd", "org", "Avante", "codecompanion" },
+		cond = not vim.g.vscode,
+		opts = {
+			render_modes = { "n", "c", "t", "i" },
+			win_options = {
+				conceallevel = {
+					default = 3,
+					rendered = 3,
+				},
+				concealcursor = {
+					rendered = "",
+				},
+			},
+		},
+	},
+	{
+		"ibhagwan/fzf-lua",
+		cond = not vim.g.vscode,
+		keys = {
+			{ "<leader>fc", false },
+			{ "<leader>gs", false },
+			{ "<leader>gc", false },
+		},
+	},
+	{
+		"swaits/lazyjj.nvim",
+		dependencies = { "nvim-lua/plenary.nvim" },
+		opts = {
+			mapping = "<leader>jj",
+		},
 	},
 }

@@ -25,7 +25,7 @@ return {
 			}
 
 			opts.completion.accept.auto_brackets.enabled = false
-			opts.completion.accept.dot_repeat = false
+			opts.completion.accept.dot_repeat = true
 			opts.completion.ghost_text.enabled = false
 
 			opts.completion.list = {

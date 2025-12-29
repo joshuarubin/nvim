@@ -49,22 +49,31 @@ return {
 			opts.servers.gopls.settings.gopls.analyses.fieldalignment = false
 			opts.servers.gopls.settings.gopls.analyses.shadow = true
 			opts.servers.gopls.settings.gopls.analyses.unusedvariable = true
+			opts.servers.gopls.settings.gopls.analyses.ST1000 = false
 			opts.servers.gopls.settings.gopls.codelenses.gc_details = true
 			opts.servers.gopls.settings.gopls.buildFlags = { "-tags=wireinject,integration" }
 			opts.servers.gopls.settings.gopls["local"] = table.concat(local_imports, ",")
 			opts.servers.gopls.settings.gopls.gofumpt = true
 			opts.servers.gopls.settings.gopls.vulncheck = "Imports"
 
-			-- Filter out shadow diagnostics for "err" variable
+			-- Filter out unwanted diagnostics
 			opts.servers.gopls.handlers = {
-				["textDocument/publishDiagnostics"] = function(err, result, ctx, config)
+				["textDocument/publishDiagnostics"] = function(err, result, ctx)
 					if result and result.diagnostics then
 						result.diagnostics = vim.tbl_filter(function(diag)
 							-- Filter out shadow warnings for "err" variable
-							return not (diag.message and diag.message:match("shadow") and diag.message:match('"err"'))
+							if diag.message and diag.message:match("shadow") and diag.message:match('"err"') then
+								return false
+							end
+
+							-- Filter out ST1000 package comment requirement
+							if diag.code == "ST1000" or (diag.message and diag.message:match("ST1000")) then
+								return false
+							end
+							return true
 						end, result.diagnostics)
 					end
-					vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx, config)
+					vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx)
 				end,
 			}
 
