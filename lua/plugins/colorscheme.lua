@@ -27,6 +27,9 @@ return {
 				-- Make window separators more visible
 				hl.WinSeparator = { fg = "#545c7e" }
 				hl.VertSplit = { fg = "#545c7e" }
+
+				-- Make unused/unnecessary code less dimmed (more readable)
+				hl.DiagnosticUnnecessary = { fg = c.fg_dark }
 			end,
 		},
 	},

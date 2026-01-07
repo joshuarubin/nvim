@@ -1,3 +1,36 @@
+-- Register copilot as self-managed so util.lsp doesn't try to restart it
+local lsp_util = require("util.lsp")
+
+lsp_util.register_self_managed("copilot")
+
+local copilot_group = vim.api.nvim_create_augroup("CopilotAutoTriggerGuard", {})
+
+-- Update auto_trigger per-buffer based on disabled state to avoid notification spam
+vim.api.nvim_create_autocmd("InsertEnter", {
+	group = copilot_group,
+	callback = function()
+		vim.b.copilot_suggestion_auto_trigger = not require("copilot.client").is_disabled()
+	end,
+})
+
+vim.api.nvim_create_autocmd("User", {
+	group = copilot_group,
+	pattern = { "LspStopPre", "LspRestartPre" },
+	callback = lsp_util.on_client("copilot", function()
+		require("copilot.command").disable()
+	end),
+})
+
+-- Re-enable Copilot after LSP start/restart
+vim.api.nvim_create_autocmd("User", {
+	group = copilot_group,
+	pattern = { "LspStartPost", "LspRestartPost" },
+	callback = lsp_util.on_client("copilot", function()
+		vim.b.copilot_suggestion_auto_trigger = true
+		require("copilot.command").enable()
+	end),
+})
+
 return {
 	{
 		"zbirenbaum/copilot.lua",

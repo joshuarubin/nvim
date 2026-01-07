@@ -1,3 +1,21 @@
+local lsp_util = require("util.lsp")
+
+local group = vim.api.nvim_create_augroup("LSPConfig", {})
+
+-- Re-apply lazydev's root_dir wrapper after lua_ls start/restart
+-- util/lsp.lua clears function-based root_dir before calling vim.lsp.start(),
+-- so we need to restore lazydev's workspace detection for proper .luarc.json discovery
+vim.api.nvim_create_autocmd("User", {
+	group = group,
+	pattern = { "LspStartPost", "LspRestartPost" },
+	callback = lsp_util.on_client("lua_ls", function()
+		local ok, lspconfig = pcall(require, "lazydev.integrations.lspconfig")
+		if ok then
+			lspconfig.setup()
+		end
+	end),
+})
+
 return {
 	{
 		"neovim/nvim-lspconfig",
