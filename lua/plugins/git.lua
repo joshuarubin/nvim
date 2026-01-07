@@ -1,3 +1,17 @@
+--[[
+git.lua - Git Integration and Version Control
+
+Plugins:
+- diffview.nvim: Advanced diff and merge tool UI
+- neogit.nvim: Magit-like Git interface
+- gitsigns.nvim: Git decorations and hunk management
+- hunk.nvim: Interactive hunk staging and editing
+- lazyjj.nvim: Jujutsu version control integration
+
+Organization rule: All git/VCS-related plugins grouped together
+See: lua/plugins/init.lua for placement guidelines
+--]]
+
 local git_opts = {}
 
 local keys = {
@@ -166,6 +180,50 @@ return {
 
 				vim.keymap.set("n", "<leader>gd", "<leader>ghd", { remap = true, buffer = bufnr, desc = "Diff This" })
 			end,
+		},
+	},
+
+	-- Interactive diff editor for staging hunks
+	{
+		"julienvincent/hunk.nvim",
+		cmd = { "DiffEditor" },
+		opts = {
+			keys = {
+				-- Global keybindings
+				global = {
+					quit = { "q" },
+					accept = { "<leader><cr>" },
+					focus_tree = { "<leader>e" },
+				},
+				-- Tree view keybindings
+				tree = {
+					expand_node = { "l", "<right>" },
+					collapse_node = { "h", "<left>" },
+					open_file = { "<cr>" },
+					toggle_file = { "a" },
+				},
+				-- Diff view keybindings
+				diff = {
+					toggle_line = { "a" },
+					toggle_hunk = { "A" },
+				},
+			},
+			ui = {
+				tree = {
+					mode = "nested",
+					width = 35,
+				},
+				layout = "vertical",
+			},
+		},
+	},
+
+	-- Jujutsu (jj) version control integration
+	{
+		"swaits/lazyjj.nvim",
+		dependencies = { "nvim-lua/plenary.nvim" },
+		opts = {
+			mapping = "<leader>jj",
 		},
 	},
 }
