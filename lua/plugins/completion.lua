@@ -10,15 +10,15 @@ return {
 		"saghen/blink.cmp",
 		cond = not vim.g.vscode,
 		opts = function(_, opts)
-			local luasnp = require("luasnp.blink")
+			local iferr = require("iferr.adapters.blink")
 
-			opts.sources.providers.luasnp = {
-				name = "luasnp",
-				module = "luasnp.blink",
+			opts.sources.providers.iferr = {
+				name = "iferr",
+				module = "iferr.adapters.blink",
 				score_offset = 100, -- show at a higher priority than lsp
 			}
 
-			table.insert(opts.sources.default, "luasnp")
+			table.insert(opts.sources.default, "iferr")
 
 			opts.sources.per_filetype = {
 				codecompanion = { "codecompanion" },
@@ -65,7 +65,7 @@ return {
 					text = function(ctx)
 						return ({
 							copilot = " ",
-							luasnp = " ",
+							iferr = " ",
 							snippets = " ",
 							lsp = " ",
 							buffer = " ",
@@ -110,12 +110,12 @@ return {
 			opts.keymap["<c-e>"] = { hide_false, "fallback" }
 			opts.keymap["<cr>"] = {
 				"accept",
-				luasnp.expand,
+				iferr.expand,
 				"fallback",
 			}
 			opts.keymap["<s-cr>"] = {
 				"accept",
-				luasnp.expand,
+				iferr.expand,
 				"fallback",
 			}
 			-- this has to be `Tab`, not `tab`, to ensure LazyVim doesn't add an

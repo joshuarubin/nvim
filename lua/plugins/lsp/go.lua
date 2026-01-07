@@ -21,6 +21,10 @@ end
 
 return {
 	{
+		"joshuarubin/iferr.nvim",
+		ft = "go",
+	},
+	{
 		"stevearc/conform.nvim",
 		cond = not vim.g.vscode,
 		opts = function(_, opts)
