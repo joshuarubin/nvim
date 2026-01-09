@@ -114,7 +114,44 @@ return {
 	-- Collection of small UI utilities
 	{
 		"folke/snacks.nvim",
+		keys = {
+			{
+				"<leader>.",
+				function()
+					Snacks.scratch({ ft = "markdown" })
+				end,
+				desc = "Markdown Scratch Buffer",
+			},
+			{
+				"<leader>s.",
+				function()
+					Snacks.scratch()
+				end,
+				desc = "Scratch Buffer (inherit filetype)",
+			},
+		},
 		opts = {
+			scratch = {
+				autowrite = true, -- Auto-save when switching buffers
+				win = {
+					keys = {
+						["delete"] = {
+							"<c-x>",
+							function(self)
+								local file = vim.api.nvim_buf_get_name(self.buf)
+								local buf = self.buf
+								vim.api.nvim_win_call(self.win, function()
+									vim.cmd("close")
+								end)
+								os.remove(file)
+								os.remove(file .. ".meta")
+								vim.api.nvim_buf_delete(buf, { force = true })
+							end,
+							desc = "Delete scratch buffer",
+						},
+					},
+				},
+			},
 			terminal = {
 				-- Disable interactive mode to work with terminal.nvim
 				interactive = false,

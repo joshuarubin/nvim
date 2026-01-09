@@ -2,7 +2,7 @@ require("config.vscode")
 
 -- normal mode
 vim.keymap.set("n", "<leader>n", "<cmd>nohlsearch<cr>", { desc = "nohlsearch" })
-vim.keymap.set("n", "<leader>fc", "/\\v^[<|=>]{7}( .*|$)<cr>", { desc = "find merge conflict markers" })
+vim.keymap.set("n", "<leader>fc", "/\\v^[<|=>%+]{7}( .*|$)<cr>", { desc = "find merge conflict markers" })
 
 vim.keymap.set("n", "d", '"_d', { desc = "delete into blackhole register to not clobber the last yank" })
 vim.keymap.set("n", "dd", "dd", { desc = "delete and yank the current line" })
