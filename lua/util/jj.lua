@@ -113,7 +113,10 @@ end
 
 -- Set up JJDiffConflicts enhancements (filetype sync, partial abort)
 M.setup_diffconflicts = function()
+	local jj_group = vim.api.nvim_create_augroup("JJDiffConflicts", { clear = true })
+
 	vim.api.nvim_create_autocmd("User", {
+		group = jj_group,
 		pattern = "JJDiffConflictsReady",
 		callback = function()
 			local filetype = find_conflict_filetype()

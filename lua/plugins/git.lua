@@ -73,7 +73,10 @@ return {
 		},
 		keys = keys,
 		init = function()
+			local neogit_group = vim.api.nvim_create_augroup("NeogitDiffview", { clear = true })
+
 			vim.api.nvim_create_autocmd("FileType", {
+				group = neogit_group,
 				pattern = "Neogit*",
 				callback = function()
 					if git_opts.dir then
@@ -82,6 +85,7 @@ return {
 				end,
 			})
 			vim.api.nvim_create_autocmd("BufWinEnter", {
+				group = neogit_group,
 				pattern = "diffview://*",
 				callback = function(ev)
 					if vim.wo.diff then
@@ -91,6 +95,7 @@ return {
 				end,
 			})
 			vim.api.nvim_create_autocmd("OptionSet", {
+				group = neogit_group,
 				callback = function(ev)
 					if not vim.wo.diff then
 						return

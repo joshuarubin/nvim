@@ -297,10 +297,15 @@ M.lsp_restart = function(info)
 	end
 
 	local timer = assert(vim.uv.new_timer())
+	local max_iterations = 100 -- 100 iterations * 100ms = 10 seconds max wait
+	local iteration_count = 0
+
 	timer:start(
 		500,
 		100,
 		vim.schedule_wrap(function()
+			iteration_count = iteration_count + 1
+
 			for client_name, tuple in pairs(detach_clients) do
 				local client, attached_buffers = unpack(tuple)
 				if client.is_stopped() then
@@ -316,7 +321,16 @@ M.lsp_restart = function(info)
 				end
 			end
 
-			if next(detach_clients) == nil and not timer:is_closing() then
+			-- Close timer if all clients stopped or timeout reached
+			if (next(detach_clients) == nil or iteration_count >= max_iterations) and not timer:is_closing() then
+				if iteration_count >= max_iterations and next(detach_clients) ~= nil then
+					-- Log warning if we hit the timeout
+					local remaining = vim.tbl_keys(detach_clients)
+					vim.notify(
+						("LSP restart timeout: clients did not stop: %s"):format(table.concat(remaining, ", ")),
+						vim.log.levels.WARN
+					)
+				end
 				timer:close()
 			end
 		end)

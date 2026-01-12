@@ -50,6 +50,11 @@ return {
 	-- Automatic directory environment loading via direnv
 	{
 		"direnv/direnv.vim",
+		-- Temporary: using fork with fix for file descriptor leak during session restore
+		-- The plugin spawned unlimited concurrent direnv jobs after 5 rapid BufEnter events
+		-- TODO: Remove url/branch override once upstream merges the fix
+		url = "https://github.com/joshuarubin/direnv.vim",
+		branch = "fd-leak-fix",
 		init = function()
 			-- Silent load to avoid messages on every directory change
 			vim.g.direnv_silent_load = 1
