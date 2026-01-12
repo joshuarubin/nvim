@@ -131,6 +131,24 @@ return {
 			},
 		},
 		opts = {
+			picker = {
+				actions = {
+					scratch_delete = function(picker, item)
+						local file = item.file
+						-- Find and delete the buffer if it exists
+						for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+							if vim.api.nvim_buf_is_valid(buf) and vim.api.nvim_buf_get_name(buf) == file then
+								vim.api.nvim_buf_delete(buf, { force = true })
+								break
+							end
+						end
+						-- Delete files
+						os.remove(file)
+						os.remove(file .. ".meta")
+						picker:refresh()
+					end,
+				},
+			},
 			scratch = {
 				autowrite = true, -- Auto-save when switching buffers
 				win = {
