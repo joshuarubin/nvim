@@ -6,6 +6,16 @@ return {
 				"cue",
 			},
 		},
+		init = function()
+			-- Sign parsers after any treesitter update/install to prevent macOS code signature
+			-- issues with unsigned nvim binaries (e.g., from Nix)
+			vim.api.nvim_create_autocmd("User", {
+				pattern = "TSUpdate",
+				callback = function()
+					vim.fn.system(vim.fn.stdpath("config") .. "/scripts/sign-parsers.sh")
+				end,
+			})
+		end,
 	},
 	{
 		"nvim-treesitter/nvim-treesitter-textobjects",
