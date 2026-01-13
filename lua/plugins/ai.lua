@@ -156,6 +156,21 @@ return {
 		init = function()
 			-- Expand 'cc' into 'CodeCompanion' in the command line
 			vim.cmd([[cabbrev cc CodeCompanion]])
+
+			-- Exclude codecompanion chat buffers from session saves
+			local group = vim.api.nvim_create_augroup("CodeCompanionSession", { clear = true })
+			vim.api.nvim_create_autocmd("User", {
+				desc = "delete codecompanion buffers before saving session",
+				group = group,
+				pattern = "PersistenceSavePre",
+				callback = function()
+					for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+						if vim.api.nvim_buf_is_valid(buf) and vim.bo[buf].filetype == "codecompanion" then
+							vim.api.nvim_buf_delete(buf, { force = true })
+						end
+					end
+				end,
+			})
 		end,
 	},
 }
