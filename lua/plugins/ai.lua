@@ -90,7 +90,7 @@ return {
 		opts = {
 			strategies = {
 				chat = {
-					adapter = "anthropic",
+					adapter = "claude_code", -- anthropic|claude_code
 					slash_commands = {
 						["buffer"] = {
 							opts = {
@@ -115,7 +115,7 @@ return {
 					},
 				},
 				inline = {
-					adapter = "anthropic", -- anthropic|copilot
+					adapter = "claude_code", -- anthropic|claude_code|copilot
 				},
 			},
 			adapters = {
