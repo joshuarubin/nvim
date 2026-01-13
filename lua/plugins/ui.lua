@@ -198,6 +198,10 @@ return {
 		opts = {
 			-- Render in all modes including insert
 			render_modes = { "n", "c", "t", "i" },
+			-- Keep concealment active in unfocused windows
+			anti_conceal = {
+				enabled = false,
+			},
 			win_options = {
 				conceallevel = {
 					default = 3,
