@@ -8,7 +8,6 @@ return {
 				"golines",
 				"tree-sitter-cli",
 				"typescript-language-server",
-				"yamllint",
 			},
 		},
 	},

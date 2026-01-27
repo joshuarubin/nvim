@@ -26,6 +26,17 @@ return {
 		ft = "go",
 	},
 	{
+		"neovim/nvim-lspconfig",
+		cond = not vim.g.vscode,
+		opts = {
+			servers = {
+				gopls = {
+					filetypes = { "go", "gomod", "gowork", "gotmpl", "gohtml" },
+				},
+			},
+		},
+	},
+	{
 		"stevearc/conform.nvim",
 		cond = not vim.g.vscode,
 		opts = function(_, opts)
@@ -56,10 +67,11 @@ return {
 			opts.servers.gopls.settings.gopls.analyses.unusedvariable = true
 			opts.servers.gopls.settings.gopls.analyses.ST1000 = false
 			opts.servers.gopls.settings.gopls.codelenses.gc_details = true
-			opts.servers.gopls.settings.gopls.buildFlags = { "-tags=wireinject,integration" }
+			opts.servers.gopls.settings.gopls.buildFlags = { "-tags=integration" }
 			opts.servers.gopls.settings.gopls["local"] = table.concat(local_imports, ",")
 			opts.servers.gopls.settings.gopls.gofumpt = true
 			opts.servers.gopls.settings.gopls.vulncheck = "Imports"
+			opts.servers.gopls.settings.gopls.templateExtensions = { "gotmpl", "gohtml" }
 
 			-- Filter out unwanted diagnostics
 			opts.servers.gopls.handlers = {

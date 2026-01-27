@@ -198,7 +198,7 @@ return {
 		opts = {
 			-- Render in all modes including insert
 			render_modes = { "n", "c", "t", "i" },
-			-- Keep concealment active in unfocused windows
+			-- Disable anti_conceal, use concealcursor instead
 			anti_conceal = {
 				enabled = false,
 			},
@@ -208,8 +208,8 @@ return {
 					rendered = 3,
 				},
 				concealcursor = {
-					-- Show cursor line content in insert mode
-					rendered = "",
+					-- Conceal cursor line in normal/visual/command, reveal in insert
+					rendered = "nvc",
 				},
 			},
 		},

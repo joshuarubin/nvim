@@ -4,6 +4,8 @@ return {
 		opts = {
 			ensure_installed = {
 				"cue",
+				"go",
+				"gotmpl",
 			},
 		},
 		init = function()

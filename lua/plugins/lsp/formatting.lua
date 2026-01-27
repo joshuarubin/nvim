@@ -12,8 +12,8 @@ return {
 			opts.formatters_by_ft.typescript = { "prettier" }
 			opts.formatters_by_ft.terraform = { "tofu_fmt" }
 			opts.formatters_by_ft.tf = { "tofu_fmt" }
-			opts.formatters_by_ft.yaml = { "yamlfix" }
-			opts.formatters_by_ft.yml = { "yamlfix" }
+			opts.formatters_by_ft.yaml = { "prettier" }
+			opts.formatters_by_ft.yml = { "prettier" }
 			opts.formatters_by_ft["markdown.mdx"] = { "prettier", "markdownlint-cli2" }
 			opts.formatters_by_ft["terraform-vars"] = { "tofu_fmt" }
 
