@@ -152,6 +152,9 @@ return {
 			scratch = {
 				autowrite = true, -- Auto-save when switching buffers
 				win = {
+					wo = {
+						spell = false,
+					},
 					keys = {
 						["delete"] = {
 							"<c-x>",

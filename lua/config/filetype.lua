@@ -8,6 +8,8 @@ vim.filetype.add({
 			-- Check for compound extensions and use the base language filetype
 			if path:match("%.go%.gotmpl$") then
 				return "go"
+			elseif path:match("%.sql%.gotmpl$") then
+				return "sql"
 			elseif path:match("%.ya?ml%.gotmpl$") then
 				return "yaml"
 			elseif path:match("%.json%.gotmpl$") then

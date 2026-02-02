@@ -131,6 +131,12 @@ return {
 				"fallback",
 			}
 
+			-- Command-line mode keymaps
+			opts.cmdline = opts.cmdline or {}
+			opts.cmdline.keymap = opts.cmdline.keymap or {}
+			opts.cmdline.keymap["<up>"] = { "select_prev", "fallback" }
+			opts.cmdline.keymap["<down>"] = { "select_next", "fallback" }
+
 			return opts
 		end,
 	},

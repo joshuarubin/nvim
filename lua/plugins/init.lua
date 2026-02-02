@@ -14,12 +14,11 @@ Plugin files are organized by theme/purpose:
 - file-ops.lua: File operations (vim-eunuch, direnv)
 - fuzzy.lua: Fuzzy finding (fzf-lua)
 - testing.lua: Testing and API tools (kulala)
-- history.lua: Terminal and undo history (terminal.nvim, vim-mundo)
 - colorscheme.lua: Color schemes (lazy-loaded)
 - ai.lua: AI assistants
 - treesitter.lua: Syntax parsing
 - lsp/: Language server configurations
-- misc.lua: Uncategorized utilities
+- misc.lua: Uncategorized utilities (terminal.nvim, vim-mundo, jj-diffconflicts, vim-cedar)
 
 ## Plugin Placement Guidelines
 

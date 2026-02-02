@@ -9,17 +9,15 @@ return {
 				conf.cmd = "tofu"
 				return conf
 			end
-
-			-- Exclude .gotmpl files from golangci-lint
-			local golangci = lint.linters.golangci_lint
-			if golangci then
-				golangci.condition = function(ctx)
-					return not vim.endswith(ctx.filename, ".gotmpl")
-				end
-			end
 		end,
 		opts = {
 			linters = {
+				-- Exclude compound template files (.*.gotmpl) from golangci-lint
+				golangcilint = {
+					condition = function(ctx)
+						return not vim.endswith(ctx.filename, ".gotmpl")
+					end,
+				},
 				sqlfluff = {
 					args = { "lint", "--format=json" },
 				},
