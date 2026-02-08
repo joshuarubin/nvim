@@ -161,12 +161,26 @@ return {
 							function(self)
 								local file = vim.api.nvim_buf_get_name(self.buf)
 								local buf = self.buf
+								local filename = vim.fn.fnamemodify(file, ":t")
+
+								-- Close window first
 								vim.api.nvim_win_call(self.win, function()
 									vim.cmd("close")
 								end)
-								os.remove(file)
-								os.remove(file .. ".meta")
-								vim.api.nvim_buf_delete(buf, { force = true })
+
+								-- Confirm before deletion
+								vim.ui.select({ "No", "Yes" }, {
+									prompt = string.format("Delete '%s'?", filename),
+									format_item = function(item)
+										return item
+									end,
+								}, function(choice)
+									if choice == "Yes" then
+										os.remove(file)
+										os.remove(file .. ".meta")
+										vim.api.nvim_buf_delete(buf, { force = true })
+									end
+								end)
 							end,
 							desc = "Delete scratch buffer",
 						},
@@ -213,6 +227,10 @@ return {
 				concealcursor = {
 					-- Conceal cursor line in normal/visual/command, reveal in insert
 					rendered = "nvc",
+				},
+				spell = {
+					default = false,
+					rendered = false,
 				},
 			},
 		},
