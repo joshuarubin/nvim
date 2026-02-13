@@ -1,8 +1,8 @@
 local ms = require("vim.lsp.protocol").Methods
 
 local local_imports = {
-	"github.com/joshuarubin",
-	"github.com/runstateops",
+	-- "github.com/joshuarubin",
+	"github.com/escapement-dev",
 }
 
 local on_goimports_result = function(err, results, ctx)
