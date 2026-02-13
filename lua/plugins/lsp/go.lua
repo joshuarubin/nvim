@@ -5,6 +5,65 @@ local local_imports = {
 	"github.com/escapement-dev",
 }
 
+-- Toggle between Go source and test files
+local function get_alternate_path(filepath)
+	local base = vim.fn.fnamemodify(filepath, ":r")
+	local filename = vim.fn.fnamemodify(filepath, ":t")
+
+	if filename:match("_test%.go$") then
+		-- Test -> Source: foo_test.go -> foo.go
+		return base:gsub("_test$", "") .. ".go"
+	else
+		-- Source -> Test: foo.go -> foo_test.go
+		return base .. "_test.go"
+	end
+end
+
+local function get_alternate_file(bufnr)
+	-- Validate buffer
+	if not vim.api.nvim_buf_is_valid(bufnr) then
+		return nil, "Invalid buffer: " .. bufnr
+	end
+
+	-- Get file path
+	local filepath = vim.api.nvim_buf_get_name(bufnr)
+	if filepath == "" then
+		return nil, "Buffer has no associated file"
+	end
+
+	-- Validate Go file
+	local ext = vim.fn.fnamemodify(filepath, ":e")
+	if ext ~= "go" then
+		return nil, "Not a Go file: " .. filepath
+	end
+
+	-- Calculate alternate
+	return get_alternate_path(filepath), nil
+end
+
+local function open_alternate(args, cmd)
+	-- Determine target buffer
+	local bufnr = vim.api.nvim_get_current_buf()
+	if args ~= "" then
+		local target = tonumber(args)
+		if not target then
+			vim.notify("Invalid buffer number: " .. args, vim.log.levels.ERROR)
+			return
+		end
+		bufnr = target
+	end
+
+	-- Get alternate file path
+	local alternate, err = get_alternate_file(bufnr)
+	if err then
+		vim.notify(err, vim.log.levels.WARN)
+		return
+	end
+
+	-- Open alternate file
+	vim.cmd[cmd](alternate)
+end
+
 local on_goimports_result = function(err, results, ctx)
 	if err then
 		vim.notify("Error running goimports: " .. err.message, vim.log.levels.ERROR)
@@ -18,6 +77,26 @@ local on_goimports_result = function(err, results, ctx)
 		end
 	end
 end
+
+-- Create :A and :AV commands for Go buffers
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = "go",
+	callback = function(event)
+		vim.api.nvim_buf_create_user_command(event.buf, "A", function(info)
+			open_alternate(info.args, "edit")
+		end, {
+			desc = "Toggle between Go source and test file",
+			nargs = "?",
+		})
+
+		vim.api.nvim_buf_create_user_command(event.buf, "AV", function(info)
+			open_alternate(info.args, "vsplit")
+		end, {
+			desc = "Open alternate Go file in vertical split",
+			nargs = "?",
+		})
+	end,
+})
 
 return {
 	{
