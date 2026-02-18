@@ -145,7 +145,6 @@ return {
 			opts.servers.gopls.settings.gopls.analyses.unusedvariable = true
 			opts.servers.gopls.settings.gopls.analyses.ST1000 = false
 			opts.servers.gopls.settings.gopls.codelenses.gc_details = true
-			opts.servers.gopls.settings.gopls.buildFlags = { "-tags=integration" }
 			opts.servers.gopls.settings.gopls["local"] = table.concat(local_imports, ",")
 			opts.servers.gopls.settings.gopls.gofumpt = true
 			opts.servers.gopls.settings.gopls.vulncheck = "Imports"
