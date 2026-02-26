@@ -1,5 +1,10 @@
 ---
-description: Execute the full push workflow for main branch
+name: jj-push
+description: Execute the full push workflow for main branch. Rebases onto main@origin, pushes, handles testing bookmark, rebases other bookmarks, and spawns new latest-updates revision.
+allowed-tools:
+  - Bash(jj *)
+  - Skill
+  - AskUserQuestion
 ---
 
 Execute the complete push workflow interactively with the following steps:
@@ -27,15 +32,17 @@ Execute the complete push workflow interactively with the following steps:
 9. **Report result**: Show final state with `jj log -r 'ancestors(@, 4)' --color=never` and summarize what was pushed.
 
 **Commit message format**:
+
 - First line: Conventional commit format: `type(scope): description`
   - type: feat, fix, refactor, docs, test, chore, style, etc.
   - scope: the area affected (nvim, treesitter, lsp, markdown, etc.)
   - description: lowercase, no period at end
   - Example: `feat(treesitter): add feature flag to disable bash parser`
 - Additional lines (optional): Add blank line then additional context if valuable
-- **NEVER** include "🤖 Generated with Claude Code" or "Co-Authored-By: Claude" lines
+- **NEVER** include "Generated with Claude Code" or "Co-Authored-By: Claude" lines
 
 **Important**:
+
 - Halt and ask for guidance if any step encounters conflicts or errors
 - Always use `jj` commands, never `git`
 - Commit descriptions must comprehensively describe ALL changes in the diff
